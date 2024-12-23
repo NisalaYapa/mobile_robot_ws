@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="smrr">
+
+  <xacro:property name="PI" value="3.14159265359" />
+
+    <ros2_control name="GazeboSystem" type="system">
+        <hardware>
+          <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+        </hardware>
+
+        <joint name="shoulder_r_joint">
+            <command_interface name="position">
+              <param name="min">0</param>
+              <param name="max">${0.5*PI}</param>
+            </command_interface>
+            <!-- <command_interface name="velocity">
+              <param name="min">-3.14</param>
+              <param name="max">3.14</param>
+            </command_interface> -->
+            <state_interface name="position"/>
+            <!-- <state_interface name="velocity"/> -->
+        </joint>
+
+        <joint name="bicep_r_joint">
+            <command_interface name="position">
+              <param name="min">${-0.25*PI}</param>
+              <param name="max">${0.25*PI}</param>
+            </command_interface>
+            <!-- <command_interface name="velocity">
+              <param name="min">-3.14</param>
+              <param name="max">3.14</param>
+            </command_interface> -->
+            <state_interface name="position"/>
+            <!-- <state_interface name="velocity"/> -->
+        </joint>
+
+        <joint name="elbow_r_joint">
+            <command_interface name="position">
+              <param name="min">0</param>
+              <param name="max">${0.5*PI}</param>
+            </command_interface>
+            <!-- <command_interface name="velocity">
+              <param name="min">-3.14</param>
+              <param name="max">3.14</param>
+            </command_interface> -->
+            <state_interface name="position"/>
+            <!-- <state_interface name="velocity"/> -->
+        </joint>
+
+        <joint name="wrist_r_joint">
+            <command_interface name="position">
+              <param name="min">${-0.25*PI}</param>
+              <param name="max">${0.25*PI}</param>
+            </command_interface>
+            <!-- <command_interface name="velocity">
+              <param name="min">-3.14</param>
+              <param name="max">3.14</param>
+            </command_interface> -->
+            <state_interface name="position"/>
+            <!-- <state_interface name="velocity"/> -->
+        </joint>
+
+        <joint name="left_wheel_joint">
+            <command_interface name="velocity">
+                <param name="min">.1</param>
+                <param name="max">1</param>
+
+            </command_interface>
+            <state_interface name ="position"/>
+            <state_interface name="velocity"/>
+        </joint>
+
+        <joint name="right_wheel_joint">
+            <command_interface name="velocity">
+                <param name="min">.1</param>
+                <param name="max">1</param>
+
+            </command_interface>
+            <state_interface name ="position"/>
+            <state_interface name="velocity"/>
+        </joint>
+
+        </ros2_control> 
+
+</robot>
+
+
+
+
+
+        

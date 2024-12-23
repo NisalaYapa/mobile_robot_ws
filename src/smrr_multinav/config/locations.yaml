@@ -1,0 +1,5 @@
+# Locations : [X, Y, Theta]
+location1: [3.0, 0.0, 0.0]
+location2: [3.0, -3.0, 1.57]
+location3: [-3.0, -3.0, -0.7]
+location4: [ -3.0, 0.0, 1.57]

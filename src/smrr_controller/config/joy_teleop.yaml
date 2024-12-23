@@ -1,0 +1,34 @@
+# config file for ros2 joy_teleop node
+joy_teleop:
+  ros__parameters:
+    # move:
+    #   type: topic
+    #   interface_type: geometry_msgs/msg/TwistStamped
+    #   topic_name: cmd/vel_joy  #diff_drive_controller/cmd_vel
+    #   deadman_buttons: [5]
+    #   axis_mappings:
+    #     twist-linear-x:
+    #       axis: 1
+    #       scale: 1.0
+    #       offset: 0.0
+    #     twist-angular-z:
+    #       axis: 0
+    #       scale: 1.0
+    #       offset: 0.0
+
+    move:
+      type: topic
+      interface_type: geometry_msgs/msg/Twist  
+      topic_name: cmd_vel_joy        
+      deadman_buttons: [5]
+      axis_mappings:
+        linear-x:
+          axis: 1
+          scale: 1.0
+          offset: 0.0
+        angular-z:
+          axis: 0
+          scale: 1.0
+          offset: 0.0
+
+

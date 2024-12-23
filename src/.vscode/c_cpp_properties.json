@@ -1,0 +1,26 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/nisala/lab_ws/install/zumo_msgs/include/**",
+        "/home/nisala/lab_ws/install/zumo_defs/include/**",
+        "/home/nisala/mobile_robot_ws/install/smrr_interfaces/include/**",
+        "/home/nisala/mobile_robot_ws/install/gazebo_sfm_plugin/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/nisala/mobile_robot_ws/src/gazebo_sfm_plugin-galactic/include/**",
+        "/home/nisala/mobile_robot_ws/src/smrr_multinav/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

@@ -1,0 +1,24 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/ishara/fyp/Human_Preffered_Velocity_Prediction/install/smrr_interfaces/include/**",
+        "/home/ishara/prelab_ros2_ws/install/zumo_msgs/include/**",
+        "/home/ishara/prelab_ros2_ws/install/zumo_defs/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/ishara/fyp/Human_Preffered_Velocity_Prediction/src/smrr_interfaces/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

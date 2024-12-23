@@ -1,0 +1,28 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/sithija/mobile_receptionist_ws/install/smrr_interfaces/include/**",
+        "/home/sithija/voyager_ws/install/voyager_msgs/include/**",
+        "/home/sithija/voyager_ws/install/voyager_localization/include/**",
+        "/home/sithija/voyager_ws/install/voyager_controller/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/sithija/mobile_receptionist_ws/src/elevator/include/**",
+        "/home/sithija/mobile_receptionist_ws/src/smrr_controller/include/**",
+        "/home/sithija/mobile_receptionist_ws/src/smrr_description/include/**",
+        "/home/sithija/mobile_receptionist_ws/src/smrr_localization/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

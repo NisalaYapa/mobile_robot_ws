@@ -1,0 +1,104 @@
+<robot name="smrr" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <transmission name="right_shoulder_transmission">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="shoulder_r_joint">
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="shoulder_r_motor">
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+          <mechanicalReduction>1.0</mechanicalReduction>
+        </actuator>
+    </transmission>
+
+    <transmission name="right_bicep_transmission">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="bicep_r_joint">
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="bicep_r_motor">
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+          <mechanicalReduction>1.0</mechanicalReduction>
+        </actuator>
+    </transmission>
+
+    <transmission name="right_elbow_transmission">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="elbow_r_joint">
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="elbow_r_motor">
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+          <mechanicalReduction>1.0</mechanicalReduction>
+        </actuator>
+    </transmission>
+
+    <transmission name="right_wrist_transmission">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="wrist_r_joint">
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="wrist_r_motor">
+          <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+          <mechanicalReduction>1.0</mechanicalReduction>
+        </actuator>
+    </transmission>
+
+    <transmission name="left_wheel_transmission">
+        <plugin>transmission_interface/SimpleTransmission</plugin>
+        <actuator name="left_motor" role="actuator_left"/>
+        <joint name="left_wheel_joint" role="joint_left">
+           <mechanicalReduction>1.0</mechanicalReduction>
+        </joint>
+    </transmission>
+
+    <transmission name="right_wheel_transmission">
+        <plugin>transmission_interface/SimpleTransmission</plugin>
+        <actuator name="right_motor" role="actuator_right"/>
+        <joint name="right_wheel_joint" role="right_left">
+           <mechanicalReduction>1.0</mechanicalReduction>
+        </joint>
+    </transmission>
+
+    <gazebo reference="left_wheel">
+        <mu1>1000000.0</mu1>  <!--1000000000000000.0-->
+        <mu2>1000000.0</mu2>
+        <minDepth>0.005</minDepth>
+        <kp>1000000000000.0</kp>
+        <kd>10.0</kd>
+        <fdir1>1 0 0</fdir1>
+        <!-- <kp>1000000000000.0</kp>
+        <kd>10.0</kd>
+        <minDepth>0.001</minDepth>
+        <maxVel>0.1</maxVel>
+        <fdir1>1 0 0</fdir1> -->
+    </gazebo>
+
+    <gazebo reference="right_wheel">
+        <mu1>1000000.0</mu1>  <!--1000000000000000.0-->
+        <mu2>1000000.0</mu2>
+        <minDepth>0.005</minDepth>
+        <kp>1000000000000.0</kp>
+        <kd>10.0</kd>
+        <fdir1>1 0 0</fdir1>
+        <!-- <kp>1000000000000.0</kp>
+        <kd>10.0</kd>
+        <minDepth>0.001</minDepth>
+        <maxVel>0.1</maxVel>
+        <fdir1>1 0 0</fdir1> -->
+    </gazebo>
+
+    <gazebo reference="front_caster">
+        <mu1>0.1</mu1>  
+        <mu2>0.1</mu2>
+        <minDepth>0.005</minDepth> 
+        <!-- 0.002 -->
+    </gazebo>
+
+    <gazebo reference="back_caster">
+        <mu1>0.1</mu1>  
+        <mu2>0.1</mu2>
+        <minDepth>0.005</minDepth>
+    </gazebo>
+
+</robot>

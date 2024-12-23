@@ -1,0 +1,12 @@
+# Goal definition
+float32 goal_x
+float32 goal_y
+
+---
+# Result definition
+bool success
+
+---
+# Feedback definition
+float32 distance_to_goal
+

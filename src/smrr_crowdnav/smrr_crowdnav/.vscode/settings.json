@@ -1,0 +1,30 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/nisala/mobile_robot_ws/build/smrr_utilities",
+        "/home/nisala/mobile_robot_ws/install/smrr_utilities/lib/python3.10/site-packages",
+        "/home/nisala/mobile_robot_ws/build/smrr_crowdnav",
+        "/home/nisala/mobile_robot_ws/install/smrr_crowdnav/lib/python3.10/site-packages",
+        "/home/nisala/mobile_robot_ws/build/object_tracker",
+        "/home/nisala/mobile_robot_ws/install/object_tracker/lib/python3.10/site-packages",
+        "/home/nisala/mobile_robot_ws/install/smrr_interfaces/local/lib/python3.10/dist-packages",
+        "/home/nisala/mobile_robot_ws/build/goal_predictor",
+        "/home/nisala/mobile_robot_ws/install/goal_predictor/lib/python3.10/site-packages",
+        "/home/nisala/lab_ws/install/zumo_msgs/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/nisala/mobile_robot_ws/build/smrr_utilities",
+        "/home/nisala/mobile_robot_ws/install/smrr_utilities/lib/python3.10/site-packages",
+        "/home/nisala/mobile_robot_ws/build/smrr_crowdnav",
+        "/home/nisala/mobile_robot_ws/install/smrr_crowdnav/lib/python3.10/site-packages",
+        "/home/nisala/mobile_robot_ws/build/object_tracker",
+        "/home/nisala/mobile_robot_ws/install/object_tracker/lib/python3.10/site-packages",
+        "/home/nisala/mobile_robot_ws/install/smrr_interfaces/local/lib/python3.10/dist-packages",
+        "/home/nisala/mobile_robot_ws/build/goal_predictor",
+        "/home/nisala/mobile_robot_ws/install/goal_predictor/lib/python3.10/site-packages",
+        "/home/nisala/lab_ws/install/zumo_msgs/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
+}

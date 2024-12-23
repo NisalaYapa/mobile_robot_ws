@@ -1,0 +1,20 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/ishara/fyp/Human_Preffered_Velocity_Prediction/build/preffered_velocity_prediction",
+        "/home/ishara/fyp/Human_Preffered_Velocity_Prediction/install/preffered_velocity_prediction/lib/python3.10/site-packages",
+        "/home/ishara/ros2_ws/build/my_robot_controller",
+        "/home/ishara/ros2_ws/install/my_robot_controller/lib/python3.10/site-packages",
+        "/home/ishara/prelab_ros2_ws/install/zumo_msgs/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/ishara/fyp/Human_Preffered_Velocity_Prediction/build/preffered_velocity_prediction",
+        "/home/ishara/fyp/Human_Preffered_Velocity_Prediction/install/preffered_velocity_prediction/lib/python3.10/site-packages",
+        "/home/ishara/ros2_ws/build/my_robot_controller",
+        "/home/ishara/ros2_ws/install/my_robot_controller/lib/python3.10/site-packages",
+        "/home/ishara/prelab_ros2_ws/install/zumo_msgs/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
+}

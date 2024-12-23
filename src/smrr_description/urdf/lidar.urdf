@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="smrr">
+
+	<link name="rplidar_link">
+        <inertial>
+			<mass value="1e-5"/>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+		</inertial>
+		<visual>
+			<origin xyz="0 0 0" rpy="1.57 0 1.57"/>
+			<geometry>
+				<!-- <box size="0.1 0.1 0.1"/> -->
+                <mesh filename="package://smrr_description/meshes/rplidar.stl" scale="0.001 0.001 0.001" />
+			</geometry>			
+		</visual>
+        <collision>
+			<origin xyz="0 0 0" rpy="1.57 0 1.57"/>
+			<geometry>
+				<!-- <box size="0.1 0.1 0.1"/> -->
+                <mesh filename="package://smrr_description/meshes/rplidar.stl" scale="0.001 0.001 0.001" />
+			</geometry>
+		</collision>
+    </link>
+
+	<joint name="rplidar_joint" type="fixed">
+		<origin xyz="0.23 0 0.001" rpy="0 0 0 "/>
+		<parent link="base_link"/>
+		<child link="rplidar_link"/>
+	</joint>
+
+
+    <gazebo reference="rplidar_link">
+        <sensor type="gpu_ray" name="laser">
+            <pose>0 0 0 0 0 0</pose>
+            <visualize>true</visualize>
+            <update_rate>10</update_rate>
+            <ray>
+                <scan>
+                    <horizontal>
+                        <samples>400</samples>
+                        <resolution>1</resolution>
+                        <min_angle>-2.0943</min_angle>
+                        <max_angle>2.0943</max_angle>
+                    </horizontal>
+                </scan>
+                <range>
+                    <min>0.15</min>
+                    <max>12.0</max> <!--6.0 -->
+                    <resolution>0.01</resolution>
+                </range>
+                <noise>
+                    <type>gaussian</type>
+                    <mean>0.0</mean>
+                    <stddev>0.01</stddev>
+                </noise>
+            </ray>
+            <plugin name="rplidar_controller" filename="libgazebo_ros_ray_sensor.so">
+                 <ros>
+                    <remapping>~/out:=/scan</remapping>
+                </ros>
+                <output_type>sensor_msgs/LaserScan</output_type>
+                <frame_name>rplidar_link</frame_name>
+            </plugin>
+        </sensor>
+    </gazebo>
+
+</robot>
