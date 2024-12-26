@@ -17,7 +17,7 @@ class HumanKF(Node):
         super().__init__('Human_KF_node')
 
         # Subscriptions
-        self.create_subscription(Entities, '/laser_data_array', self.human_position_callback, 10)
+        self.create_subscription(Entities, '/pos', self.human_position_callback, 10)
         self.create_subscription(Entities, '/vel', self.human_velocity_callback, 10)
         self.create_subscription(Entities, '/goals', self.human_goal_callback, 10)
 
