@@ -5,6 +5,8 @@ from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray, Int32MultiArray
 from smrr_interfaces.msg import Entities, VelocityClassData
 import numpy as np
+from visualization_msgs.msg import Marker, MarkerArray
+from builtin_interfaces.msg import Duration
 
 class VelocityExtractor(Node):
     def __init__(self):
@@ -25,6 +27,8 @@ class VelocityExtractor(Node):
         
         # custom interface
         self.pub_velocity_class = self.create_publisher(VelocityClassData, 'velocity_class_data', 10)
+        self.human_position_publisher = self.create_publisher(MarkerArray, 'positions_latest', 10)
+        self.human_velocity_publisher = self.create_publisher(MarkerArray, 'velocities_latest', 10)
 
         # storage for previous data
         self.prev_x = {}
@@ -105,6 +109,8 @@ class VelocityExtractor(Node):
         msg.y_positions = y_positions
         self.pub_velocity_class.publish(msg)
 
+        self.publish_latest_positions(msg)
+        self.publish_latest_velocities(msg)
 
         # loging the published data
         self.get_logger().info(f'Published x velocity: {x_vel}')
@@ -112,6 +118,93 @@ class VelocityExtractor(Node):
         self.get_logger().info(f'Published class data: {class_list}')
         self.get_logger().info(f'Published x positions: {x_positions}')
         self.get_logger().info(f'Published y positions: {y_positions}')
+
+
+    def publish_latest_positions(self, msg):
+        marker_array = MarkerArray()  
+        count = len(msg.x_positions) 
+        x_pos  = msg.x_positions
+        y_pos = msg.y_positions
+
+        for human_id in range(count):
+            marker = Marker()
+            marker.header.frame_id = "map"
+            marker.header.stamp = self.get_clock().now().to_msg()
+            marker.ns = "human_positions"
+            marker.id = human_id
+            marker.type = Marker.CYLINDER
+            marker.action = Marker.ADD
+            marker.pose.position.x = x_pos[human_id] # x position
+            marker.pose.position.y = y_pos[human_id] # y position
+            marker.pose.position.z = 0.0  # z position (assumed flat plane)
+            marker.scale.x = 0.2  # Sphere size in x
+            marker.scale.y = 0.2  # Sphere size in y
+            marker.scale.z = 0.01 # Sphere size in z
+            marker.color.a = 1.0  # Transparency
+            marker.color.r = 1.0  # Red
+            marker.color.g = 0.0  # Green
+            marker.color.b = 0.0  # Blue
+
+            # Set lifetime of the marker
+            marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second
+            marker_array.markers.append(marker)
+        self.human_position_publisher.publish(marker_array)
+        
+
+    def publish_latest_velocities(self, msg):
+        marker_array = MarkerArray()  
+        count = len(msg.x_positions) 
+        x_pos  = msg.x_positions
+        y_pos = msg.y_positions
+        x_vel = msg.x_velocities
+        y_vel = msg.y_velocities
+
+        for human_id in range(count):
+            marker = Marker()
+            marker.header.frame_id = "map"
+            marker.header.stamp = self.get_clock().now().to_msg()
+            marker.ns = "human_velocities"
+            marker.id = human_id
+            marker.type = Marker.ARROW  # Change to arrow
+            marker.action = Marker.ADD
+
+            # Set the starting point of the arrow (human position)
+            marker.pose.position.x = x_pos[human_id]  # x position
+            marker.pose.position.y = y_pos[human_id] # y position
+            marker.pose.position.z = 0.0  # z position (assumed flat plane)
+
+            # Calculate the orientation of the arrow from velocity components
+            vx, vy = x_vel[human_id], y_vel[human_id]  # Extract velocities from state
+            velocity_magnitude = (vx**2 + vy**2)**0.5
+            theta = np.arctan2(vy,vx)
+
+            if velocity_magnitude > 0:
+                marker.pose.orientation.x = 0.0
+                marker.pose.orientation.y = 0.0
+                marker.pose.orientation.z = np.sin(theta/2)
+                marker.pose.orientation.w = np.cos(theta/2)
+            else:
+                marker.pose.orientation.w = 1.0  # Default orientation
+
+            # Scale the arrow: length proportional to velocity magnitude
+            marker.scale.x = velocity_magnitude # Arrow length
+            marker.scale.y = 0.05  # Arrow thickness
+            marker.scale.z = 0.01 # Arrow thickness
+
+            # Set the color of the arrow
+            marker.color.a = 1.0  # Transparency
+            marker.color.r = 1.0  # Red
+            marker.color.g = 0.0  # Green
+            marker.color.b = 0.0  # Blue
+
+            # Set lifetime of the marker
+            marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second
+
+            marker_array.markers.append(marker)
+
+        self.human_velocity_publisher.publish(marker_array)
+
+
 
 def main(args=None):
     rclpy.init(args=args)

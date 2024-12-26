@@ -30,7 +30,7 @@ class HumanKF(Node):
 
         self.filtered_positions_publisher = self.create_publisher(Entities, '/laser_data_array_kf', 10)
         self.filtered_velocity_publisher = self.create_publisher(Entities, '/vel_kf', 10)
-        self.filtered_goal_publisher = self.create_publisher(Entities, '/goals_kf', 10)
+        #self.filtered_goal_publisher = self.create_publisher(Entities, '/goals_kf', 10)
 
 
         # Initialize variables
@@ -196,6 +196,7 @@ class HumanKF(Node):
         self.filtered_positions_publisher.publish(self.pos)
         self.filtered_velocity_publisher.publish(self.vel)
 
+
     
 
 
@@ -208,8 +209,7 @@ class HumanKF(Node):
         vel_y = []
         pos_x = []
         pos_y = []
-        goal_x = []
-        goal_y = []      
+  
 
         for human_id in range(len(self.x)):
             state = self.x[human_id]
