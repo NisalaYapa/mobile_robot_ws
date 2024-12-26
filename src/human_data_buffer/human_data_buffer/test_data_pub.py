@@ -96,6 +96,7 @@ class TestDataPub(Node):
         marker_array = MarkerArray()   
 
         for i in range(count):
+    
             marker = Marker()
             marker.header.frame_id = "map"
             marker.header.stamp = self.get_clock().now().to_msg()
