@@ -15,7 +15,7 @@ from smrr_interfaces.msg import Entities
 class HumanKF(Node):
     def __init__(self):
         super().__init__('Human_KF_node')
-        
+
         # Subscriptions
         self.create_subscription(Entities, '/laser_data_array', self.human_position_callback, 10)
         self.create_subscription(Entities, '/vel', self.human_velocity_callback, 10)
@@ -151,11 +151,54 @@ class HumanKF(Node):
             self.P[i] = (np.eye(4) - K @ self.H) @ P_pred  # Updated covariance estimate
 
         # Publish filtered positions
+        self.publish_human_data()
+
         self.publish_filtered_positions()
         self.publish_filtered_velocities()
+
+
         
+    def publish_human_data(self):
+
+        count = (len(self.x))
+        vel_x = []
+        vel_y = []
+        pos_x = []
+        pos_y = []
+        goal_x = []
+        goal_y = []      
+
+        for human_id in range(len(self.x)):
+            state = self.x[human_id]
+
+            pos_x.append(state[0])
+            pos_y.append(state[1])
+            vel_x.append(state[2])
+            vel_y.append(state[3])
+
+        self.pos = Entities()
+        self.vel    = Entities()
+        self.goals  = Entities()
+
+        self.pos.count       = count
+        self.pos.x           = pos_x
+        self.pos.y           = pos_y
+        
+        self.vel.count     = count
+        self.vel.x         = vel_x
+        self.vel.y         = vel_y
+
+        self.goals.count     = count
+        self.goals.x         = goal_x
+        self.goals.y         = goal_y
+
+        
+        self.filtered_positions_publisher.publish(self.pos)
+        self.filtered_velocity_publisher.publish(self.vel)
 
     
+
+
 
     def publish_filtered_positions(self):
         marker_array = MarkerArray()
@@ -201,26 +244,9 @@ class HumanKF(Node):
 
             marker_array.markers.append(marker)
 
+
         # Publish the updated marker array
-        self.pos = Entities()
-        self.vel    = Entities()
-        self.goals  = Entities()
-
-        self.pos.count       = count
-        self.pos.x           = pos_x
-        self.pos.y           = pos_y
-        
-        self.vel.count     = count
-        self.vel.x         = vel_x
-        self.vel.y         = vel_y
-
-        self.goals.count     = count
-        self.goals.x         = goal_x
-        self.goals.y         = goal_y
-
         self.filtered_positions_marker.publish(marker_array)
-        self.filtered_positions_publisher.publish(self.pos)
-        self.filtered_velocity_publisher.publish(self.vel)
 
 
  
@@ -283,7 +309,7 @@ class HumanKF(Node):
             marker = Marker()
             marker.header.frame_id = "map"
             marker.header.stamp = self.get_clock().now().to_msg()
-            marker.ns = "filtered_human_velocities"
+            marker.ns = "human_positions"
             marker.id = human_id
             marker.type = Marker.CYLINDER
             marker.action = Marker.ADD
