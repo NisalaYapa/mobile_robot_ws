@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 
-# buffer with statistics for each agent in the multy dimetional numpy array
+# buffer with statistics for each agent in the multi-dimensional numpy array
 
 import rclpy
 from rclpy.node import Node
 from smrr_interfaces.msg import VelocityClassData, Buffer, DataElementFloat, DataElementString
 import numpy as np
 from collections import deque, Counter
+from visualization_msgs.msg import Marker, MarkerArray
+from builtin_interfaces.msg import Duration
+
+
 
 class DataBufferNode(Node):
     def __init__(self):
@@ -23,6 +27,8 @@ class DataBufferNode(Node):
         # The buffer message contains lists of data for each agent
         self.pub_buffer = self.create_publisher(Buffer, 'buffer', 10)
         self.pub_timer = self.create_timer(0.5, self.publish_buffer)
+        self.human_position_buffer = self.create_publisher(MarkerArray, 'human_position_buffer', 10)
+        self.human_velocity_buffer = self.create_publisher(MarkerArray, 'human_velocity_buffer', 10)
 
         # Initialize the buffer matrix with a numpy array
         # Structure: each row is [human_id, x_velocities (deque), y_velocities (deque), class_details (deque), x_positions(deque), y_positions(deque), statistics (dict)]
@@ -148,22 +154,6 @@ class DataBufferNode(Node):
     def publish_buffer(self):
         msg = Buffer()  # Create a new Buffer message
 
-        # fill the messge data
-        
-        # agent_ids = []
-        # x_velocities = []
-        # y_velocities = []
-        # class_ids = []
-        # x_positions = []
-        # y_positions = []
-        # x_mean = []
-        # y_mean = []
-        # x_std_dev = []
-        # y_std_dev = []
-        # x_variance = []
-        # y_variance = []
-        # majority_class_ids = []
-
         # nested structure
         agent_ids = []
         x_velocities = []
@@ -182,12 +172,6 @@ class DataBufferNode(Node):
 
         for i in range(len(self.agent_matrix)):
             agent_ids.append(self.agent_matrix[i, 0])
-            # x_velocities.extend(list(self.agent_matrix[i, 1]))
-            # y_velocities.extend(list(self.agent_matrix[i, 2]))
-            # class_ids.extend(list(self.agent_matrix[i, 3]))
-            # x_positions.extend(list(self.agent_matrix[i, 4]))
-            # y_positions.extend(list(self.agent_matrix[i, 5]))
-
             x_vel_list = DataElementFloat() # create a new DataElementFloat object for each agent to store x velocities of the agent
             y_vel_list = DataElementFloat()
             class_list = DataElementString()
@@ -218,6 +202,9 @@ class DataBufferNode(Node):
             y_variance.append(stats.get('y_variance', 0))
             majority_class_ids.append(stats.get('majority_class_id', -1))
 
+        print("x_velocities")
+        print(x_velocities)
+
         # Assign the formatted data to the message fields
         msg.agent_count = int(len(agent_ids))
         msg.agent_ids = agent_ids
@@ -236,6 +223,9 @@ class DataBufferNode(Node):
         # publish the message
         self.pub_buffer.publish(msg)
         self.get_logger().info("Published buffer data.")
+
+        self.human_position_marker(msg)
+        self.human_velocity_marker(msg)
 
         # log buffer x and y velocities
         self.get_logger().info(f"x_velocities: {x_velocities}")
@@ -272,6 +262,90 @@ class DataBufferNode(Node):
     def get_all_buffers(self):
         # Retrieve buffer data for all agents
         return self.agent_matrix
+
+    def human_position_marker(self, msg):
+        marker_array = MarkerArray()  
+        count = msg.agent_count
+        x_pos  = msg.x_positions
+        y_pos = msg.y_positions
+
+        for human_id in range(count):
+            marker = Marker()
+            marker.header.frame_id = "map"
+            marker.header.stamp = self.get_clock().now().to_msg()
+            marker.ns = "human_positions"
+            marker.id = human_id
+            marker.type = Marker.CYLINDER
+            marker.action = Marker.ADD
+            marker.pose.position.x = x_pos[human_id].float_data[-1] # x position
+            marker.pose.position.y = y_pos[human_id].float_data[-1]# y position
+            marker.pose.position.z = 0.0  # z position (assumed flat plane)
+            marker.scale.x = 0.2  # Sphere size in x
+            marker.scale.y = 0.2  # Sphere size in y
+            marker.scale.z = 0.01 # Sphere size in z
+            marker.color.a = 1.0  # Transparency
+            marker.color.r = 1.0  # Red
+            marker.color.g = 0.0  # Green
+            marker.color.b = 0.0  # Blue
+
+            # Set lifetime of the marker
+            marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second
+            marker_array.markers.append(marker)
+        self.human_position_buffer.publish(marker_array)
+        
+
+    def human_velocity_marker(self, msg):
+        marker_array = MarkerArray()  
+        count = len(msg.x_positions) 
+        x_pos  = msg.x_positions
+        y_pos = msg.y_positions
+        x_vel = msg.x_mean
+        y_vel = msg.y_mean
+
+        for human_id in range(count):
+            marker = Marker()
+            marker.header.frame_id = "map"
+            marker.header.stamp = self.get_clock().now().to_msg()
+            marker.ns = "human_velocities"
+            marker.id = human_id
+            marker.type = Marker.ARROW  # Change to arrow
+            marker.action = Marker.ADD
+
+            # Set the starting point of the arrow (human position)
+            marker.pose.position.x = x_pos[human_id].float_data[-1]  # x position
+            marker.pose.position.y = y_pos[human_id].float_data[-1] # y position
+            marker.pose.position.z = 0.0  # z position (assumed flat plane)
+
+            # Calculate the orientation of the arrow from velocity components
+            vx, vy = x_vel[human_id], y_vel[human_id]  # Extract velocities from state
+            velocity_magnitude = (vx**2 + vy**2)**0.5
+            theta = np.arctan2(vy,vx)
+
+            if velocity_magnitude > 0:
+                marker.pose.orientation.x = 0.0
+                marker.pose.orientation.y = 0.0
+                marker.pose.orientation.z = np.sin(theta/2)
+                marker.pose.orientation.w = np.cos(theta/2)
+            else:
+                marker.pose.orientation.w = 1.0  # Default orientation
+
+            # Scale the arrow: length proportional to velocity magnitude
+            marker.scale.x = velocity_magnitude # Arrow length
+            marker.scale.y = 0.05  # Arrow thickness
+            marker.scale.z = 0.01 # Arrow thickness
+
+            # Set the color of the arrow
+            marker.color.a = 1.0  # Transparency
+            marker.color.r = 1.0  # Red
+            marker.color.g = 0.0  # Green
+            marker.color.b = 0.0  # Blue
+
+            # Set lifetime of the marker
+            marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second
+
+            marker_array.markers.append(marker)
+
+        self.human_velocity_buffer.publish(marker_array)
 
 
 def main(args=None):

@@ -1,12 +1,20 @@
 int32[] agent_ids
 int16 agent_count
 
-# Buffer data for each agent (last 10 values for each field)
-float32[] x_velocities    # Flattened array with up to 10 values per agent
-float32[] y_velocities    # Flattened array with up to 10 values per agent
-string[] class_ids         # Flattened array with up to 10 values per agent
-float32[] x_positions     # Flattened array with up to 10 values per agent
-float32[] y_positions     # Flattened array with up to 10 values per agent
+# # Buffer data for each agent (last 10 values for each field)
+# float32[] x_velocities    # Flattened array with up to 10 values per agent
+# float32[] y_velocities    # Flattened array with up to 10 values per agent
+# string[] class_ids         # Flattened array with up to 10 values per agent
+# float32[] x_positions     # Flattened array with up to 10 values per agent
+# float32[] y_positions     # Flattened array with up to 10 values per agent
+
+# nested data structure for each agent
+
+DataElementFloat[] x_velocities
+DataElementFloat[] y_velocities
+DataElementString[] class_ids
+DataElementFloat[] x_positions
+DataElementFloat[] y_positions
 
 # Statistical data for each agent
 float32[] x_mean          # Mean x-velocity for each agent
