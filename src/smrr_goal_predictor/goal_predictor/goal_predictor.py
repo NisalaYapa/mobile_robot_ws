@@ -4,18 +4,13 @@ import matplotlib.pyplot    as plt
 from scipy.stats    import norm
 from rclpy.node     import Node
 from smrr_interfaces.msg import Entities, Buffer
-
+from visualization_msgs.msg import Marker, MarkerArray
+from builtin_interfaces.msg import Duration
 
 class GoalPredictor(Node):
     def __init__(self):
         super().__init__('goal_predictor')
 
-        # commmented
-        # self.pos_subscription = self.create_subscription(
-        #     Entities,
-        #     'map_data',
-        #     self.predictor_callback,
-        #     10)
 
         # subscribe to the buffer topic
         self.pos_subscription = self.create_subscription(Buffer, '/buffer', self.predictor_callback, 10)
@@ -24,7 +19,10 @@ class GoalPredictor(Node):
         self.vel_publisher  = self.create_publisher(Entities,'/vel', 10)
         self.goal_publisher = self.create_publisher(Entities,'/goals', 10)
 
-        self.pos_subscription  
+        self.human_goals = self.create_publisher(MarkerArray, 'human_goals_marker', 10)
+        self.human_positions = self.create_publisher(MarkerArray, 'human_positions_goalpredictor', 10)
+        self.human_velocities = self.create_publisher(MarkerArray, 'human_velocity_goalpredictor', 10)
+
 
         self.pedestrian_pos = [] 
         self.pedestrian_vel = []
@@ -158,6 +156,10 @@ class GoalPredictor(Node):
             self.goals.x[k] = D[np.argmax(destination_probs)][0]
             self.goals.y[k] = D[np.argmax(destination_probs)][1]
 
+        self.publish_goal_marker()
+        self.publish_position_marker()
+        self.publish_velocity_marker()
+
         return self.goals
         #return D[np.argmax(destination_probs)], destination_probs
 
@@ -178,6 +180,122 @@ class GoalPredictor(Node):
         # plt.draw()  
         # plt.pause(0.01)  
 
+    def publish_goal_marker(self):
+        marker_array = MarkerArray()  
+        count = len(self.goals.x)
+        x_pos  = self.goals.x
+        y_pos = self.goals.y
+
+        for human_id in range(count):
+            marker = Marker()
+            marker.header.frame_id = "map"
+            marker.header.stamp = self.get_clock().now().to_msg()
+            marker.ns = "human_goals"
+            marker.id = human_id
+            marker.type = Marker.CUBE
+            marker.action = Marker.ADD
+            marker.pose.position.x = x_pos[human_id]# x position
+            marker.pose.position.y = y_pos[human_id]# y position
+            marker.pose.position.z = 0.0  # z position (assumed flat plane)
+            marker.scale.x = 0.2  # Sphere size in x
+            marker.scale.y = 0.2  # Sphere size in y
+            marker.scale.z = 0.01 # Sphere size in z
+            marker.color.a = 1.0  # Transparency
+            marker.color.r = human_id/12  # Red
+            marker.color.g = (13-human_id)/12 # Green
+            marker.color.b = human_id/12  # Blue
+
+            # Set lifetime of the marker
+            marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second
+            marker_array.markers.append(marker)
+        self.human_goals.publish(marker_array)
+
+
+    def publish_position_marker(self):
+        marker_array = MarkerArray()  
+        count = len(self.agents.x)
+        x_pos  = self.agents.x
+        y_pos = self.agents.y
+
+        for human_id in range(count):
+            marker = Marker()
+            marker.header.frame_id = "map"
+            marker.header.stamp = self.get_clock().now().to_msg()
+            marker.ns = "human_positions"
+            marker.id = human_id
+            marker.type = Marker.CYLINDER
+            marker.action = Marker.ADD
+            marker.pose.position.x = x_pos[human_id]# x position
+            marker.pose.position.y = y_pos[human_id]# y position
+            marker.pose.position.z = 0.0  # z position (assumed flat plane)
+            marker.scale.x = 0.2  # Sphere size in x
+            marker.scale.y = 0.2  # Sphere size in y
+            marker.scale.z = 0.01 # Sphere size in z
+            marker.color.a = 1.0  # Transparency
+            marker.color.r = human_id/12  # Red
+            marker.color.g = (13-human_id)/12 # Green
+            marker.color.b = human_id/12  # Blue
+
+            # Set lifetime of the marker
+            marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second
+            marker_array.markers.append(marker)
+        self.human_positions.publish(marker_array)
+
+    
+    
+    def publish_velocity_marker(self):
+
+        marker_array = MarkerArray()  
+        count = len(self.agents.x)
+        x_pos  = self.agents.x
+        y_pos = self.agents.y
+        x_vel = self.vel.x
+        y_vel = self.vel.y
+
+        for human_id in range(count):
+            marker = Marker()
+            marker.header.frame_id = "map"
+            marker.header.stamp = self.get_clock().now().to_msg()
+            marker.ns = "human_velocities"
+            marker.id = human_id
+            marker.type = Marker.ARROW  # Change to arrow
+            marker.action = Marker.ADD
+
+            # Set the starting point of the arrow (human position)
+            marker.pose.position.x = x_pos[human_id]  # x position
+            marker.pose.position.y = y_pos[human_id] # y position
+            marker.pose.position.z = 0.0  # z position (assumed flat plane)
+
+            # Calculate the orientation of the arrow from velocity components
+            vx, vy = x_vel[human_id], y_vel[human_id]  # Extract velocities from state
+            velocity_magnitude = (vx**2 + vy**2)**0.5
+            theta = np.arctan2(vy,vx)
+
+            if velocity_magnitude > 0:
+                marker.pose.orientation.x = 0.0
+                marker.pose.orientation.y = 0.0
+                marker.pose.orientation.z = np.sin(theta/2)
+                marker.pose.orientation.w = np.cos(theta/2)
+            else:
+                marker.pose.orientation.w = 1.0  # Default orientation
+
+            # Scale the arrow: length proportional to velocity magnitude
+            marker.scale.x = velocity_magnitude # Arrow length
+            marker.scale.y = 0.05  # Arrow thickness
+            marker.scale.z = 0.01 # Arrow thickness
+
+            # Set the color of the arrow
+            marker.color.a = 1.0  # Transparency
+            marker.color.r = 1.0  # Red
+            marker.color.g = 0.0  # Green
+            marker.color.b = 0.0  # Blue
+
+            # Set lifetime of the marker
+            marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second
+
+            marker_array.markers.append(marker)
+
+        self.human_velocities.publish(marker_array)
 
 def main(args=None):
     rclpy.init(args=args)

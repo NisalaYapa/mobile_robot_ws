@@ -22,7 +22,7 @@ class TestDataPub(Node):
         self.x_positions = []
         self.y_positions = []
 
-    def agennt_entry(self):
+    def agent_entry(self):
         new_class = str(random.randint(0, 3))
         new_x =random.uniform(1.0,10.0)
         new_y = random.uniform(1.0,10.0)
@@ -53,7 +53,7 @@ class TestDataPub(Node):
         flag = 0
         if random.random() < 0.4:
             # 20 % chance of agent enter
-            self.agennt_entry()
+            self.agent_entry()
             flag = 1
         if random.random() < 0.38 and self.x_positions:
             # 15 % chance of agent exit
