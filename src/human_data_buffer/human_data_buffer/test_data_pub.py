@@ -9,21 +9,22 @@ import random
 from visualization_msgs.msg import Marker, MarkerArray
 from builtin_interfaces.msg import Duration
 
-
 # create a publisher in Entity data type for testing 
 class TestDataPub(Node):
     def __init__(self):
         super().__init__('test_data_pub')
         self.pub = self.create_publisher(Entities, '/object_tracker/laser_data_array', 10)
-        self.position_marker = self.create_publisher(MarkerArray, '/raw_position_marker', 10)
         self.timer = self.create_timer(0.5, self.timer_callback)
 
         self.clases = []
         self.x_positions = []
         self.y_positions = []
+        #self.set_of_human_classes = [child,normal-adult,elder-no-disabilities,disabled]
+        self.set_of_human_classes = ['child','normal-adult','elder-no-disabilities','disabled']
 
-    def agent_entry(self):
-        new_class = str(random.randint(0, 3))
+    def agennt_entry(self):
+        #new_class = str(random.randint(0, 3))
+        new_class = self.set_of_human_classes[random.randint(0,3)] # pick a random class from the set of classes
         new_x =random.uniform(1.0,10.0)
         new_y = random.uniform(1.0,10.0)
 
@@ -53,7 +54,7 @@ class TestDataPub(Node):
         flag = 0
         if random.random() < 0.4:
             # 20 % chance of agent enter
-            self.agent_entry()
+            self.agennt_entry()
             flag = 1
         if random.random() < 0.38 and self.x_positions:
             # 15 % chance of agent exit
@@ -79,13 +80,11 @@ class TestDataPub(Node):
         msg.y = self.y_positions
         msg.classes = self.clases
         msg.count = len(self.x_positions)
-
-        self.publish_human_position_marker(msg)
-
-
         self.pub.publish(msg)
 
         self.get_logger().info(f'Published {msg.count} agents , x: {msg.x}, y: {msg.y}, classes: {msg.classes}')
+        
+
 
 
     def publish_human_position_marker(self, msg):
