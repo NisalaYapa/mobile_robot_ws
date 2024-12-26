@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'smrr_goal_predictor'
+package_name = 'goal_predictor'
 
 setup(
     name=package_name,

@@ -26,6 +26,8 @@ class VelocityExtractor(Node):
         # self.pub_class = self.create_publisher(Int32MultiArray, 'human_classes', 10)
         
         # custom interface
+        self.raw_human_position = self.create_publisher(MarkerArray, 'raw_positions', 10)
+
         self.pub_velocity_class = self.create_publisher(VelocityClassData, 'velocity_class_data', 10)
         self.human_position_publisher = self.create_publisher(MarkerArray, 'positions_latest', 10)
         self.human_velocity_publisher = self.create_publisher(MarkerArray, 'velocities_latest', 10)
@@ -42,6 +44,9 @@ class VelocityExtractor(Node):
         y_positions = msg.y #list of y positions
         class_ids = msg.classes
         agent_count = msg.count
+
+
+        self.raw_human_position_marker(msg)
 
         # calculate velocity and update previous positions
         x_vel = []
@@ -203,6 +208,36 @@ class VelocityExtractor(Node):
             marker_array.markers.append(marker)
 
         self.human_velocity_publisher.publish(marker_array)
+
+    def raw_human_position_marker(self, msg):
+        marker_array = MarkerArray()  
+        count = len(msg.x) 
+        x_pos  = msg.x
+        y_pos = msg.y
+
+        for human_id in range(count):
+            marker = Marker()
+            marker.header.frame_id = "map"
+            marker.header.stamp = self.get_clock().now().to_msg()
+            marker.ns = "human_positions"
+            marker.id = human_id
+            marker.type = Marker.CYLINDER
+            marker.action = Marker.ADD
+            marker.pose.position.x = x_pos[human_id] # x position
+            marker.pose.position.y = y_pos[human_id] # y position
+            marker.pose.position.z = 0.0  # z position (assumed flat plane)
+            marker.scale.x = 0.2  # Sphere size in x
+            marker.scale.y = 0.2  # Sphere size in y
+            marker.scale.z = 0.01 # Sphere size in z
+            marker.color.a = 1.0  # Transparency
+            marker.color.r = 1.0  # Red
+            marker.color.g = 0.0  # Green
+            marker.color.b = 0.0  # Blue
+
+            # Set lifetime of the marker
+            marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second
+            marker_array.markers.append(marker)
+        self.human_position_publisher.publish(marker_array)
 
 
 

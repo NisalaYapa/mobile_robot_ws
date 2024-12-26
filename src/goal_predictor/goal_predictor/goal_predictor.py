@@ -6,6 +6,7 @@ from rclpy.node     import Node
 from smrr_interfaces.msg import Entities, Buffer
 from visualization_msgs.msg import Marker, MarkerArray
 from builtin_interfaces.msg import Duration
+import colorsys
 
 class GoalPredictor(Node):
     def __init__(self):
