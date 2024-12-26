@@ -6,12 +6,16 @@ from smrr_interfaces.msg import Entities, VelocityClassData
 from std_msgs.msg import Int32MultiArray, Float32MultiArray
 import numpy as np
 import random
+from visualization_msgs.msg import Marker, MarkerArray
+from builtin_interfaces.msg import Duration
+
 
 # create a publisher in Entity data type for testing 
 class TestDataPub(Node):
     def __init__(self):
         super().__init__('test_data_pub')
         self.pub = self.create_publisher(Entities, '/object_tracker/laser_data_array', 10)
+        self.position_marker = self.create_publisher(MarkerArray, '/raw_position_marker', 10)
         self.timer = self.create_timer(0.5, self.timer_callback)
 
         self.clases = []
@@ -75,9 +79,47 @@ class TestDataPub(Node):
         msg.y = self.y_positions
         msg.classes = self.clases
         msg.count = len(self.x_positions)
+
+        self.publish_human_position_marker(msg)
+
+
         self.pub.publish(msg)
 
         self.get_logger().info(f'Published {msg.count} agents , x: {msg.x}, y: {msg.y}, classes: {msg.classes}')
+
+
+    def publish_human_position_marker(self, msg):
+        count = msg.count
+        x_ = msg.x
+        y_ = msg.y
+
+        marker_array = MarkerArray()   
+
+        for i in range(count):
+            marker = Marker()
+            marker.header.frame_id = "map"
+            marker.header.stamp = self.get_clock().now().to_msg()
+            marker.ns = "raw_human_positions"
+            marker.id = i
+            marker.type = Marker.CYLINDER
+            marker.action = Marker.ADD
+            marker.pose.position.x = x_[i]# x position
+            marker.pose.position.y = y_[i]  # y position
+            marker.pose.position.z = 0.0  # z position (assumed flat plane)
+            marker.scale.x = 0.2  # Sphere size in x
+            marker.scale.y = 0.2  # Sphere size in y
+            marker.scale.z = 0.01 # Sphere size in z
+            marker.color.a = 1.0  # Transparency
+            marker.color.r = 1.0  # Red
+            marker.color.g = 0.0  # Green
+            marker.color.b = 0.0  # Blue
+
+            # Set lifetime of the marker
+            marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second
+
+            marker_array.markers.append(marker)
+
+        self.position_marker.publish(marker_array)
         
 
 def main(args=None):
