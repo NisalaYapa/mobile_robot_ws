@@ -6,6 +6,8 @@ import random
 from std_msgs.msg import Float32MultiArray, Int32MultiArray
 from filterpy.kalman import KalmanFilter
 from smrr_interfaces.msg import Buffer, PrefVelocity
+from visualization_msgs.msg import Marker, MarkerArray
+from builtin_interfaces.msg import Duration
 
 class HumanPrefferedVelocity(Node):
     def __init__(self):
@@ -19,6 +21,10 @@ class HumanPrefferedVelocity(Node):
 
         # publisher for preffered velocity
         self.preferred_velocity_publisher = self.create_publisher(PrefVelocity, 'preferred_velocity', 10)
+
+        self.human_positions_pre_vel = self.create_publisher(MarkerArray, 'human_position_PrefVel', 10)
+        self.human_velocities_pre_vel = self.create_publisher(MarkerArray, 'human_velocities_PrefVel', 10)
+
         self.timer = self.create_timer(0.5, self.publish_preferred_velocity)
 
         # class id and agent id for interface 
@@ -31,10 +37,20 @@ class HumanPrefferedVelocity(Node):
 
         self.filters = []
         self.num_of_people = 0
+
+        # Nisala Added these things to visulization        
+        self.x_position = []
+        self.y_position = []
+        self.x_velocity = []
+        self.y_velocity = []
         
     def process_buffer_data(self, msg):
         self.agent_ids = msg.agent_ids
         self.cls_ids = msg.class_ids
+        self.x_position = msg.x_positions
+        self.y_position = msg.y_positions
+        self.x_velocity = msg.x_mean
+        self.y_velocity = msg.y_mean
 
         self.process_lidar_data(msg)
         self.process_cls_data(msg)
@@ -46,6 +62,98 @@ class HumanPrefferedVelocity(Node):
         msg.class_ids = self.cls_ids
         self.preferred_velocity_publisher.publish(msg)
         self.get_logger().info('Publishing preferred velocity')
+
+        self.human_position_marker()
+        self.human_velocity_marker()
+
+
+    def human_position_marker(self):
+        marker_array = MarkerArray()  
+        count = len(self.x_position)
+        x_pos  = self.x_position
+        y_pos = self.y_position
+
+        for human_id in range(count):
+            marker = Marker()
+            marker.header.frame_id = "map"
+            marker.header.stamp = self.get_clock().now().to_msg()
+            marker.ns = "human_positions"
+            marker.id = human_id
+            marker.type = Marker.CYLINDER
+            marker.action = Marker.ADD
+            marker.pose.position.x = x_pos[human_id].float_data[-1] # x position
+            marker.pose.position.y = y_pos[human_id].float_data[-1]# y position
+            marker.pose.position.z = 0.0  # z position (assumed flat plane)
+            marker.scale.x = 0.2  # Sphere size in x
+            marker.scale.y = 0.2  # Sphere size in y
+            marker.scale.z = 0.01 # Sphere size in z
+            marker.color.a = 1.0  # Transparency
+            marker.color.r = 1.0  # Red
+            marker.color.g = 0.0  # Green
+            marker.color.b = 0.0  # Blue
+
+            # Set lifetime of the marker
+            marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second
+            marker_array.markers.append(marker)
+        self.human_positions_pre_vel.publish(marker_array)
+        
+
+    def human_velocity_marker(self):
+        marker_array = MarkerArray()  
+        count = len(self.x_position)
+        x_pos  = self.x_position
+        y_pos = self.y_position
+        x_vel = self.x_velocity
+        y_vel = self.y_velocity
+        pref_vel = self.preferred_velocity
+
+        for human_id in range(count):
+            marker = Marker()
+            marker.header.frame_id = "map"
+            marker.header.stamp = self.get_clock().now().to_msg()
+            marker.ns = "human_velocities"
+            marker.id = human_id
+            marker.type = Marker.ARROW  # Change to arrow
+            marker.action = Marker.ADD
+
+            # Set the starting point of the arrow (human position)
+            marker.pose.position.x = x_pos[human_id].float_data[-1]  # x position
+            marker.pose.position.y = y_pos[human_id].float_data[-1] # y position
+            marker.pose.position.z = 0.0  # z position (assumed flat plane)
+
+            # Calculate the orientation of the arrow from velocity components
+            vx, vy = x_vel[human_id], y_vel[human_id]  # Extract velocities from state
+            velocity_magnitude = pref_vel[human_id]
+            theta = np.arctan2(vy,vx)
+
+            if velocity_magnitude > 0:
+                marker.pose.orientation.x = 0.0
+                marker.pose.orientation.y = 0.0
+                marker.pose.orientation.z = np.sin(theta/2)
+                marker.pose.orientation.w = np.cos(theta/2)
+            else:
+                marker.pose.orientation.w = 1.0  # Default orientation
+
+            # Scale the arrow: length proportional to velocity magnitude
+            marker.scale.x = velocity_magnitude # Arrow length
+            marker.scale.y = 0.05  # Arrow thickness
+            marker.scale.z = 0.01 # Arrow thickness
+
+            # Set the color of the arrow
+            marker.color.a = 1.0  # Transparency
+            marker.color.r = 1.0  # Red
+            marker.color.g = 0.0  # Green
+            marker.color.b = 0.0  # Blue
+
+            # Set lifetime of the marker
+            marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second
+
+            marker_array.markers.append(marker)
+
+        self.human_velocities_pre_vel.publish(marker_array)
+
+
+        
 
     def kalman_filter(self):
         # initialize kalman filter 
