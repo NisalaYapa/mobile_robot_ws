@@ -37,14 +37,21 @@ ros2 bag play rosbag2_2024_12_27-00_09_10
 1. **`human_data_pub`**
    Test human data publisher (No need to run, when the bag file is running)
    Topics:
-   **`/object_tracker/laser_data_array`** : Test human data publisher
-   
+   **`/object_tracker/laser_data_array`** : Test human data publisher 
    
 
 3. **`human_data_extracter`**
    Calculating velocities of each hman agent when the raw human positiin data is received
+   Topics:
+   **`/object_tracker/laser_data_array`** : Subscribe to human data
+   **`velocity_class_data`** : publish human positions, velocties, classes
+
+   Markers:
+   **`raw_positions`** : plot /object_tracker/laser_data_array (input positions)
+   **`positions_latest`** : human positions publisher
+   **`velocities_latest`** : human velocities publisher
    
-4. **`human_data_buffer`**
+5. **`human_data_buffer`**
    Stores 10 values for eac human agent and calculates human motion statistics
 
 ```bash
