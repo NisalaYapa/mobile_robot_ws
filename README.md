@@ -41,31 +41,31 @@ ros2 bag play rosbag2_2024_12_27-00_09_10
    - **`/object_tracker/laser_data_array`**: Publishes test human data.
 
    **Markers**:  
-   - **`/raw_position_marker`**: input positions of human agents. 
+   - **`/human_data_buffer/raw_position_marker`**: input positions of human agents. 
 
 2. **`human_data_extracter`**  
    This node calculates the velocities of each human agent when raw human position data is received.  
 
    **Topics**:  
    - **`/object_tracker/laser_data_array`**: Subscribes to human data.  
-   - **`velocity_class_data`**: Publishes human positions, velocities, and classes.  
+   - **`/human_data_buffer/velocity_class_data`**: Publishes human positions, velocities, and classes.  
 
    **Markers**:  
-   - **`human_position_buffer`**: Publishes human positions.  
-   - **`human_velocity_buffer`**: Publishes human velocities.  
+   - **`/human_data_buffer/human_position_buffer`**: Publishes human positions.  
+   - **`/human_data_buffer/human_velocity_buffer`**: Publishes human velocities.  
 
    
 5. **`human_data_buffer`**
    Stores 10 values for eac human agent and calculates human motion statistics
    
    **Topics**:  
-   - **`velocity_class_data`**: subscribes human positions, velocities, and classes.
-   - **`buffer`**: publishes buffered positions, velocities and other statistics.
+   - **`/human_data_buffer/velocity_class_data`**: subscribes human positions, velocities, and classes.
+   - **`/human_data_buffer/buffer`**: publishes buffered positions, velocities and other statistics.
 
    **Markers**:  
-   - **`raw_positions`**: Plots `/object_tracker/laser_data_array` (input positions).  
-   - **`positions_latest`**: Publishes human positions.  
-   - **`velocities_latest`**: Publishes human velocities.  
+   - **`/human_data_buffer/raw_positions`**: Plots `/object_tracker/laser_data_array` (input positions).  
+   - **`/human_data_buffer/positions_latest`**: Publishes human positions.  
+   - **`/human_data_buffer/velocities_latest`**: Publishes human velocities.  
    
 
 ```bash
@@ -78,12 +78,12 @@ ros2 run human_data_buffer human_data_buffer
 This is for generating a value for the preffered human velocity of each human agent using actual motion and motion details according to the human class (kid, adult, old, disabled) with integrating a Kalman Filter
 
    **Topics**:  
-   - **`buffer`**: subscribes buffered positions, velocities and other statistics.
-   - **`preferred_velocity`**: publishes prefered velocity for each human agent.
+   - **`/human_data_buffer/buffer`**: subscribes buffered positions, velocities and other statistics.
+   - **`/preffered_velocity_prediction/preferred_velocity`**: publishes prefered velocity for each human agent.
 
    **Markers**:  
-   - **`human_position_PrefVel`**: Publishes human positions.  
-   - **`human_velocities_PrefVel`**: Publishes human velocities.  
+   - **`/preffered_velocity_prediction/human_position_marker`**: Publishes human positions.  
+   - **`/preffered_velocity_prediction/human_velocities_marker`**: Publishes human velocities.  
 
 ```bash
 ros2 run preffered_velocity_prediction preffered_velocity
@@ -94,15 +94,15 @@ ros2 run preffered_velocity_prediction preffered_velocity
 This is a node to predict the posible human destination according to their motion.
 
    **Topics**:  
-   - **`/buffer`**: subscribes buffered positions, velocities and other statistics.
-   - **`/pos`**: publishes human agents positions
-   - **`/vel`**: publishes human agents velocities
-   - **`/goals`**: publishes human agents predicted goals
+   - **`/human_data_buffer/buffer`**: subscribes buffered positions, velocities and other statistics.
+   - **`/goal_predictor/pos`**: publishes human agents positions
+   - **`/goal_predictor/vel`**: publishes human agents velocities
+   - **`/goal_predictor/goals`**: publishes human agents predicted goals
 
    **Markers**:  
-   - **`human_goals_marker`**: Published human goals (predicted)
-   - **`human_positions_goalpredictor`**: Publishes human positions.  
-   - **`human_velocity_goalpredictor`**: Publishes human velocities.  
+   - **`/goal_predictor/human_goals_marker`**: Published human goals (predicted)
+   - **`/goal_predictor/human_positions_marker`**: Publishes human positions.  
+   - **`/goal_predictor/human_velocity_marker`**: Publishes human velocities.  
    
 
 ```bash
@@ -119,32 +119,32 @@ The Kalman Filter is used to smooth human positions and velocities, providing ac
    The primary Kalman Filter node that processes and smoothens human motion data.
    
    **Topics**:  
-   - **`/pos`**: subscribes human agents positions
-   - **`/vel`**: subscribes human agents velocities
-   - **`/goals`**: subscribes human agents predicted goals
-   - **`/laser_data_array_kf`**: publishes kalman filtered human positions
-   - **`/vel_kf`**: publishes kalman filterd human velocities
+   - **`/goal_predictor//pos`**: subscribes human agents positions
+   - **`/goal_predictor//vel`**: subscribes human agents velocities
+   - **`/goal_predictor//goals`**: subscribes human agents predicted goals
+   - **`/smrr_crowdnav/pos_kf`**: publishes kalman filtered human positions
+   - **`/smrr_crowdnav/vel_kf`**: publishes kalman filterd human velocities
 
    **Markers**:  
-   - **`/human_positions`**: Publishes human positions (input).  
-   - **`/human_velocities`**: Publishes human velocities (input).
-   - **`/filtered_human_marker`**: Publishes human positions (kalman filterd).  
-   - **`/filtered_human_velocities`**: Publishes human velocities (kalman filterd).  
+   - **`/smrr_crowdnav/human_positions`**: Publishes human positions (input).  
+   - **`/smrr_crowdnav/human_velocities`**: Publishes human velocities (input).
+   - **`/smrr_crowdnav/filtered_human_marker`**: Publishes human positions (kalman filterd).  
+   - **`/smrr_crowdnav/filtered_human_velocities`**: Publishes human velocities (kalman filterd).  
 
 
 3. **`kf_no_kf`**  
    A testing node that visualizes the performance of the Kalman Filter. It compares human motion predictions with and without the Kalman Filter using ORCA.
    
    **Topics**:  
-   - **`/pos`**: subscribes human agents positions
-   - **`/vel`**: subscribes human agents velocities
-   - **`/laser_data_array_kf`**: subscribes kalman filtered human positions
-   - **`/vel_kf`**: subscribes kalman filterd human velocities
+   - **`/goal_predictor/pos`**: subscribes human agents positions
+   - **`/goal_predictor/vel`**: subscribes human agents velocities
+   - **`/goal_predictor/laser_data_array_kf`**: subscribes kalman filtered human positions
+   - **`/smrr_crowdnav/vel_kf`**: subscribes kalman filterd human velocities
    - **`/diff_drive_controller/odom`**: subscribes to robots velocity
 
    **Markers**:  
-   - **`human_trajectories_no_kf`**: Publishes human future states (ORCA) without Kalman Filter.  
-   - **`human_trajectories_kf`**: Publishes human future states (ORCA) with Kalman Filter.
+   - **`/smrr_crowdnav/human_trajectories_no_kf`**: Publishes human future states (ORCA) without Kalman Filter.  
+   - **`/smrr_crowdnav/human_trajectories_kf`**: Publishes human future states (ORCA) with Kalman Filter.
 
 
 ```bash
