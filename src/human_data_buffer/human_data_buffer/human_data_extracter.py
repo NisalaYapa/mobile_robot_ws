@@ -26,11 +26,11 @@ class VelocityExtractor(Node):
         # self.pub_class = self.create_publisher(Int32MultiArray, 'human_classes', 10)
         
         # custom interface
-        self.raw_human_position = self.create_publisher(MarkerArray, 'raw_positions', 10)
+        self.raw_human_position = self.create_publisher(MarkerArray, '/human_data_buffer/raw_positions', 10)
 
-        self.pub_velocity_class = self.create_publisher(VelocityClassData, 'velocity_class_data', 10)
-        self.human_position_publisher = self.create_publisher(MarkerArray, 'positions_latest', 10)
-        self.human_velocity_publisher = self.create_publisher(MarkerArray, 'velocities_latest', 10)
+        self.pub_velocity_class = self.create_publisher(VelocityClassData, '/human_data_buffer/velocity_class_data', 10)
+        self.human_position_publisher = self.create_publisher(MarkerArray, '/human_data_buffer/positions_latest', 10)
+        self.human_velocity_publisher = self.create_publisher(MarkerArray, '/human_data_buffer/velocities_latest', 10)
 
         # storage for previous data
         self.prev_x = []

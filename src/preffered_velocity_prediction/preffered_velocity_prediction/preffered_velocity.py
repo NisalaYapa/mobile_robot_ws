@@ -17,13 +17,13 @@ class HumanPrefferedVelocity(Node):
         #self.cls_reader = self.create_subscription(Int32MultiArray, 'human_clsses', self.process_cls_data,10)
         
         # subscribe to buffer
-        self.data_reader = self.create_subscription(Buffer, 'buffer', self.process_buffer_data,10)
+        self.data_reader = self.create_subscription(Buffer, '/human_data_buffer/buffer', self.process_buffer_data,10)
 
         # publisher for preffered velocity
-        self.preferred_velocity_publisher = self.create_publisher(PrefVelocity, 'preferred_velocity', 10)
+        self.preferred_velocity_publisher = self.create_publisher(PrefVelocity, '/preffered_velocity_prediction/preferred_velocity', 10)
 
-        self.human_positions_pre_vel = self.create_publisher(MarkerArray, 'human_position_PrefVel', 10)
-        self.human_velocities_pre_vel = self.create_publisher(MarkerArray, 'human_velocities_PrefVel', 10)
+        self.human_positions_pre_vel = self.create_publisher(MarkerArray, '/preffered_velocity_prediction/human_position_marker', 10)
+        self.human_velocities_pre_vel = self.create_publisher(MarkerArray, '/preffered_velocity_prediction/human_velocities_marker', 10)
 
         self.timer = self.create_timer(0.5, self.publish_preferred_velocity)
 

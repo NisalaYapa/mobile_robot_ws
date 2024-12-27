@@ -77,20 +77,19 @@ class KalmanTest(Node):
 
         # Create subscribers for the custom messages
         # Create subscribers for the custom messages
-        self.create_subscription(Entities, '/laser_data_array', self.human_position_callback, 10)
-        self.create_subscription(Entities, '/vel', self.human_velocity_callback, 10)
-        self.create_subscription(Entities, '/laser_data_array_kf', self.human_position_kf_callback, 10)
-        self.create_subscription(Entities, '/vel_kf', self.human_velocity_kf_callback, 10)
+        self.create_subscription(Entities, '/goal_predictor/pos', self.human_position_callback, 10)
+        self.create_subscription(Entities, '/goal_predictor/vel', self.human_velocity_callback, 10)
+        self.create_subscription(Entities, '/smrr_crowdnav/pos_kf', self.human_position_kf_callback, 10)
+        self.create_subscription(Entities, '/smrr_crowdnav/vel_kf', self.human_velocity_kf_callback, 10)
 
         self.create_subscription(Odometry, '/diff_drive_controller/odom', self.robot_velocity_callback, 10)
 
-        self.human_prediction_publisher_no_kf = self.create_publisher(MarkerArray, 'human_trajectories_no_kf', 10)
-        self.human_prediction_publisher_kf = self.create_publisher(MarkerArray, 'human_trajectories_kf', 10)
+        self.human_prediction_publisher_no_kf = self.create_publisher(MarkerArray, '/smrr_crowdnav/human_trajectories_no_kf', 10)
+        self.human_prediction_publisher_kf = self.create_publisher(MarkerArray, '/smrr_crowdnav/human_trajectories_kf', 10)
         
         
         # Publisher to send control commands (v, omega)
-        self.action_publisher = self.create_publisher(TwistStamped, '/diff_drive_controller/cmd_vel', 10)
-        self.prediction_publisher = self.create_publisher(MarkerArray, 'prediction_states_marker', 10)
+        #self.prediction_publisher = self.create_publisher(MarkerArray, 'prediction_states_marker', 10)
        
         self.get_logger().info("Node initiated")
 

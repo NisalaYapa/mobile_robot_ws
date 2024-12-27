@@ -14,6 +14,7 @@ class TestDataPub(Node):
     def __init__(self):
         super().__init__('test_data_pub')
         self.pub = self.create_publisher(Entities, '/object_tracker/laser_data_array', 10)
+        self.position_marker = self.create_publisher(MarkerArray, '/human_data_buffer/raw_position_marker', 10)
         self.timer = self.create_timer(0.5, self.timer_callback)
 
         self.clases = []
@@ -66,6 +67,7 @@ class TestDataPub(Node):
             self.update_positions()
         
         self.publish_data()
+        
 
     def update_positions(self):
         for i in range(len(self.x_positions)):
@@ -81,6 +83,7 @@ class TestDataPub(Node):
         msg.classes = self.clases
         msg.count = len(self.x_positions)
         self.pub.publish(msg)
+        self.publish_human_position_marker(msg)
 
         self.get_logger().info(f'Published {msg.count} agents , x: {msg.x}, y: {msg.y}, classes: {msg.classes}')
         

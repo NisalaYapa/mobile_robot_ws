@@ -19,16 +19,16 @@ class DataBufferNode(Node):
         # New subscription for the velocity data
         self.subscription = self.create_subscription(
             VelocityClassData,
-            'velocity_class_data',
+            '/human_data_buffer/velocity_class_data',
             self.callback_velocity_data,
             10
         )
         # Publisher for the buffer data
         # The buffer message contains lists of data for each agent
-        self.pub_buffer = self.create_publisher(Buffer, 'buffer', 10)
+        self.pub_buffer = self.create_publisher(Buffer, '/human_data_buffer/buffer', 10)
         self.pub_timer = self.create_timer(0.5, self.publish_buffer)
-        self.human_position_buffer = self.create_publisher(MarkerArray, 'human_position_buffer', 10)
-        self.human_velocity_buffer = self.create_publisher(MarkerArray, 'human_velocity_buffer', 10)
+        self.human_position_buffer = self.create_publisher(MarkerArray, '/human_data_buffer/human_position_buffer', 10)
+        self.human_velocity_buffer = self.create_publisher(MarkerArray, '/human_data_buffer/human_velocity_buffer', 10)
 
         # Initialize the buffer matrix with a numpy array
         # Structure: each row is [human_id, x_velocities (deque), y_velocities (deque), class_details (deque), x_positions(deque), y_positions(deque), statistics (dict)]

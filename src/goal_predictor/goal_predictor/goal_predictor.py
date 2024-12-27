@@ -14,15 +14,15 @@ class GoalPredictor(Node):
 
 
         # subscribe to the buffer topic
-        self.pos_subscription = self.create_subscription(Buffer, '/buffer', self.predictor_callback, 10)
+        self.pos_subscription = self.create_subscription(Buffer, '/human_data_buffer/buffer', self.predictor_callback, 10)
         
-        self.pos_publisher  = self.create_publisher(Entities,'/pos', 10)
-        self.vel_publisher  = self.create_publisher(Entities,'/vel', 10)
-        self.goal_publisher = self.create_publisher(Entities,'/goals', 10)
+        self.pos_publisher  = self.create_publisher(Entities,'/goal_predictor/pos', 10)
+        self.vel_publisher  = self.create_publisher(Entities,'/goal_predictor/vel', 10)
+        self.goal_publisher = self.create_publisher(Entities,'/goal_predictor/goals', 10)
 
-        self.human_goals = self.create_publisher(MarkerArray, 'human_goals_marker', 10)
-        self.human_positions = self.create_publisher(MarkerArray, 'human_positions_goalpredictor', 10)
-        self.human_velocities = self.create_publisher(MarkerArray, 'human_velocity_goalpredictor', 10)
+        self.human_goals = self.create_publisher(MarkerArray, '/goal_predictor/human_goals_marker', 10)
+        self.human_positions = self.create_publisher(MarkerArray, '/goal_predictor/human_positions_marker', 10)
+        self.human_velocities = self.create_publisher(MarkerArray, '/goal_predictor/human_velocity_marker', 10)
 
 
         self.pedestrian_pos = [] 

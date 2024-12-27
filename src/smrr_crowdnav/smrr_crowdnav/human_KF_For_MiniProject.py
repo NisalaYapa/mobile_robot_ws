@@ -16,25 +16,25 @@ class HumanKF(Node):
     def __init__(self):
         super().__init__('Human_KF_node')
         # Subscriptions
-        self.create_subscription(Entities, '/laser_data_array', self.human_position_callback, 10)
+        self.create_subscription(Entities, '/pos', self.human_position_callback, 10)
         self.create_subscription(Entities, '/vel', self.human_velocity_callback, 10)
         self.create_subscription(Entities, '/goals', self.human_goal_callback, 10)
 
         # Publisher to output filtered positions
-        self.filtered_positions_marker = self.create_publisher(MarkerArray, '/filtered_human_marker', 10)
-        self.filtered_velocities_marker = self.create_publisher(MarkerArray, '/filtered_human_velocities', 10)
+        self.filtered_positions_marker = self.create_publisher(MarkerArray, '/smrr_crowdnav/filtered_human_marker', 10)
+        self.filtered_velocities_marker = self.create_publisher(MarkerArray, '/smrr_crowdnav/filtered_human_velocities', 10)
      
-        self.positions_marker = self.create_publisher(MarkerArray, '/human_positions', 10)
-        self.velocities_marker = self.create_publisher(MarkerArray, '/human_velocities', 10)
+        self.positions_marker = self.create_publisher(MarkerArray, '/smrr_crowdnav/human_positions', 10)
+        self.velocities_marker = self.create_publisher(MarkerArray, '/smrr_crowdnav/human_velocities', 10)
 
-        self.filtered_positions_publisher = self.create_publisher(Entities, '/laser_data_array_kf', 10)
-        self.filtered_velocity_publisher = self.create_publisher(Entities, '/vel_kf', 10)
-        self.filtered_goal_publisher = self.create_publisher(Entities, '/goals_kf', 10)
+        self.filtered_positions_publisher = self.create_publisher(Entities, '/smrr_crowdnav/pos_kf', 10)
+        self.filtered_velocity_publisher = self.create_publisher(Entities, '//smrr_crowdnavvel_kf', 10)
+        self.filtered_goal_publisher = self.create_publisher(Entities, '/smrr_crowdnav/goals_kf', 10)
 
         
 
-        self.rqt_publisher = self.create_publisher(Float64MultiArray, '/state_nokf', 10)
-        self.rqt_kf_publisher = self.create_publisher(Float64MultiArray, '/state_kf', 10)
+        self.rqt_publisher = self.create_publisher(Float64MultiArray, '/smrr_crowdnav/state_nokf', 10)
+        self.rqt_kf_publisher = self.create_publisher(Float64MultiArray, '/smrr_crowdnav/state_kf', 10)
 
 
         # Initialize variables

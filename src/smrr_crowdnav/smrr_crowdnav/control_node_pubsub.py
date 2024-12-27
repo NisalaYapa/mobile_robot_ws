@@ -100,14 +100,14 @@ class CrowdNavMPCNode(Node):
 
         # Create subscribers for the custom messages
         # Create subscribers for the custom messages
-        self.create_subscription(Entities, '/laser_data_array', self.human_position_callback, 10)
-        self.create_subscription(Entities, '/vel', self.human_velocity_callback, 10)
-        self.create_subscription(Entities, '/goals', self.human_goal_callback, 10)
+        self.create_subscription(Entities, '/smrr_crowdnav/pos_kf', self.human_position_callback, 10)
+        self.create_subscription(Entities, '/smrr_crowdnav/vel_kf', self.human_velocity_callback, 10)
+        self.create_subscription(Entities, '/goal_predictor/goals', self.human_goal_callback, 10)
         self.create_subscription(Odometry, '/diff_drive_controller/odom', self.robot_velocity_callback, 10)
 
         # Publisher to send control commands (v, omega)
         self.action_publisher = self.create_publisher(TwistStamped, '/diff_drive_controller/cmd_vel', 10)
-        self.prediction_publisher = self.create_publisher(MarkerArray, 'prediction_states_marker', 10)
+        self.prediction_publisher = self.create_publisher(MarkerArray, '/smrr_crowdnav/prediction_states_marker', 10)
        
         self.get_logger().info("Node initiated")
 

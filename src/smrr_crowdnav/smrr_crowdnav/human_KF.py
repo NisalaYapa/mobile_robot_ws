@@ -17,20 +17,20 @@ class HumanKF(Node):
         super().__init__('Human_KF_node')
 
         # Subscriptions
-        self.create_subscription(Entities, '/pos', self.human_position_callback, 10)
-        self.create_subscription(Entities, '/vel', self.human_velocity_callback, 10)
-        self.create_subscription(Entities, '/goals', self.human_goal_callback, 10)
+        self.create_subscription(Entities, '/goal_predictor/pos', self.human_position_callback, 10)
+        self.create_subscription(Entities, '/goal_predictor/vel', self.human_velocity_callback, 10)
+        self.create_subscription(Entities, '/goal_predictor/goals', self.human_goal_callback, 10)
 
         # Publisher to output filtered positions
-        self.filtered_positions_marker = self.create_publisher(MarkerArray, '/filtered_human_marker', 10)
-        self.filtered_velocities_marker = self.create_publisher(MarkerArray, '/filtered_human_velocities', 10)
+        self.filtered_positions_marker = self.create_publisher(MarkerArray, '/smrr_crowdnav/filtered_human_marker', 10)
+        self.filtered_velocities_marker = self.create_publisher(MarkerArray, '/smrr_crowdnav/filtered_human_velocities', 10)
      
-        self.positions_marker = self.create_publisher(MarkerArray, '/human_positions', 10)
-        self.velocities_marker = self.create_publisher(MarkerArray, '/human_velocities', 10)
+        self.positions_marker = self.create_publisher(MarkerArray, '/smrr_crowdnav/human_positions', 10)
+        self.velocities_marker = self.create_publisher(MarkerArray, '/smrr_crowdnav/human_velocities', 10)
 
-        self.filtered_positions_publisher = self.create_publisher(Entities, '/laser_data_array_kf', 10)
-        self.filtered_velocity_publisher = self.create_publisher(Entities, '/vel_kf', 10)
-        #self.filtered_goal_publisher = self.create_publisher(Entities, '/goals_kf', 10)
+        self.filtered_positions_publisher = self.create_publisher(Entities, '/smrr_crowdnav/pos_kf', 10)
+        self.filtered_velocity_publisher = self.create_publisher(Entities, '/smrr_crowdnav/vel_kf', 10)
+        #self.filtered_goal_publisher = self.create_publisher(Entities, '/smrr_crowdnav/goals_kf', 10)
 
 
         # Initialize variables
