@@ -38,7 +38,10 @@ ros2 bag play rosbag2_2024_12_27-00_09_10
    A test human data publisher. This node is not required when the bag file is running.  
 
    **Topics**:  
-   - **`/object_tracker/laser_data_array`**: Publishes test human data.  
+   - **`/object_tracker/laser_data_array`**: Publishes test human data.
+
+   **Markers**:  
+   - **`/raw_position_marker`**: input positions of human agents. 
 
 2. **`human_data_extracter`**  
    This node calculates the velocities of each human agent when raw human position data is received.  
