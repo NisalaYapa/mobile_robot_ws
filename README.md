@@ -38,7 +38,10 @@ ros2 bag play rosbag2_2024_12_27-00_09_10
    A test human data publisher. This node is not required when the bag file is running.  
 
    **Topics**:  
-   - **`/object_tracker/laser_data_array`**: Publishes test human data.  
+   - **`/object_tracker/laser_data_array`**: Publishes test human data.
+
+   **Markers**:  
+   - **`/raw_position_marker`**: input positions of human agents. 
 
 2. **`human_data_extracter`**  
    This node calculates the velocities of each human agent when raw human position data is received.  
@@ -48,9 +51,8 @@ ros2 bag play rosbag2_2024_12_27-00_09_10
    - **`velocity_class_data`**: Publishes human positions, velocities, and classes.  
 
    **Markers**:  
-   - **`raw_positions`**: Plots `/object_tracker/laser_data_array` (input positions).  
-   - **`positions_latest`**: Publishes human positions.  
-   - **`velocities_latest`**: Publishes human velocities.  
+   - **`human_position_buffer`**: Publishes human positions.  
+   - **`human_velocity_buffer`**: Publishes human velocities.  
 
    
 5. **`human_data_buffer`**
@@ -74,6 +76,15 @@ ros2 run human_data_buffer human_data_buffer
 
 ### Prefferd Velocity Package
 This is for generating a value for the preffered human velocity of each human agent using actual motion and motion details according to the human class (kid, adult, old, disabled) with integrating a Kalman Filter
+
+   **Topics**:  
+   - **`buffer`**: subscribes buffered positions, velocities and other statistics.
+   - **`preferred_velocity`**: publishes prefered velocity for each human agent.
+
+   **Markers**:  
+   - **`human_position_PrefVel`**: Publishes human positions.  
+   - **`human_velocities_PrefVel`**: Publishes human velocities.  
+
 ```bash
 ros2 run preffered_velocity_prediction preffered_velocity
 ```
@@ -81,6 +92,19 @@ ros2 run preffered_velocity_prediction preffered_velocity
 
 ### Goal Predictor Package
 This is a node to predict the posible human destination according to their motion.
+
+   **Topics**:  
+   - **`/buffer`**: subscribes buffered positions, velocities and other statistics.
+   - **`/pos`**: publishes human agents positions
+   - **`/vel`**: publishes human agents velocities
+   - **`/goals`**: publishes human agents predicted goals
+
+   **Markers**:  
+   - **`human_goals_marker`**: Published human goals (predicted)
+   - **`human_positions_goalpredictor`**: Publishes human positions.  
+   - **`human_velocity_goalpredictor`**: Publishes human velocities.  
+   
+
 ```bash
 ros2 run goal_predictor goal_predictor
 ```
@@ -89,12 +113,38 @@ ros2 run goal_predictor goal_predictor
 
 The Kalman Filter is used to smooth human positions and velocities, providing accurate data for the crowd navigation MPC.
 
+
 #### Nodes:
 1. **`human_kf`**  
    The primary Kalman Filter node that processes and smoothens human motion data.
+   
+   **Topics**:  
+   - **`/pos`**: subscribes human agents positions
+   - **`/vel`**: subscribes human agents velocities
+   - **`/goals`**: subscribes human agents predicted goals
+   - **`/laser_data_array_kf`**: publishes kalman filtered human positions
+   - **`/vel_kf`**: publishes kalman filterd human velocities
 
-2. **`kf_no_kf`**  
+   **Markers**:  
+   - **`/human_positions`**: Publishes human positions (input).  
+   - **`/human_velocities`**: Publishes human velocities (input).
+   - **`/filtered_human_marker`**: Publishes human positions (kalman filterd).  
+   - **`/filtered_human_velocities`**: Publishes human velocities (kalman filterd).  
+
+
+3. **`kf_no_kf`**  
    A testing node that visualizes the performance of the Kalman Filter. It compares human motion predictions with and without the Kalman Filter using ORCA.
+   
+   **Topics**:  
+   - **`/pos`**: subscribes human agents positions
+   - **`/vel`**: subscribes human agents velocities
+   - **`/laser_data_array_kf`**: subscribes kalman filtered human positions
+   - **`/vel_kf`**: subscribes kalman filterd human velocities
+   - **`/diff_drive_controller/odom`**: subscribes to robots velocity
+
+   **Markers**:  
+   - **`human_trajectories_no_kf`**: Publishes human future states (ORCA) without Kalman Filter.  
+   - **`human_trajectories_kf`**: Publishes human future states (ORCA) with Kalman Filter.
 
 
 ```bash
