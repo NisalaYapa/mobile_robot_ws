@@ -7,7 +7,9 @@ This is the ROS2 workspace of the SANSAR the mobile robot receptionist 2.0 with 
 ## Steps
 
 ### launching the robot into Gazebo
+```bash
 ros2 launch smrr_description gazebo_gpu.launch.py
+```
 
 
 ### vizualization in RViz2
@@ -46,4 +48,5 @@ ros2 run smrr_crowdnav control_node_laser
 
 
 ### Crowd Navigation Goal Client
+ros2 run smrr_crowdnav goal_client
 
