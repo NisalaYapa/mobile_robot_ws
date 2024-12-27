@@ -141,7 +141,7 @@ class VelocityExtractor(Node):
         count = len(msg.x_positions) 
         x_pos  = msg.x_positions
         y_pos = msg.y_positions
-        self.get_logger(f"human_count {count}")
+        #self.get_logger(f"human_count {count}")
 
         for human_id in range(count):
             marker = Marker()
