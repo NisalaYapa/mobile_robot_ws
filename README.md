@@ -108,6 +108,10 @@ ros2 run goal_predictor goal_predictor
 
 The Kalman Filter is used to smooth human positions and velocities, providing accurate data for the crowd navigation MPC.
 
+
+#### Nodes:
+1. **`human_kf`**  
+   The primary Kalman Filter node that processes and smoothens human motion data.
    **Topics**:  
    - **`/pos`**: subscribes human agents positions
    - **`/vel`**: subscribes human agents velocities
@@ -121,12 +125,19 @@ The Kalman Filter is used to smooth human positions and velocities, providing ac
    - **`/filtered_human_marker`**: Publishes human positions (kalman filterd).  
    - **`/filtered_human_velocities`**: Publishes human velocities (kalman filterd).  
 
-#### Nodes:
-1. **`human_kf`**  
-   The primary Kalman Filter node that processes and smoothens human motion data.
 
-2. **`kf_no_kf`**  
+3. **`kf_no_kf`**  
    A testing node that visualizes the performance of the Kalman Filter. It compares human motion predictions with and without the Kalman Filter using ORCA.
+   **Topics**:  
+   - **`/pos`**: subscribes human agents positions
+   - **`/vel`**: subscribes human agents velocities
+   - **`/laser_data_array_kf`**: subscribes kalman filtered human positions
+   - **`/vel_kf`**: subscribes kalman filterd human velocities
+   - **`/diff_drive_controller/odom`**: subscribes to robots velocity
+
+   **Markers**:  
+   - **`human_trajectories_no_kf`**: Publishes human future states (ORCA) without Kalman Filter.  
+   - **`human_trajectories_kf`**: Publishes human future states (ORCA) with Kalman Filter.
 
 
 ```bash
