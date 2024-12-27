@@ -88,6 +88,18 @@ ros2 run preffered_velocity_prediction preffered_velocity
 
 ### Goal Predictor Package
 This is a node to predict the posible human destination according to their motion.
+   **Topics**:  
+   - **`/buffer`**: subscribes buffered positions, velocities and other statistics.
+   - **`/pos`**: publishes human agents positions
+   - **`/vel`**: publishes human agents velocities
+   - **`/goals`**: publishes human agents predicted goals
+
+   **Markers**:  
+   - **`human_goals_marker`**: Published human goals (predicted)
+   - **`human_positions_goalpredictor`**: Publishes human positions.  
+   - **`human_velocity_goalpredictor`**: Publishes human velocities.  
+   
+
 ```bash
 ros2 run goal_predictor goal_predictor
 ```
