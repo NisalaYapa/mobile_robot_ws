@@ -73,6 +73,7 @@ ros2 run human_data_buffer human_data_buffer
 
 ### Prefferd Velocity Package
 This is for generating a value for the preffered human velocity of each human agent using actual motion and motion details according to the human class (kid, adult, old, disabled) with integrating a Kalman Filter
+
    **Topics**:  
    - **`buffer`**: subscribes buffered positions, velocities and other statistics.
    - **`preferred_velocity`**: publishes prefered velocity for each human agent.
@@ -88,6 +89,7 @@ ros2 run preffered_velocity_prediction preffered_velocity
 
 ### Goal Predictor Package
 This is a node to predict the posible human destination according to their motion.
+
    **Topics**:  
    - **`/buffer`**: subscribes buffered positions, velocities and other statistics.
    - **`/pos`**: publishes human agents positions
@@ -112,6 +114,7 @@ The Kalman Filter is used to smooth human positions and velocities, providing ac
 #### Nodes:
 1. **`human_kf`**  
    The primary Kalman Filter node that processes and smoothens human motion data.
+   
    **Topics**:  
    - **`/pos`**: subscribes human agents positions
    - **`/vel`**: subscribes human agents velocities
@@ -128,6 +131,7 @@ The Kalman Filter is used to smooth human positions and velocities, providing ac
 
 3. **`kf_no_kf`**  
    A testing node that visualizes the performance of the Kalman Filter. It compares human motion predictions with and without the Kalman Filter using ORCA.
+   
    **Topics**:  
    - **`/pos`**: subscribes human agents positions
    - **`/vel`**: subscribes human agents velocities
