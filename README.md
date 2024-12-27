@@ -23,7 +23,7 @@ rviz2
 ros2 launch smrr_localization local_localization.launch.py 
 ```
 
-### Runnig the Bag File
+### Running the Bag File
 For the convinience, here is using a bag file as a human data publisher (This is recorded by running several nodes such as YOLO and human position estimators.
 ```bash
 cd /home/nisala/mobile_robot_ws/src/human_data_buffer/human_data_buffer
@@ -36,6 +36,10 @@ ros2 bag play rosbag2_2024_12_27-00_09_10
 
 1. **`human_data_pub`**
    Test human data publisher (No need to run, when the bag file is running)
+   Topics:
+   **`/object_tracker/laser_data_array`** : Test human data publisher
+   
+   
 
 3. **`human_data_extracter`**
    Calculating velocities of each hman agent when the raw human positiin data is received
