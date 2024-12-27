@@ -55,6 +55,16 @@ ros2 bag play rosbag2_2024_12_27-00_09_10
    
 5. **`human_data_buffer`**
    Stores 10 values for eac human agent and calculates human motion statistics
+   
+   **Topics**:  
+   - **`velocity_class_data`**: subscribes human positions, velocities, and classes.
+   - **`buffer`**: publishes buffered positions, velocities and other statistics.
+
+   **Markers**:  
+   - **`raw_positions`**: Plots `/object_tracker/laser_data_array` (input positions).  
+   - **`positions_latest`**: Publishes human positions.  
+   - **`velocities_latest`**: Publishes human velocities.  
+   
 
 ```bash
 ros2 run human_data_buffer human_data_pub 
