@@ -54,10 +54,17 @@ This is a node to predict the posible human destination according to their motio
 ros2 run goal_predictor goal_predictor
 ```
 
-### Kalman Filter for Smoothen the human data
-Kalman Filter for smoothen the human position and velocities to use in the crowd navigation MPC
-human_kf : Kalman Filter Node
-kf_no_kf :  A tesing node to visualizr kalman filter. This is predicting the human motion using ORCA with and without Kalman Filter and visualize them.
+### Human Data Smoothing (Kalman Filter)
+
+The Kalman Filter is used to smooth human positions and velocities, providing accurate data for the crowd navigation MPC.
+
+#### Nodes:
+1. **`human_kf`**  
+   The primary Kalman Filter node that processes and smoothens human motion data.
+
+2. **`kf_no_kf`**  
+   A testing node that visualizes the performance of the Kalman Filter. It compares human motion predictions with and without the Kalman Filter using ORCA.
+
 
 ```bash
 ros2 run smrr_crowdnav human_kf
