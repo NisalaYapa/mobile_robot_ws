@@ -34,13 +34,13 @@ ros2 bag play rosbag2_2024_12_27-00_09_10
 
 #### Nodes:
 
-1. **`human_data_pub`**  
+1. **`human_data_pub`**
    Test human data publisher (No need to run, when the bag file is running)
 
-2. **`human_data_extracter`**
+3. **`human_data_extracter`**
    Calculating velocities of each hman agent when the raw human positiin data is received
    
-3. **`human_data_buffer`**
+4. **`human_data_buffer`**
    Stores 10 values for eac human agent and calculates human motion statistics
 
 ```bash
