@@ -80,6 +80,19 @@ ros2 run smrr_crowdnav kf_no_kf
 ```
 
 ### Crowd Naavigatation Action Server
+There are several versions of Crowd Mavigtion MPC
+
+1. **`control_node_pubsub`**
+  This the publisher subscriber archtecture of the MPC (No need to run the goal client)
+3. **`control_node`**
+   This is the latest version of MPC action server architecture
+5. **`control_node_waypoint`**
+   This is a testing node integrating waypoint following. (Merged into the control node)
+7. **`control_node_basic_action_server`**
+   This is a testing node to thest the action server architecture. (Merged into the control node)
+9. **`control_node_laser`**
+    This is a testing node to check the computational complexity when the raw lidar data is used as static obstacles (Need to be merged into the control node)
+
 ```bash
 ros2 run smrr_crowdnav control_node
 ros2 run smrr_crowdnav control_node_pubsub
