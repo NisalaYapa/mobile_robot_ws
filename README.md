@@ -119,9 +119,9 @@ The Kalman Filter is used to smooth human positions and velocities, providing ac
    The primary Kalman Filter node that processes and smoothens human motion data.
    
    **Topics**:  
-   - **`/goal_predictor//pos`**: subscribes human agents positions
-   - **`/goal_predictor//vel`**: subscribes human agents velocities
-   - **`/goal_predictor//goals`**: subscribes human agents predicted goals
+   - **`/goal_predictor/pos`**: subscribes human agents positions
+   - **`/goal_predictor/vel`**: subscribes human agents velocities
+   - **`/goal_predictor/goals`**: subscribes human agents predicted goals
    - **`/smrr_crowdnav/pos_kf`**: publishes kalman filtered human positions
    - **`/smrr_crowdnav/vel_kf`**: publishes kalman filterd human velocities
 
