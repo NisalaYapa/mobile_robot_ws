@@ -49,11 +49,16 @@ ros2 run preffered_velocity_prediction preffered_velocity
 
 
 ### Goal Predictor Package
+This is a node to predict the posible human destination according to their motion.
 ```bash
 ros2 run goal_predictor goal_predictor
 ```
 
 ### Kalman Filter for Smoothen the human data
+Kalman Filter for smoothen the human position and velocities to use in the crowd navigation MPC
+human_kf : Kalman Filter Node
+kf_no_kf :  A tesing node to visualizr kalman filter. This is predicting the human motion using ORCA with and without Kalman Filter and visualize them.
+
 ```bash
 ros2 run smrr_crowdnav human_kf
 ros2 run smrr_crowdnav kf_no_kf 
