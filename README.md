@@ -175,6 +175,8 @@ ros2 run smrr_crowdnav control_node_laser
 ```
 
 ### Crowd Navigation Goal Client
+This is the action client for the action server. This can publish a goal to the robot. To change the goal, plaese change the cofig file.
+
 ```bash
 ros2 run smrr_crowdnav goal_client
 ```
