@@ -157,7 +157,7 @@ class NewMPCReal():
             cost = 0
             for t in range(self.horizon):
                 dist_to_goal = cs.sumsqr(X_pred[t][:2] - goal_pos)  # Distance to the goal
-                angle_to_goal = np.arctan2((goal_pos-X_pred[t][:2])[1],(goal_pos-X_pred[t][:2])[0])
+                #angle_to_goal = np.arctan2((goal_pos-X_pred[t][:2])[1],(goal_pos-X_pred[t][:2])[0])
                 #cost += cs.sumsqr(angle_to_goal-X_pred[t][2])*Q_orientation
 
                 # Penalize control inputs (mainly smoothness in omega)
