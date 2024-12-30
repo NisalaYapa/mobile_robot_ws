@@ -63,8 +63,8 @@ class VelocityExtractor(Node):
                 # if agent left
                 #if pre_x == 0.0 or pre_y == 0.0:
                 if x_position == 0.0 and y_position == 0.0:
-                    vx = -100.0
-                    vy = -100.0
+                    vx = 0.0
+                    vy = 0.0
                     cl_id = "-1"
                     # remove agent from previous positions
                     self.prev_x.pop(i)

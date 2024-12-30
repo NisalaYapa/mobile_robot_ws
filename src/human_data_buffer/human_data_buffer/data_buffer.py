@@ -48,7 +48,7 @@ class DataBufferNode(Node):
             for i, (x_vel, y_vel, class_id, x_position, y_position) in enumerate(zip(x_velocities, y_velocities, class_ids, x_positions, y_positions)):
                 # Check if the agent has left (indicated by -1 velocities)
 
-                if x_vel == -100.0 and y_vel == -100.0:
+                if class_id == '-1' :
                     # If agent has left, remove their row from the buffer
                     try:
                         self.remove_agent(i)
