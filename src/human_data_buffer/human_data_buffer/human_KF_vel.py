@@ -14,7 +14,7 @@ from smrr_interfaces.msg import Entities, VelocityClassData
 
 class HumanKF(Node):
     def __init__(self):
-        super().__init__('Human_KF_node')
+        super().__init__('Human_KF_vel_node')
 
         # Subscriptions
         self.create_subscription(VelocityClassData, '/human_data_buffer/velocity_class_data', self.human_callback, 10)
@@ -138,7 +138,7 @@ class HumanKF(Node):
         self.human_kf = VelocityClassData()
 
 
-        self.human_kf.class_ids = self.class_ids
+        self.human_kf.class_ids = self.class_id
         self.human_kf.x_positions = pos_x
         self.human_kf.y_positions  = pos_y
         self.human_kf.x_velocities = vel_x

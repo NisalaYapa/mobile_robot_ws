@@ -19,7 +19,7 @@ class DataBufferNode(Node):
         # New subscription for the velocity data
         self.subscription = self.create_subscription(
             VelocityClassData,
-            '/human_data_buffer/velocity_class_data',
+            '/human_data_buffer/velocity_class_data_kf',
             self.callback_velocity_data,
             10
         )

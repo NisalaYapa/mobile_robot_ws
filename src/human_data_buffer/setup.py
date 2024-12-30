@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'human_data_buffer = human_data_buffer.data_buffer:main',
+            'human_data_kf = human_data_buffer.human_KF_vel:main',
             'human_data_extracter = human_data_buffer.human_data_extracter:main',
             'human_data_pub = human_data_buffer.test_data_pub:main',
         ],
