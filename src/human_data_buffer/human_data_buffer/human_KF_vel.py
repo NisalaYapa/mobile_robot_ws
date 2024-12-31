@@ -46,7 +46,7 @@ class HumanKF(Node):
         self.v = []  #store measurements to publish as markers
         self.P = []  # Covariance matrices for each human
 
-        self.timer = self.create_timer(0.1, self.update_kalman_filter)
+        #self.timer = self.create_timer(0.1, self.update_kalman_filter)
 
         self.get_logger().info("HumanKF Node initialized.")
 
@@ -75,17 +75,29 @@ class HumanKF(Node):
         self.previous_human_count = human_count
 
     def human_callback(self, msg):
+        self.change = 0
         count = len(msg.x_positions)
+        print(msg.class_ids)
+        print(count)
         self.class_id = msg.class_ids
         self.human_positions = [{'x': msg.x_positions[i], 'y': msg.y_positions[i]} for i in range(count)]
         self.human_velocities = [{'vx': msg.x_velocities[i], 'vy': msg.y_velocities[i]} for i in range(count)]
+
+        if "-1" in self.class_id:
+            self.change = 1
 
         #Check if human count has changed
         if count != self.previous_human_count:
             self.get_logger().info(f"Human count changed from {self.previous_human_count} to {count}. Resetting Kalman filter.")
             self.reset_kalman_filter(count)
 
-        
+        elif self.change:
+            self.filtered_human_publisher.publish(msg)
+            print("#######################################################################################")
+            
+
+        else:
+            self.update_kalman_filter()
 
         
 

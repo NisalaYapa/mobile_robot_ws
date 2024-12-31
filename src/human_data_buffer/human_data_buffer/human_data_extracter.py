@@ -35,6 +35,8 @@ class VelocityExtractor(Node):
         # storage for previous data
         self.prev_x = []
         self.prev_y = []
+        self.prev_count = 0
+        self.prev_zero = 0
 
         # update rate
         self.update_rate = 0.5 # 2 Hz
@@ -44,13 +46,14 @@ class VelocityExtractor(Node):
         y_positions = msg.y #list of y positions
         class_ids = msg.classes
         agent_count = msg.count
-
-
+        print(x_positions)
+       
         self.raw_human_position_marker(msg)
 
         # calculate velocity and update previous positions
         x_vel = []
         y_vel = []
+        
         class_list = []
 
         for i, (x_position, y_position, class_id) in enumerate(zip(x_positions, y_positions, class_ids)):
@@ -60,20 +63,24 @@ class VelocityExtractor(Node):
             pre_y = self.prev_y[i] if i < len(self.prev_y) else y_position
 
             try:
+                print("try")
                 # if agent left
                 #if pre_x == 0.0 or pre_y == 0.0:
-                if x_position == 0.0 and y_position == 0.0:
+                if y_position == 0.0:
+                    print('-1 found')
                     vx = 0.0
                     vy = 0.0
                     cl_id = "-1"
                     # remove agent from previous positions
                     self.prev_x.pop(i)
                     self.prev_y.pop(i)
+                    self.prev_zero = 1
 
                 else:
                     vx = (x_position - pre_x) / self.update_rate
                     vy = (y_position - pre_y) / self.update_rate
                     cl_id = class_id
+                    self.prev_zero = 0
             except:
                 vx = 0.0
                 vy = 0.0
@@ -129,11 +136,11 @@ class VelocityExtractor(Node):
         self.publish_latest_velocities(msg)
 
         # loging the published data
-        self.get_logger().info(f'Published x velocity: {x_vel}')
-        self.get_logger().info(f'Published y velocity: {y_vel}')
-        self.get_logger().info(f'Published class data: {class_list}')
-        self.get_logger().info(f'Published x positions: {x_positions}')
-        self.get_logger().info(f'Published y positions: {y_positions}')
+        # self.get_logger().info(f'Published x velocity: {x_vel}')
+        # self.get_logger().info(f'Published y velocity: {y_vel}')
+        # self.get_logger().info(f'Published class data: {class_list}')
+        # self.get_logger().info(f'Published x positions: {x_positions}')
+        # self.get_logger().info(f'Published y positions: {y_positions}')
 
 
     def publish_latest_positions(self, msg):
@@ -215,7 +222,7 @@ class VelocityExtractor(Node):
             marker.color.b = 0.0  # Blue
 
             # Set lifetime of the marker
-            marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second
+            marker.lifetime = Duration(sec=0, nanosec=0)  # Marker lasts for 1 second
 
             marker_array.markers.append(marker)
 
@@ -247,7 +254,7 @@ class VelocityExtractor(Node):
             marker.color.b = 0.0  # Blue
 
             # Set lifetime of the marker
-            marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second
+            marker.lifetime = Duration(sec=0, nanosec=0)  # Marker lasts for 1 second
             marker_array.markers.append(marker)
         self.human_position_publisher.publish(marker_array)
 

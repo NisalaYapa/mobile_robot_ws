@@ -50,6 +50,7 @@ class DataBufferNode(Node):
 
                 if class_id == '-1' :
                     # If agent has left, remove their row from the buffer
+                    self.get_logger().warn("Agent has left")
                     try:
                         self.remove_agent(i)
                     except Exception as e:
@@ -289,7 +290,7 @@ class DataBufferNode(Node):
             marker.color.b = 0.0  # Blue
 
             # Set lifetime of the marker
-            marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second
+            marker.lifetime = Duration(sec=0, nanosec=0)  # Marker lasts for 1 second
             marker_array.markers.append(marker)
         self.human_position_buffer.publish(marker_array)
         
@@ -341,7 +342,7 @@ class DataBufferNode(Node):
             marker.color.b = 0.0  # Blue
 
             # Set lifetime of the marker
-            marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second
+            marker.lifetime = Duration(sec=0, nanosec=0)  # Marker lasts for 1 second
 
             marker_array.markers.append(marker)
 
