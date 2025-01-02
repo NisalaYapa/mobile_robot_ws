@@ -187,6 +187,19 @@ class GoalPredictor(Node):
         x_pos  = self.goals.x
         y_pos = self.goals.y
 
+        colors = [
+            (1.0, 0.0, 0.0),  # Red
+            (0.0, 1.0, 0.0),  # Green
+            (0.0, 0.0, 1.0),  # Blue
+            (1.0, 1.0, 0.0),  # Yellow
+            (0.0, 1.0, 1.0),  # Cyan
+            (1.0, 0.0, 1.0),  # Magenta
+            (0.5, 0.5, 0.5),  # Grey
+            (1.0, 0.5, 0.0),  # Orange
+            (0.5, 0.0, 1.0),  # Purple
+            (0.0, 0.5, 1.0),  # Light Blue
+        ]
+
         for human_id in range(count):
             marker = Marker()
             marker.header.frame_id = "map"
@@ -202,9 +215,10 @@ class GoalPredictor(Node):
             marker.scale.y = 0.2  # Sphere size in y
             marker.scale.z = 0.01 # Sphere size in z
             marker.color.a = 1.0  # Transparency
-            marker.color.r = human_id/12  # Red
-            marker.color.g = (13-human_id)/12 # Green
-            marker.color.b = human_id/12  # Blue
+            color = colors[human_id % len(colors)]
+            marker.color.r = color[0]
+            marker.color.g = color[1]
+            marker.color.b = color[2]
 
             # Set lifetime of the marker
             marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second
@@ -215,8 +229,22 @@ class GoalPredictor(Node):
     def publish_position_marker(self):
         marker_array = MarkerArray()  
         count = len(self.agents.x)
-        x_pos  = self.agents.x
+        x_pos = self.agents.x
         y_pos = self.agents.y
+
+        # Predefined color palette
+        colors = [
+            (1.0, 0.0, 0.0),  # Red
+            (0.0, 1.0, 0.0),  # Green
+            (0.0, 0.0, 1.0),  # Blue
+            (1.0, 1.0, 0.0),  # Yellow
+            (0.0, 1.0, 1.0),  # Cyan
+            (1.0, 0.0, 1.0),  # Magenta
+            (0.5, 0.5, 0.5),  # Grey
+            (1.0, 0.5, 0.0),  # Orange
+            (0.5, 0.0, 1.0),  # Purple
+            (0.0, 0.5, 1.0),  # Light Blue
+        ]
 
         for human_id in range(count):
             marker = Marker()
@@ -226,22 +254,25 @@ class GoalPredictor(Node):
             marker.id = human_id
             marker.type = Marker.CYLINDER
             marker.action = Marker.ADD
-            marker.pose.position.x = x_pos[human_id]# x position
-            marker.pose.position.y = y_pos[human_id]# y position
+            marker.pose.position.x = x_pos[human_id]  # x position
+            marker.pose.position.y = y_pos[human_id]  # y position
             marker.pose.position.z = 0.0  # z position (assumed flat plane)
             marker.scale.x = 0.2  # Sphere size in x
             marker.scale.y = 0.2  # Sphere size in y
-            marker.scale.z = 0.01 # Sphere size in z
+            marker.scale.z = 0.01  # Sphere size in z
             marker.color.a = 1.0  # Transparency
-            marker.color.r = human_id/12  # Red
-            marker.color.g = (13-human_id)/12 # Green
-            marker.color.b = human_id/12  # Blue
+
+            # Assign color from palette or cycle through it
+            color = colors[human_id % len(colors)]
+            marker.color.r = color[0]
+            marker.color.g = color[1]
+            marker.color.b = color[2]
 
             # Set lifetime of the marker
             marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second
             marker_array.markers.append(marker)
-        self.human_positions.publish(marker_array)
 
+        self.human_positions.publish(marker_array)
     
     
     def publish_velocity_marker(self):
@@ -252,6 +283,19 @@ class GoalPredictor(Node):
         y_pos = self.agents.y
         x_vel = self.vel.x
         y_vel = self.vel.y
+
+        colors = [
+        (1.0, 0.0, 0.0),  # Red
+        (0.0, 1.0, 0.0),  # Green
+        (0.0, 0.0, 1.0),  # Blue
+        (1.0, 1.0, 0.0),  # Yellow
+        (0.0, 1.0, 1.0),  # Cyan
+        (1.0, 0.0, 1.0),  # Magenta
+        (0.5, 0.5, 0.5),  # Grey
+        (1.0, 0.5, 0.0),  # Orange
+        (0.5, 0.0, 1.0),  # Purple
+        (0.0, 0.5, 1.0),  # Light Blue
+    ]
 
         for human_id in range(count):
             marker = Marker()
@@ -287,9 +331,10 @@ class GoalPredictor(Node):
 
             # Set the color of the arrow
             marker.color.a = 1.0  # Transparency
-            marker.color.r = 1.0  # Red
-            marker.color.g = 0.0  # Green
-            marker.color.b = 0.0  # Blue
+            color = colors[human_id % len(colors)]
+            marker.color.r = color[0]
+            marker.color.g = color[1]
+            marker.color.b = color[2]
 
             # Set lifetime of the marker
             marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second

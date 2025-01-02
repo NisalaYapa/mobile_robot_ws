@@ -35,8 +35,7 @@ class VelocityExtractor(Node):
         # storage for previous data
         self.prev_x = []
         self.prev_y = []
-        self.prev_count = 0
-        self.prev_zero = 0
+
 
         # update rate
         self.update_rate = 0.5 # 2 Hz
@@ -47,6 +46,8 @@ class VelocityExtractor(Node):
         class_ids = msg.classes
         agent_count = msg.count
         print(x_positions)
+        print(y_positions)
+
        
         self.raw_human_position_marker(msg)
 
@@ -59,28 +60,45 @@ class VelocityExtractor(Node):
         for i, (x_position, y_position, class_id) in enumerate(zip(x_positions, y_positions, class_ids)):
             #pre_x = self.prev_x.get(i, x_position)
             #pre_y = self.prev_y.get(i, y_position)
-            pre_x = self.prev_x[i] if i < len(self.prev_x) else x_position
-            pre_y = self.prev_y[i] if i < len(self.prev_y) else y_position
+            #pre_x = self.prev_x[i] if i + 1 <= len(self.prev_x) else x_position 
+            #pre_y = self.prev_y[i] if i + 1 <= len(self.prev_y) else y_position
+
+                 
+
 
             try:
-                print("try")
+           
                 # if agent left
                 #if pre_x == 0.0 or pre_y == 0.0:
                 if y_position == 0.0:
-                    print('-1 found')
                     vx = 0.0
                     vy = 0.0
                     cl_id = "-1"
+                    self.get_logger().warning("removed a person")
                     # remove agent from previous positions
                     self.prev_x.pop(i)
                     self.prev_y.pop(i)
-                    self.prev_zero = 1
+
 
                 else:
-                    vx = (x_position - pre_x) / self.update_rate
-                    vy = (y_position - pre_y) / self.update_rate
-                    cl_id = class_id
-                    self.prev_zero = 0
+                    if i + 1 <= len(self.prev_x):
+                        pre_x = self.prev_x[i]
+                        pre_y = self.prev_y[i]
+                        vx = (x_position - pre_x) / self.update_rate
+                        vy = (y_position - pre_y) / self.update_rate
+                        cl_id = class_id
+
+
+
+                    else:
+                        pre_x = x_position
+                        pre_y = y_position
+                        self.get_logger().warning("added new person")      
+                            
+                        vx = 0.0
+                        vy = 0.0
+                        cl_id = class_id
+
             except:
                 vx = 0.0
                 vy = 0.0
@@ -108,20 +126,6 @@ class VelocityExtractor(Node):
         self.publish_velocity(x_vel, y_vel, class_list, x_positions, y_positions)
 
     def publish_velocity(self, x_vel,y_vel, class_list, x_positions, y_positions):
-        # publish x velocity
-        # msg = Float32MultiArray()
-        # msg.data = x_vel
-        # self.pub_x_velocity.publish(msg)
-
-        # # publish y velocity
-        # msg = Float32MultiArray()
-        # msg.data = y_vel
-        # self.pub_y_velocity.publish(msg)
-
-        # # publish class data
-        # msg = Int32MultiArray()
-        # msg.data = class_list
-        # self.pub_class.publish(msg)
 
         # custom interface
         msg = VelocityClassData()
@@ -134,6 +138,9 @@ class VelocityExtractor(Node):
 
         self.publish_latest_positions(msg)
         self.publish_latest_velocities(msg)
+
+        print(f"x velocities {x_vel}")
+        print(f"y velocities {y_vel}")
 
         # loging the published data
         # self.get_logger().info(f'Published x velocity: {x_vel}')
@@ -256,7 +263,7 @@ class VelocityExtractor(Node):
             # Set lifetime of the marker
             marker.lifetime = Duration(sec=0, nanosec=0)  # Marker lasts for 1 second
             marker_array.markers.append(marker)
-        self.human_position_publisher.publish(marker_array)
+        self.raw_human_position.publish(marker_array)
 
 
 
