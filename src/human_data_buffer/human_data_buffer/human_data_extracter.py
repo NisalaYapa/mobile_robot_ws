@@ -58,13 +58,7 @@ class VelocityExtractor(Node):
         class_list = []
 
         for i, (x_position, y_position, class_id) in enumerate(zip(x_positions, y_positions, class_ids)):
-            #pre_x = self.prev_x.get(i, x_position)
-            #pre_y = self.prev_y.get(i, y_position)
-            #pre_x = self.prev_x[i] if i + 1 <= len(self.prev_x) else x_position 
-            #pre_y = self.prev_y[i] if i + 1 <= len(self.prev_y) else y_position
-
-                 
-
+                      
 
             try:
            
