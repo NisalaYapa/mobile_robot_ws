@@ -2,10 +2,6 @@
 
 ![Sample Image](src/images/Presentation021.jpg "Crowd Navigation Architecture")
 
-<img src=".src/images/Presentation021.jpg" alt="Alt text" width="500" title="Optional Title">
-
-
-
 
 This is the ROS2 workspace of the SANSAR the mobile robot receptionist 2.0 with fully merged crowd navigation nodes.
 
