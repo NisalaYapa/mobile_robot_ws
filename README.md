@@ -1,6 +1,6 @@
 # Crowd Navigation using Model Predictive Control (MPC)
 
-![Sample Image](.src/images/Presentation021.jpg "Crowd Navigation Architecture")
+![Sample Image](src/images/Presentation021.jpg "Crowd Navigation Architecture")
 
 <img src=".src/images/Presentation021.jpg" alt="Alt text" width="500" title="Optional Title">
 
