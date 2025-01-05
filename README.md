@@ -56,7 +56,12 @@ ros2 bag play rosbag2_2024_12_27-00_09_10
 
    **Topics**:  
    - **`/object_tracker/laser_data_array`**: Subscribes to human data.  
-   - **`/human_data_buffer/velocity_class_data`**: Publishes human positions, velocities, and classes.  
+   - **`/human_data_buffer/velocity_class_data`**: Publishes human positions, velocities, and classes.
+   
+   **Markers**:  
+   - **`/human_data_buffer/raw_positions`**: Plots `/object_tracker/laser_data_array` (input positions).  
+   - **`/human_data_buffer/positions_latest`**: Publishes human positions.  
+   - **`/human_data_buffer/velocities_latest`**: Publishes human velocities.  
 
    
 4. **`human_data_buffer`**
