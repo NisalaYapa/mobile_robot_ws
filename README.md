@@ -72,7 +72,6 @@ ros2 bag play rosbag2_2024_12_27-00_09_10
    - **`/human_data_buffer/buffer`**: publishes buffered positions, velocities and other statistics.
 
    **Markers**:  
-   - **`/human_data_buffer/raw_positions`**: Plots `/object_tracker/laser_data_array` (input positions).  
    - **`/human_data_buffer/human_position_buffer`**: Publishes human positions.  
    - **`/human_data_buffer/human_velocity_buffer`**: Publishes human velocities.  
    
