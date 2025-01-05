@@ -1,5 +1,6 @@
 # Crowd Navigation using Model Predictive Control (MPC)
 
+![Sample Image](.src/images/sample.png "Sample Title")
 
 
 
