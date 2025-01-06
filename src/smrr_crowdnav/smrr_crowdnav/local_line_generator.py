@@ -18,16 +18,16 @@ class LidarLineExtraction(Node):
         super().__init__('lidar_line_extraction')
 
         # Parameters
-        self.distance_threshold = 0.5  # Threshold for RDP in meters
-        self.hac_distance_threshold = 0.8  # Distance threshold for HAC
-        self.min_cluster_size = 5  # Minimum points in a cluster
+        self.distance_threshold = 0.2  # Threshold for RDP in meters
+        self.hac_distance_threshold = 0.5 # Distance threshold for HAC
+        self.min_cluster_size = 3  # Minimum points in a cluster
 
         # TF2 Buffer and Transform Listener
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
         # Create a publisher for visualization markers
-        #self.marker_publisher = self.create_publisher(Marker, 'line_segments', 10)
+        self.marker_publisher = self.create_publisher(Marker, 'line_segments', 10)
         self.line_publisher = self.create_publisher(Entities, '/local_lines_array', 10)
 
         # Subscribe to the /scan topic
@@ -47,7 +47,7 @@ class LidarLineExtraction(Node):
         )
 
         # Timer to control marker update rate (e.g., 1 Hz)
-        #self.timer = self.create_timer(1.0, self.publish_marker)
+        self.timer = self.create_timer(1.0, self.publish_marker)
 
         # Placeholder for robot pose and processed marker points
         self.robot_pose = None
@@ -136,7 +136,7 @@ class LidarLineExtraction(Node):
         return clusters
 
     def rdp(self, points, epsilon):
-        if len(points) < 3:
+        if len(points) < 2:
             return points
 
         start, end = np.array(points[0]), np.array(points[-1])
@@ -210,7 +210,7 @@ class LidarLineExtraction(Node):
         cartesian_points = self.polar_to_cartesian(angle_min, angle_increment, ranges)
 
         # Transform points to map frame
-        cartesian_points = self.transform_points(cartesian_points, "map")
+        #cartesian_points = self.transform_points(cartesian_points, "map")
 
         # Ensure cartesian_points has data before proceeding
         if not cartesian_points:
@@ -223,42 +223,42 @@ class LidarLineExtraction(Node):
         # Merge clusters and estimate line segments
         self.merged_lines = self.merge_clusters(clusters)
 
-    # def publish_marker(self):
-    #     # Create a marker for visualization
-    #     marker = Marker()
-    #     marker.header.frame_id = 'map'  # Ensure this matches your frame
-    #     marker.header.stamp = self.get_clock().now().to_msg()
-    #     marker.ns = 'lines'
-    #     marker.id = 0
-    #     marker.type = Marker.LINE_LIST
-    #     marker.action = Marker.ADD
-    #     marker.scale.x = 0.05  # Smaller line width for visibility
-    #     marker.color.a = 1.0  # Opacity
-    #     marker.color.r = 1.0  # Red color
+    def publish_marker(self):
+        # Create a marker for visualization
+        marker = Marker()
+        marker.header.frame_id = 'laser'  # Ensure this matches your frame
+        marker.header.stamp = self.get_clock().now().to_msg()
+        marker.ns = 'lines'
+        marker.id = 0
+        marker.type = Marker.LINE_LIST
+        marker.action = Marker.ADD
+        marker.scale.x = 0.05  # Smaller line width for visibility
+        marker.color.a = 1.0  # Opacity
+        marker.color.r = 1.0  # Red color
 
-    #     # Add individual line segments to the marker for each cluster
-    #     for cluster in self.merged_lines:
-    #         # Only add lines if there are at least two points in the simplified points
-    #         for i in range(0, len(cluster) - 1):
-    #             start = cluster[i]
-    #             end = cluster[i + 1]
+        # Add individual line segments to the marker for each cluster
+        for cluster in self.merged_lines:
+            # Only add lines if there are at least two points in the simplified points
+            for i in range(0, len(cluster) - 1):
+                start = cluster[i]
+                end = cluster[i + 1]
 
-    #             # Start point of the line segment
-    #             point_start = Point()
-    #             point_start.x = start[0]
-    #             point_start.y = start[1]
-    #             point_start.z = 0.0
-    #             marker.points.append(point_start)
+                # Start point of the line segment
+                point_start = Point()
+                point_start.x = start[0]
+                point_start.y = start[1]
+                point_start.z = 0.0
+                marker.points.append(point_start)
 
-    #             # End point of the line segment
-    #             point_end = Point()
-    #             point_end.x = end[0]
-    #             point_end.y = end[1]
-    #             point_end.z = 0.0
-    #             marker.points.append(point_end)
+                # End point of the line segment
+                point_end = Point()
+                point_end.x = end[0]
+                point_end.y = end[1]
+                point_end.z = 0.0
+                marker.points.append(point_end)
 
-    #     # Publish the marker
-    #     self.marker_publisher.publish(marker)
+        # Publish the marker
+        self.marker_publisher.publish(marker)
 
 
 def main(args=None):
