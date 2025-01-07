@@ -186,7 +186,7 @@ class DataBufferNode(Node):
             x_pos_list.float_data = list(self.agent_matrix[i, 4])
             y_pos_list.float_data = list(self.agent_matrix[i, 5])
 
-
+            print(f"class ids {class_list}")
             x_velocities.append(x_vel_list)
             y_velocities.append(y_vel_list)
             class_ids.append(class_list)

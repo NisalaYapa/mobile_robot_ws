@@ -46,7 +46,7 @@ class HumanPrefferedVelocity(Node):
         
     def process_buffer_data(self, msg):
         self.agent_ids = msg.agent_ids
-        self.cls_ids = msg.class_ids
+        self.cls_ids = msg.majority_class_id
         self.x_position = msg.x_positions
         self.y_position = msg.y_positions
         self.x_velocity = msg.x_mean
