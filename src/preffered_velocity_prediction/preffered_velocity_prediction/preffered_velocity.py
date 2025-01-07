@@ -59,6 +59,7 @@ class HumanPrefferedVelocity(Node):
         msg = PrefVelocity()
         msg.agent_ids = self.agent_ids
         msg.preferred_velocities = self.preferred_velocity
+        print(f"class ids {self.cls_ids}")
         msg.class_ids = self.cls_ids
         self.preferred_velocity_publisher.publish(msg)
         self.get_logger().info('Publishing preferred velocity')

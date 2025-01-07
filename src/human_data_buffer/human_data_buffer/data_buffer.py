@@ -100,6 +100,7 @@ class DataBufferNode(Node):
             deque([y_position], maxlen=10), # y positions deque
             {"y_variance": 0}                           # Placeholder for statistics dictionary
         ]
+        print(f"new_row {new_row}")
         self.agent_matrix = np.vstack([self.agent_matrix, new_row])  # Add new row to the numpy matrix
         self.next_available_id += 1  # Increment ID for the next new agent
 
@@ -203,8 +204,8 @@ class DataBufferNode(Node):
             y_variance.append(stats.get('y_variance', 0))
             majority_class_ids.append(stats.get('majority_class_id', -1))
 
-        print("x_velocities")
-        print(x_velocities)
+        #print("x_velocities")
+        #print(x_velocities)
 
         # Assign the formatted data to the message fields
         msg.agent_count = int(len(agent_ids))
@@ -229,8 +230,8 @@ class DataBufferNode(Node):
         self.human_velocity_marker(msg)
 
         # log buffer x and y velocities
-        self.get_logger().info(f"x_velocities: {x_velocities}")
-        self.get_logger().info(f"y_velocities: {y_velocities}")
+        #self.get_logger().info(f"x_velocities: {x_velocities}")
+        #self.get_logger().info(f"y_velocities: {y_velocities}")
 
     def remove_agent(self, index):
         # Remove the row corresponding to the agent that has left
