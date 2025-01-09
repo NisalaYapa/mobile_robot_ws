@@ -6,8 +6,8 @@ class Visualizer(Node):
     def __init__(self):
         super().__init__("visualizer")
 
-        self.declare_parameter("subscriber_topic", "/laser_data_array")
-        self.declare_parameter("publisher_topic", "/lidar_markers")
+        self.declare_parameter("subscriber_topic", "/object_tracker/laser_data_array")
+        self.declare_parameter("publisher_topic", "/object_tracker/lidar_markers")
         self.declare_parameter("marker_frame", "map")
         self.declare_parameter("marker_color", "red")
 

@@ -5,7 +5,6 @@ from sensor_msgs.msg import LaserScan
 from smrr_interfaces.msg import Entities
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
-from visualization_msgs.msg import Marker, MarkerArray
 from .include.transform import GeometricTransformations
 
 # Global variables
@@ -17,7 +16,7 @@ class LidarSubscriber(Node):
         super().__init__("lidar_subscriber")
         self.cb_group      = ReentrantCallbackGroup()
         self.laser_sub_    = self.create_subscription(LaserScan, "/scan", self.lidar_callback, 10, callback_group=self.cb_group)
-        self.laser_pub_    = self.create_publisher(Entities, "/laser_data_array", 10)
+        self.laser_pub_    = self.create_publisher(Entities, "/object_tracker/laser_data_array", 10)
         self.transform     = GeometricTransformations(self)
 
         self.get_logger().info("Lidar subscriber node has been started")
@@ -46,14 +45,20 @@ class LidarSubscriber(Node):
             distances                    = np.linalg.norm(lidar_points - np.array([person_x, person_y], dtype=float), axis=1)
             points_within_circle         = np.where(distances <= threshold)[0]
 
+            if ((float(person_x) == 0.0) or  (float(person_y) == 0.0) ):
+                continue
+
             if len(points_within_circle) == 0:
+                median_lidar_x = 0
+                median_lidar_y = 0
+                updated_lidar_data.append([median_lidar_x, median_lidar_y, class_])
                 self.get_logger().warn(f"Person {i} not found in LiDAR data")
                 continue
 
-            mean_lidar_x   = np.mean(lidar_points[points_within_circle, 0])
-            mean_lidar_y   = np.mean(lidar_points[points_within_circle, 1])
+            median_lidar_x   = np.median(lidar_points[points_within_circle, 0])
+            median_lidar_y   = np.median(lidar_points[points_within_circle, 1])
 
-            updated_lidar_data.append([mean_lidar_x, mean_lidar_y, class_])
+            updated_lidar_data.append([median_lidar_x, median_lidar_y, class_])
         
         lidar_data   = updated_lidar_data
 
@@ -120,7 +125,7 @@ class VisualDataSubscriber(Node):
     def __init__(self):
         super().__init__("visual_data_subscriber")
         self.cb_group    = ReentrantCallbackGroup()
-        self.visual_sub_ = self.create_subscription(Entities, "/visual_dynamic_obs_array", self.visual_callback, 10, callback_group=self.cb_group)
+        self.visual_sub_ = self.create_subscription(Entities, "/object_tracker/visual_dynamic_obs_array", self.visual_callback, 10, callback_group=self.cb_group)
 
     def visual_callback(self, visual_msg):
         global visual_data, lidar_data
