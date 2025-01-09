@@ -16,9 +16,9 @@ class CameraSubscriber(Node):
     def __init__(self):
         super().__init__('camera_subscriber')
 
-        self.model   = YOLO('/home/sadeep/mobile_receptionist_ws/src/object_tracker/object_tracker/best.pt')
+        self.model   = YOLO('/home/nisala/mobile_robot_ws/src/object_tracker/object_tracker/best.pt')
 
-        self.sub_       = self.create_subscription(Image, '/zed2_left_camera/image_raw', self.camera_callback, 10)
+        self.sub_       = self.create_subscription(Image, '/camera/camera/color/image_raw', self.camera_callback, 10)
         self.img_pub_   = self.create_publisher(Image, '/object_tracker/inference_result', 1)
         self.array_pub_ = self.create_publisher(Entities, '/object_tracker/visual_dynamic_obs_array', 1)
 
