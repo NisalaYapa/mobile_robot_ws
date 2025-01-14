@@ -4,7 +4,7 @@
   <name>smrr_description</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="sadeepm20@gmail.com">sadeep</maintainer>
+  <maintainer email="nisalam20@gmail.com">nisala</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

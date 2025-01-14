@@ -784,11 +784,11 @@
         <!-- <actor name="actor1">
             <pose>-1 2 1.25 0 0 0</pose>
                 <skin>
-                  <filename>/home/sadeep/mobile_receptionist_ws/src/gazebo_sfm_plugin-galactic/media/models/child_run.dae</filename>
+                  <filename>/home/nisala/mobile_robot_ws/src/gazebo_sfm_plugin-galactic/media/models/child_run.dae</filename>
                   <scale>1.0</scale>
                 </skin>
                 <animation name="walking">
-                  <filename>/home/sadeep/mobile_receptionist_ws/src/gazebo_sfm_plugin-galactic/media/models/child_run.dae</filename>
+                  <filename>/home/nisala/mobile_robot_ws/src/gazebo_sfm_plugin-galactic/media/models/child_run.dae</filename>
                   <scale>1.000000</scale>
                   <interpolate_x>true</interpolate_x>
                 </animation>
@@ -861,11 +861,11 @@
            <!-- <actor name="actor3">
             <pose>-3 0 1.25 0 0 0</pose>
             <skin>
-              <filename>/home/sadeep/mobile_receptionist_ws/src/gazebo_sfm_plugin-galactic/media/models/casual_man.dae</filename>
+              <filename>/home/nisala/mobile_robot_ws/src/gazebo_sfm_plugin-galactic/media/models/casual_man.dae</filename>
               <scale>1.0</scale>
             </skin>
             <animation name="stand">
-              <filename>/home/sadeep/mobile_receptionist_ws/src/gazebo_sfm_plugin-galactic/media/models/talk_a.dae</filename>
+              <filename>/home/nisala/mobile_robot_ws/src/gazebo_sfm_plugin-galactic/media/models/talk_a.dae</filename>
               <scale>1.000000</scale>
               <interpolate_x>true</interpolate_x>
             </animation> 
@@ -883,11 +883,11 @@
             <actor name="actor4">
                 <pose>-6 3 1.25 0 0 0</pose>
                 <skin>
-                  <filename>/home/sadeep/mobile_receptionist_ws/src/gazebo_sfm_plugin-galactic/media/models/regular_man.dae</filename>
+                  <filename>/home/nisala/mobile_robot_ws/src/gazebo_sfm_plugin-galactic/media/models/regular_man.dae</filename>
                   <scale>1.0</scale>
                 </skin>
                 <animation name="stand">
-                  <filename>/home/sadeep/mobile_receptionist_ws/src/gazebo_sfm_plugin-galactic/media/models/talk_b.dae</filename>
+                  <filename>/home/nisala/mobile_robot_ws/src/gazebo_sfm_plugin-galactic/media/models/talk_b.dae</filename>
                   <scale>1.000000</scale>
                   <interpolate_x>true</interpolate_x>
                 </animation> 
@@ -944,11 +944,11 @@
           <!-- <actor name="actor6">
             <pose>3 0.8 1.25 0 0 0</pose>
             <skin>
-              <filename>/home/sadeep/mobile_receptionist_ws/src/gazebo_sfm_plugin-galactic/media/models/worker_man.dae</filename> 
+              <filename>/home/nisala/mobile_robot_ws/src/gazebo_sfm_plugin-galactic/media/models/worker_man.dae</filename> 
               <scale>1.0</scale>
             </skin>
             <animation name="walking">
-              <filename>/home/sadeep/mobile_receptionist_ws/src/gazebo_sfm_plugin-galactic/media/models/walk-blue.dae</filename>
+              <filename>/home/nisala/mobile_robot_ws/src/gazebo_sfm_plugin-galactic/media/models/walk-blue.dae</filename>
               <scale>1.000000</scale>
               <interpolate_x>true</interpolate_x>
             </animation>
@@ -1020,11 +1020,11 @@
           <!-- <actor name="actor8">
             <pose>0 3 0 0 0 0</pose>
             <skin>
-              <filename>/home/sadeep/mobile_receptionist_ws/src/gazebo_sfm_plugin-galactic/media/models/elegant_man.dae</filename> 
+              <filename>/home/nisala/mobile_robot_ws/src/gazebo_sfm_plugin-galactic/media/models/elegant_man.dae</filename> 
               <scale>1.0</scale>
             </skin>
             <animation name="walking">
-              <filename>/home/sadeep/mobile_receptionist_ws/src/gazebo_sfm_plugin-galactic/media/models/walk-red.dae</filename>
+              <filename>/home/nisala/mobile_robot_ws/src/gazebo_sfm_plugin-galactic/media/models/walk-red.dae</filename>
               <scale>1.000000</scale>
               <interpolate_x>true</interpolate_x>
             </animation>

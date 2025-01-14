@@ -41,11 +41,11 @@
     <actor name="actor1">
         <pose>-1 2 1.25 0 0 1.57</pose>
         <skin>
-          <filename>/home/sithija/mobile_receptionist_ws/src/gazebo_sfm_plugin-galactic/media/models/worker_man.dae</filename>
+          <filename>/home/nisala/mobile_robot_ws/src/gazebo_sfm_plugin-galactic/media/models/worker_man.dae</filename>
           <scale>1.0</scale>
         </skin>
         <animation name="walking">
-          <filename>/home/sithija/mobile_receptionist_ws/src/gazebo_sfm_plugin-galactic/media/models/stand.dae</filename>
+          <filename>/home/nisala/mobile_robot_ws/src/gazebo_sfm_plugin-galactic/media/models/stand.dae</filename>
           <scale>1.000000</scale>
           <interpolate_x>true</interpolate_x>
         </animation>

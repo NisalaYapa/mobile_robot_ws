@@ -324,7 +324,7 @@ void PedestrianSFMPlugin::OnUpdate(const common::UpdateInfo &_info) {
   // Print the position
   // std::cout << this->topic_name << " x = " << this->sfmActor.position.getX() << ", y = " << this->sfmActor.position.getX() << std::endl;
 
-  if (this->should_rotate == 1) {                                                             // added by Sadeep
+  if (this->should_rotate == 1) {                                                             // added by nisala
     actorPose.Pos().Z(0.5138);
     actorPose.Rot() = ignition::math::Quaterniond(1.57, 1.57, yaw); 
     

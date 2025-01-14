@@ -25,8 +25,8 @@ def generate_launch_description():
     # setting gazebo model path for simulator environment models and description models
     # model_path = os.path.join(gazebo_model_path_prefix, "media", "models")
     # model_path += pathsep + os.path.join(smrr_description_prefix, "share")
-    model_path = "/home/sithija/mobile_receptionist_ws/src/gazebo_sfm_plugin-galactic/media/models"
-    # model_path += pathsep + "/home/sadeep/fyp_ws/install/smrr_description"
+    model_path = "/home/nisala/mobile_robot_ws/src/gazebo_sfm_plugin-galactic/media/models"
+    # model_path += pathsep + "/home/nisala/fyp_ws/install/smrr_description"
     env_var = SetEnvironmentVariable("GAZEBO_MODEL_PATH", model_path)
 
     # gazzebo world argument

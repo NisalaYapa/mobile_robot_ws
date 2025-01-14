@@ -4,7 +4,7 @@
   <name>smrr_interfaces</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="sithija.vihanga28@gmail.com">sithija</maintainer>
+  <maintainer email="nisala.vihanga28@gmail.com">nisala</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
