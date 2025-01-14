@@ -31,7 +31,7 @@ def generate_launch_description():
 
     # gazzebo world argument
     gazebo_world_arg = DeclareLaunchArgument(name="gazebo_world",
-                                             default_value=os.path.join(gazebo_model_path_prefix, "worlds", "small_house.world"),
+                                             default_value=os.path.join(gazebo_model_path_prefix, "worlds", "crowdnav.world"),
                                              description="path to gazebo world")
 
     # gazebo world file path

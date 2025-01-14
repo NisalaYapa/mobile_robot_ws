@@ -56,7 +56,7 @@ def generate_launch_description():
                     ],
     )
 
-    gazebo_world_arg = DeclareLaunchArgument("world", default_value=os.path.join(get_package_share_directory("gazebo_sfm_plugin"), "worlds", "small_house.world"),
+    gazebo_world_arg = DeclareLaunchArgument("world", default_value=os.path.join(get_package_share_directory("gazebo_sfm_plugin"), "worlds", "crowdnav.world"),
                                                 description="Gazebo world file name")
     # gazebo_world = os.path.join(get_package_share_directory("gazebo_sfm_plugin"), "worlds", "small_house.world")
     gazebo_world = LaunchConfiguration("world")
