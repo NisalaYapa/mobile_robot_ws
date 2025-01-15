@@ -23,6 +23,7 @@ class GoalPredictor(Node):
         self.human_goals = self.create_publisher(MarkerArray, '/goal_predictor/human_goals_marker', 10)
         self.human_positions = self.create_publisher(MarkerArray, '/goal_predictor/human_positions_marker', 10)
         self.human_velocities = self.create_publisher(MarkerArray, '/goal_predictor/human_velocity_marker', 10)
+        self.destination_locations = self.create_publisher(MarkerArray, '/goal_predictor/destinations', 10)
 
 
         self.pedestrian_pos = [] 
@@ -33,16 +34,17 @@ class GoalPredictor(Node):
 
         self.max_agent_buffer = 12
 
-        self.destinations = np.array([[5.0, 8.0], 
-           [2.3, 1.4], 
-           [3.2, 7.6], 
-           [1.5, 4.8], 
-           [6.1, 2.9], 
-           [0.4, 9.3], 
-           [8.0, 3.7], 
-           [5.6, 1.1], 
-           [9.5, 2.2], 
-           [4.0, 0.8]])
+        self.destinations = np.array(
+            [[5.0, 8.0], 
+           [2.0, -5.0], 
+           [5, 3], 
+           [-1, 2], 
+           [3, 0], 
+           [-1, -3], 
+           [8.0, 3], 
+           [-5, 5], 
+           [9, -2], 
+           [4.0, 0]])
 
 
         self.agents = Entities()
@@ -160,6 +162,7 @@ class GoalPredictor(Node):
         self.publish_goal_marker()
         self.publish_position_marker()
         self.publish_velocity_marker()
+        self.destinations_marker()
 
         return self.goals
         #return D[np.argmax(destination_probs)], destination_probs
@@ -180,6 +183,50 @@ class GoalPredictor(Node):
         # plt.legend()
         # plt.draw()  
         # plt.pause(0.01)  
+
+    def destinations_marker(self):
+        marker_array = MarkerArray()  
+        count = len(self.destinations)
+
+        colors = [
+            (1.0, 0.0, 0.0),  # Red
+            (0.0, 1.0, 0.0),  # Green
+            (0.0, 0.0, 1.0),  # Blue
+            (1.0, 1.0, 0.0),  # Yellow
+            (0.0, 1.0, 1.0),  # Cyan
+            (1.0, 0.0, 1.0),  # Magenta
+            (0.5, 0.5, 0.5),  # Grey
+            (1.0, 0.5, 0.0),  # Orange
+            (0.5, 0.0, 1.0),  # Purple
+            (0.0, 0.5, 1.0),  # Light Blue
+        ]
+
+
+
+        for i in range(count):
+            marker = Marker()
+            marker.header.frame_id = "map"
+            marker.header.stamp = self.get_clock().now().to_msg()
+            marker.ns = "destinations"
+            marker.id = i
+            marker.type = Marker.CYLINDER
+            marker.action = Marker.ADD
+            marker.pose.position.x = self.destinations[i][0]# x position
+            marker.pose.position.y = self.destinations[i][1]# y position
+            marker.pose.position.z = 0.0  # z position (assumed flat plane)
+            marker.scale.x = 1.0 # Sphere size in x
+            marker.scale.y = 1.0  # Sphere size in y
+            marker.scale.z = 0.01 # Sphere size in z
+            marker.color.a = 0.2 # Transparency
+            color = colors[9]
+            marker.color.r = color[0]
+            marker.color.g = color[1]
+            marker.color.b = color[2]
+
+            # Set lifetime of the marker
+            marker.lifetime = Duration(sec=1, nanosec=0)  # Marker lasts for 1 second
+            marker_array.markers.append(marker)
+        self.destination_locations.publish(marker_array)
 
     def publish_goal_marker(self):
         marker_array = MarkerArray()  
@@ -208,12 +255,12 @@ class GoalPredictor(Node):
             marker.id = human_id
             marker.type = Marker.CUBE
             marker.action = Marker.ADD
-            marker.pose.position.x = x_pos[human_id]# x position
-            marker.pose.position.y = y_pos[human_id]# y position
+            marker.pose.position.x = x_pos[human_id]+(human_id/5)# x position
+            marker.pose.position.y = y_pos[human_id] + (human_id/5)# y position
             marker.pose.position.z = 0.0  # z position (assumed flat plane)
             marker.scale.x = 0.2  # Sphere size in x
             marker.scale.y = 0.2  # Sphere size in y
-            marker.scale.z = 0.01 # Sphere size in z
+            marker.scale.z = 0.1 # Sphere size in z
             marker.color.a = 1.0  # Transparency
             color = colors[human_id % len(colors)]
             marker.color.r = color[0]
@@ -259,7 +306,7 @@ class GoalPredictor(Node):
             marker.pose.position.z = 0.0  # z position (assumed flat plane)
             marker.scale.x = 0.2  # Sphere size in x
             marker.scale.y = 0.2  # Sphere size in y
-            marker.scale.z = 0.01  # Sphere size in z
+            marker.scale.z = 0.1  # Sphere size in z
             marker.color.a = 1.0  # Transparency
 
             # Assign color from palette or cycle through it
