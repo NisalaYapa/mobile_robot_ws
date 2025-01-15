@@ -271,6 +271,19 @@ class DataBufferNode(Node):
         x_pos  = msg.x_positions
         y_pos = msg.y_positions
 
+        colors = [
+            (1.0, 0.0, 0.0),  # Red
+            (0.0, 1.0, 0.0),  # Green
+            (0.0, 0.0, 1.0),  # Blue
+            (1.0, 1.0, 0.0),  # Yellow
+            (0.0, 1.0, 1.0),  # Cyan
+            (1.0, 0.0, 1.0),  # Magenta
+            (0.5, 0.5, 0.5),  # Grey
+            (1.0, 0.5, 0.0),  # Orange
+            (0.5, 0.0, 1.0),  # Purple
+            (0.0, 0.5, 1.0),  # Light Blue
+        ]
+
         for human_id in range(count):
             marker = Marker()
             marker.header.frame_id = "map"
@@ -286,9 +299,10 @@ class DataBufferNode(Node):
             marker.scale.y = 0.2  # Sphere size in y
             marker.scale.z = 0.01 # Sphere size in z
             marker.color.a = 1.0  # Transparency
-            marker.color.r = 1.0  # Red
-            marker.color.g = 0.0  # Green
-            marker.color.b = 0.0  # Blue
+            color = colors[5]
+            marker.color.r = color[0] # Red
+            marker.color.g = color[1] # Green
+            marker.color.b = color[2]  # Blue
 
             # Set lifetime of the marker
             marker.lifetime = Duration(sec=0, nanosec=0)  # Marker lasts for 1 second
@@ -303,6 +317,19 @@ class DataBufferNode(Node):
         y_pos = msg.y_positions
         x_vel = msg.x_mean
         y_vel = msg.y_mean
+
+        colors = [
+            (1.0, 0.0, 0.0),  # Red
+            (0.0, 1.0, 0.0),  # Green
+            (0.0, 0.0, 1.0),  # Blue
+            (1.0, 1.0, 0.0),  # Yellow
+            (0.0, 1.0, 1.0),  # Cyan
+            (1.0, 0.0, 1.0),  # Magenta
+            (0.5, 0.5, 0.5),  # Grey
+            (1.0, 0.5, 0.0),  # Orange
+            (0.5, 0.0, 1.0),  # Purple
+            (0.0, 0.5, 1.0),  # Light Blue
+        ]
 
         for human_id in range(count):
             marker = Marker()
@@ -338,10 +365,10 @@ class DataBufferNode(Node):
 
             # Set the color of the arrow
             marker.color.a = 1.0  # Transparency
-            marker.color.r = 1.0  # Red
-            marker.color.g = 0.0  # Green
-            marker.color.b = 0.0  # Blue
-
+            color = colors[5]
+            marker.color.r = color[0] # Red
+            marker.color.g = color[1] # Green
+            marker.color.b = color[2]  # Blue
             # Set lifetime of the marker
             marker.lifetime = Duration(sec=0, nanosec=0)  # Marker lasts for 1 second
 

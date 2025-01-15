@@ -106,8 +106,8 @@ class CrowdNavMPCNode(Node):
         self.self_state = SelfState(px=0.0, py=0.0, vx=0.0, vy=0.0, theta=0.0, omega=0.0)
 
         # Create subscribers for custom messages
-        self.create_subscription(Entities, '/smrr_crowdnav/pos_kf', self.human_position_callback, 10)
-        self.create_subscription(Entities, '/smrr_crowdnav/vel_kf', self.human_velocity_callback, 10)
+        self.create_subscription(Entities, '/goal_predictor/pos', self.human_position_callback, 10)
+        self.create_subscription(Entities, '/goal_predictor/vel', self.human_velocity_callback, 10)
         self.create_subscription(Entities, '/goal_predictor/goals', self.human_goal_callback, 10)
         self.create_subscription(Odometry, '/diff_drive_controller/odom', self.robot_velocity_callback, 10)
 
@@ -433,7 +433,7 @@ class CrowdNavMPCNode(Node):
         line_strip_marker.id = 1000
         line_strip_marker.type = Marker.LINE_STRIP
         line_strip_marker.action = Marker.ADD
-        line_strip_marker.scale.x = 0.03
+        line_strip_marker.scale.x = 0.1
         line_strip_marker.color.r = 1.0
         line_strip_marker.color.a = 1.0
 
@@ -463,9 +463,9 @@ class CrowdNavMPCNode(Node):
                 point_marker.id = human_id * 1000 + time_step  # Unique ID for each point
                 point_marker.type = Marker.SPHERE
                 point_marker.action = Marker.ADD
-                point_marker.scale.x = 0.10  # Adjust scale for visibility
-                point_marker.scale.y = 0.10
-                point_marker.scale.z = 0.10
+                point_marker.scale.x = 0.25  # Adjust scale for visibility
+                point_marker.scale.y = 0.25
+                point_marker.scale.z = 0.25
                 point_marker.color.r = 0.0  # Red color for visibility
                 point_marker.color.g = 1.0
                 point_marker.color.b = 0.0
