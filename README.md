@@ -46,15 +46,8 @@ ros2 bag play rosbag2_2024_12_27-00_09_10
    **Markers**:  
    - **`/human_data_buffer/raw_position_marker`**: input positions of human agents. 
 
-2. **`human_data_kf`**  
-   This node is a Kalman Filter to smoothen the human data
 
-   **Topics**:  
-   - **`/human_data_buffer/velocity_class_data`**: Subscribes human positions, velocities, and classes.  
-   - **`/human_data_buffer/velocity_class_data_kf`**: Publishes human positions, velocities, and classes after kalman filter.  
-
-   
-3. **`human_data_extracter`**  
+2. **`human_data_extracter`**  
    This node calculates the velocities of each human agent when raw human position data is received.  
 
    **Topics**:  
@@ -66,7 +59,14 @@ ros2 bag play rosbag2_2024_12_27-00_09_10
    - **`/human_data_buffer/positions_latest`**: Publishes human positions.  
    - **`/human_data_buffer/velocities_latest`**: Publishes human velocities.  
 
-   
+ 3. **`human_data_kf`**  
+   This node is a Kalman Filter to smoothen the human data
+
+   **Topics**:  
+   - **`/human_data_buffer/velocity_class_data`**: Subscribes human positions, velocities, and classes.  
+   - **`/human_data_buffer/velocity_class_data_kf`**: Publishes human positions, velocities, and classes after kalman filter.  
+
+     
 4. **`human_data_buffer`**
    Stores 10 values for eac human agent and calculates human motion statistics
    
