@@ -109,8 +109,12 @@ class KalmanTest(Node):
         # Update human states with velocity data
         for i in range(msg.count):
             try:
-                self.human_states[i].vx = msg.x[i]
-                self.human_states[i].vy = msg.y[i]
+                self.human_states[i].vx = msg.x[i]*4
+                self.human_states[i].vy = msg.y[i]*4
+
+                print("#############")
+                print(msg.x[i])
+                print(msg.y[i])
             except :
                 pass
 
@@ -143,8 +147,8 @@ class KalmanTest(Node):
         # Update human states with goal data
         for i in range(msg.count):
             try:
-                self.human_states_kf[i].gx = msg.x[i]
-                self.human_states_kf[i].gy = msg.y[i]
+                self.human_states_kf[i].gx = 0.0 #msg.x[i]
+                self.human_states_kf[i].gy = 0.0 #msg.y[i]
             except :
                 pass
 
@@ -215,7 +219,7 @@ class KalmanTest(Node):
             line_marker.id = human_id  # Unique ID for each human's trajectory
             line_marker.type = Marker.LINE_STRIP  # Create a line strip
             line_marker.action = Marker.ADD
-            line_marker.scale.x = 0.02 # Thickness of the line
+            line_marker.scale.x = 0.1 # Thickness of the line
             line_marker.color.r = 1.0  # Red color for visibility
             line_marker.color.g = 0.0
             line_marker.color.b = 1.0
@@ -238,9 +242,9 @@ class KalmanTest(Node):
                 point_marker.id = human_id * 1000 + len(line_marker.points)  # Unique ID for each point
                 point_marker.type = Marker.SPHERE
                 point_marker.action = Marker.ADD
-                point_marker.scale.x = 0.12  # Adjust scale for visibility
-                point_marker.scale.y = 0.12
-                point_marker.scale.z = 0.12
+                point_marker.scale.x = 0.2  # Adjust scale for visibility
+                point_marker.scale.y = 0.2
+                point_marker.scale.z = 0.2
                 point_marker.color.r = 1.0  # Blue color for points
                 point_marker.color.g = 0.0
                 point_marker.color.b = 0.0
@@ -272,7 +276,7 @@ class KalmanTest(Node):
             line_marker.id = human_id  # Unique ID for each human's trajectory
             line_marker.type = Marker.LINE_STRIP  # Create a line strip
             line_marker.action = Marker.ADD
-            line_marker.scale.x = 0.02 # Thickness of the line
+            line_marker.scale.x = 0.1 # Thickness of the line
             line_marker.color.r = 0.0  # Red color for visibility
             line_marker.color.g = 1.0
             line_marker.color.b = 1.0
@@ -295,9 +299,9 @@ class KalmanTest(Node):
                 point_marker.id = human_id * 1000 + len(line_marker.points)  # Unique ID for each point
                 point_marker.type = Marker.SPHERE
                 point_marker.action = Marker.ADD
-                point_marker.scale.x = 0.12  # Adjust scale for visibility
-                point_marker.scale.y = 0.12
-                point_marker.scale.z = 0.12
+                point_marker.scale.x = 0.2  # Adjust scale for visibility
+                point_marker.scale.y = 0.2
+                point_marker.scale.z = 0.2
                 point_marker.color.r = 0.0  # Blue color for points
                 point_marker.color.g = 1.0
                 point_marker.color.b = 0.0
