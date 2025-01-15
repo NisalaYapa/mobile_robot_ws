@@ -44,7 +44,7 @@ class GoalPredictor(Node):
            [8.0, 3], 
            [-5, 5], 
            [9, -2], 
-           [4.0, 0]])
+           [6, 0]])
 
 
         self.agents = Entities()
