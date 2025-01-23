@@ -19,6 +19,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/InferenceResult.msg"
   "msg/Yolov10Inference.msg"
   "msg/Buffer.msg"
+  "msg/Footprint.msg"
   "msg/DataElementFloat.msg"
   "msg/DataElementInt.msg"
   "msg/DataElementString.msg"

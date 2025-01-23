@@ -21,6 +21,7 @@ class CameraSubscriber(Node):
         self.sub_       = self.create_subscription(Image, '/camera/camera/color/image_raw', self.camera_callback, 10)
         self.img_pub_   = self.create_publisher(Image, '/object_tracker/inference_result', 1)
         self.array_pub_ = self.create_publisher(Entities, '/object_tracker/visual_dynamic_obs_array', 1)
+        self.footprint_pub_ = self.create_publisher(Entities, '/object_tracker/footprint_array', 1)
 
         self.inference_node_utils = InferenceNodeUtils(model=self.model)
         
@@ -59,6 +60,8 @@ class CameraSubscriber(Node):
         entities.classes = classes
         entities.x = arr_x
         entities.y = arr_y
+
+        
 
 
 
