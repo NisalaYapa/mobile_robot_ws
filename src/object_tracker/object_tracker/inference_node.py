@@ -30,9 +30,14 @@ class CameraSubscriber(Node):
     def camera_callback(self, msg):
         img         = bridge.imgmsg_to_cv2(msg, "bgr8")
         results     = self.model(img)
+        #print(f"results {results}")
 
         try:
             xyxy_boxes = results[0].boxes.xyxy  # Bounding box coordinates (x1, y1, x2, y2)
+
+            print(f"xyxy_boxes {xyxy_boxes}")
+            
+
             class_indices = results[0].boxes.cls  # Class indices
 
             class_velocities = torch.tensor([1.5, 0.8, 1.0, 1.2])
@@ -47,13 +52,15 @@ class CameraSubscriber(Node):
             pass
 
         mid_point_x = int(img.shape[1] / 2)
-        classes, arr_x, arr_y = self.inference_node_utils.coordinates_from_camera(results, img, mid_point_x)
+        classes, arr_x, arr_y , width = self.inference_node_utils.coordinates_from_camera(results, img, mid_point_x)
 
         entities = Entities()
         entities.count = len(arr_x)
         entities.classes = classes
         entities.x = arr_x
         entities.y = arr_y
+
+
 
         self.array_pub_.publish(entities)
         img_msg = bridge.cv2_to_imgmsg(img)

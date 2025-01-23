@@ -20,7 +20,7 @@ class InferenceNodeUtils():
         return (hor_dis * 45.07) / 557
     
     def coordinates_from_camera(self, results, img, mid_point_x):
-        classes, arr_x, arr_y = [], [], []
+        classes, arr_x, arr_y, real_width = [], [], [] , []
 
         for r in (results):
             boxes = r.boxes
@@ -41,6 +41,19 @@ class InferenceNodeUtils():
                     height   = y_max - y_min
                     distance = self.distance_from_camera(height)
 
+                    ### nisala added this
+                    width = x_max - x_min
+
+                    print(f"height {height}")
+                    print(f"width {width}")
+                    print(f"distance {distance}")
+                    real_width = width*distance/height
+
+                    print(f"real_width {real_width}")
+
+
+
+
                     # Angle calculations, distance corrections
                     u                  = int((x_min + x_max) / 2)  
                     horizontal_pixel   = u - mid_point_x
@@ -53,11 +66,11 @@ class InferenceNodeUtils():
 
                     lidar_x, lidar_y, lidar_z, _ = np.dot(self.lidar_to_cam_opt, [cam_x, cam_y, cam_z, 1])
 
-                    label = f'D: {distance:.2f}m A: {angle:.2f} deg'
+                    label = f'D: {distance:.2f}m A: {angle:.2f} deg W: {real_width}'
                     cv2.putText(img, label, (x_min, y_min - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 0), 2)
 
                     classes.append(self.model.names[int(c)])
                     arr_x.append(lidar_x)
                     arr_y.append(lidar_y)
 
-        return classes, arr_x, arr_y
+        return classes, arr_x, arr_y, real_width 
