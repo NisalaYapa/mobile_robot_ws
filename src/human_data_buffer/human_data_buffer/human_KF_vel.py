@@ -93,7 +93,7 @@ class HumanKF(Node):
 
         elif self.change:
             self.filtered_human_publisher.publish(msg)
-            print("#######################################################################################")
+
             
 
         else:
