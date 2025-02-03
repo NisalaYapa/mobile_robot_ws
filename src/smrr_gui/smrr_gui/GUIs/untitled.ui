@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QPushButton {
+    background: qlineargradient(
+        spread:pad, x1:0, y1:0, x2:1, y2:1, 
+        stop:0 #ff9a9e, stop:1 #fad0c4
+    );
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+}
+
+QPushButton:hover {
+    background: qlineargradient(
+        spread:pad, x1:0, y1:0, x2:1, y2:1, 
+        stop:0 #fad0c4, stop:1 #ff9a9e
+    );
+    transform: translateY(-3px);
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+QPushButton:pressed {
+    transform: translateY(2px);
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.15);
+}
+</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QStackedWidget" name="stackedWidget">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>20</y>
+      <width>741</width>
+      <height>501</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <property name="currentIndex">
+     <number>1</number>
+    </property>
+    <widget class="QWidget" name="Home">
+     <property name="styleSheet">
+      <string notr="true">background: qlineargradient(
+    spread:pad, x1:0, y1:0, x2:1, y2:1, 
+    stop:0 #ff7eb3, stop:1 #ff758c
+);
+color: #3A3A3A;
+</string>
+     </property>
+     <widget class="QPushButton" name="btn_crowdnav">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>440</y>
+        <width>141</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: red;</string>
+      </property>
+      <property name="text">
+       <string>Crowd Navigation</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_muiltinav">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>440</y>
+        <width>171</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: red;</string>
+      </property>
+      <property name="text">
+       <string>Multifloor Navigation</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_arm">
+      <property name="geometry">
+       <rect>
+        <x>550</x>
+        <y>440</y>
+        <width>141</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: red;</string>
+      </property>
+      <property name="text">
+       <string>Arm Manipulator</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="Crowdnav">
+     <property name="styleSheet">
+      <string notr="true">background: qlineargradient(
+    spread:pad, x1:0, y1:0, x2:1, y2:1, 
+    stop:0 #ff9a9e, stop:1 #fad0c4
+);
+color: #3A3A3A;
+</string>
+     </property>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>50</y>
+        <width>171</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>15</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">
+    background: transparent;</string>
+      </property>
+      <property name="text">
+       <string>Crowd Navigation</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_home_5">
+      <property name="geometry">
+       <rect>
+        <x>580</x>
+        <y>450</y>
+        <width>151</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton {
+    background: #ff7eb3;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+QPushButton:hover {
+    background: #ff527b;
+    transform: scale(1.05);
+}
+
+QPushButton:pressed {
+    background: #ff305a;
+    transform: scale(0.98);
+}
+</string>
+      </property>
+      <property name="text">
+       <string>Home</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="Multifloor">
+     <property name="styleSheet">
+      <string notr="true">background: qlineargradient(
+    spread:pad, x1:0, y1:0, x2:1, y2:1, 
+    stop:0 #b2fefa, stop:1 #0ed2f7
+);
+color: #333333;
+</string>
+     </property>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>50</y>
+        <width>241</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>15</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">
+    background: transparent;</string>
+      </property>
+      <property name="text">
+       <string>Multifloor Navigation</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_home_4">
+      <property name="geometry">
+       <rect>
+        <x>580</x>
+        <y>450</y>
+        <width>151</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton {
+    background: #ff7eb3;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+QPushButton:hover {
+    background: #ff527b;
+    transform: scale(1.05);
+}
+
+QPushButton:pressed {
+    background: #ff305a;
+    transform: scale(0.98);
+}
+</string>
+      </property>
+      <property name="text">
+       <string>Home</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="Arm">
+     <property name="styleSheet">
+      <string notr="true">background: qlineargradient(
+    spread:pad, x1:0, y1:0, x2:1, y2:1, 
+    stop:0 #005AA7, stop:1 #00C6FB
+);
+color: #FFFFFF;
+</string>
+     </property>
+     <widget class="QPushButton" name="btn_home_3">
+      <property name="geometry">
+       <rect>
+        <x>580</x>
+        <y>450</y>
+        <width>151</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton {
+    background: #ff7eb3;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+QPushButton:hover {
+    background: #ff527b;
+    transform: scale(1.05);
+}
+
+QPushButton:pressed {
+    background: #ff305a;
+    transform: scale(0.98);
+}
+</string>
+      </property>
+      <property name="text">
+       <string>Home</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>40</y>
+        <width>241</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>15</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">
+    background: transparent;</string>
+      </property>
+      <property name="text">
+       <string>Arm Manipulator</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
