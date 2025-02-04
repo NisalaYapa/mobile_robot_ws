@@ -1,32 +1,27 @@
 import rclpy
+import sys
 from rclpy.node import Node
-from std_msgs.msg import String  # Example message type
+from std_msgs.msg import String
+from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
-from .GUIs.Ui_robot import Ui_MainWindow
-
+from .GUIs.Ui_robot_test2 import Ui_MainWindow
 
 
 class ROS2IntegrationNode(Node):
-    def __init__(self):
+    def __init__(self, main_win):
         super().__init__('robot_gui')
 
         # Initialize publisher
         self.publisher = self.create_publisher(String, 'robot_control', 10)
 
-        # Create a Qt application
-        self.app = QtWidgets.QApplication([])
-
-        # Set up the GUI
-        self.main_window = QtWidgets.QMainWindow()
+        self.main_win = main_win
         self.ui = Ui_MainWindow()
-        self.ui.setupUi(self.main_window)
+        self.ui.setupUi(self.main_win)
 
-        # Connect GUI buttons to ROS 2 callback functions
+        # Connect buttons to functions
         self.ui.btn_crowdnav.clicked.connect(self.handle_crowdnav)
-        self.ui.btn_muiltinav.clicked.connect(self.handle_muiltinav)
+        self.ui.btn_multinav.clicked.connect(self.handle_muiltinav)
         self.ui.btn_arm.clicked.connect(self.handle_arm)
-
-        self.main_window.show()
 
     def handle_crowdnav(self):
         self.get_logger().info('Crowd Navigation activated')
@@ -46,20 +41,21 @@ class ROS2IntegrationNode(Node):
         msg.data = 'arm_manipulator'
         self.publisher.publish(msg)
 
-    def spin(self):
-        # Spin the ROS 2 node and the GUI
-        while rclpy.ok():
-            rclpy.spin_once(self)
-            self.app.processEvents()
 
 def main():
     rclpy.init()
 
-    # Create the ROS 2 node and run the GUI
-    node = ROS2IntegrationNode()
-    node.spin()
+    app = QApplication(sys.argv)  # QApplication must be initialized before any widgets
+    main_win = QMainWindow()
+    ros_node = ROS2IntegrationNode(main_win)
 
-    rclpy.shutdown()
+    main_win.show()  # Show the main window
+
+    try:
+        sys.exit(app.exec_())  # Start the Qt event loop
+    except SystemExit:
+        rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()

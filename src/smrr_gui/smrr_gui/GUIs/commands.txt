@@ -1,0 +1,3 @@
+pyuic5 robot_gui_test#.ui -o Ui_robot_test#.py
+
+pyuic5 robot_gui_test3.ui -o Ui_robot_test3.py

@@ -4,10 +4,14 @@ from rclpy.node import Node
 from std_msgs.msg import String
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
-from .GUIs.Ui_robot import Ui_MainWindow
+from .GUIs.Ui_robot_test3 import Ui_MainWindow
 
 
-class ROS2IntegrationNode(Node):
+
+
+
+
+class RobotGUI(Node):
     def __init__(self, main_win):
         super().__init__('robot_gui')
 
@@ -20,23 +24,31 @@ class ROS2IntegrationNode(Node):
 
         # Connect buttons to functions
         self.ui.btn_crowdnav.clicked.connect(self.handle_crowdnav)
-        self.ui.btn_multinav.clicked.connect(self.handle_muiltinav)
+        self.ui.btn_multifloor.clicked.connect(self.handle_muiltinav)
         self.ui.btn_arm.clicked.connect(self.handle_arm)
+
+        self.ui.mainstack.setCurrentWidget(self.ui.CrowdNav)
 
     def handle_crowdnav(self):
         self.get_logger().info('Crowd Navigation activated')
+        self.ui.mainstack.setCurrentWidget(self.ui.CrowdNav)
+        self.ui.label.setText("Crowd Navigation")
         msg = String()
         msg.data = 'crowd_navigation'
         self.publisher.publish(msg)
 
     def handle_muiltinav(self):
         self.get_logger().info('Multifloor Navigation activated')
+        self.ui.mainstack.setCurrentWidget(self.ui.Multifloor)
+        self.ui.label.setText("Multifloor Navigation")
         msg = String()
         msg.data = 'multifloor_navigation'
         self.publisher.publish(msg)
 
     def handle_arm(self):
         self.get_logger().info('Arm Manipulator activated')
+        self.ui.mainstack.setCurrentWidget(self.ui.Arm)
+        self.ui.label.setText("Arm Manipulator")
         msg = String()
         msg.data = 'arm_manipulator'
         self.publisher.publish(msg)
@@ -47,7 +59,7 @@ def main():
 
     app = QApplication(sys.argv)  # QApplication must be initialized before any widgets
     main_win = QMainWindow()
-    ros_node = ROS2IntegrationNode(main_win)
+    ros_node = RobotGUI(main_win)
 
     main_win.show()  # Show the main window
 
