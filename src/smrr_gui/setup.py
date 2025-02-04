@@ -5,7 +5,7 @@ package_name = 'smrr_gui'
 setup(
     name=package_name,
     version='0.0.0',
-    packages=find_packages(exclude=['test']),
+    packages=find_packages(include=['smrr_gui', 'smrr_gui.GUIs']),
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-        'test_gui= smrr_gui.test_gui:main'
+        'test_gui= smrr_gui.test_gui:main',
+        'new_gui= smrr_gui.robot_gui:main'
         ],
     },
 )
