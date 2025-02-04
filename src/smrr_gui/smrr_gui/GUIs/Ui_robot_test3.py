@@ -121,6 +121,19 @@ class Ui_MainWindow(object):
         self.mainstack.setObjectName("mainstack")
         self.CrowdNav = QtWidgets.QWidget()
         self.CrowdNav.setObjectName("CrowdNav")
+        self.btn_crwnav_run = QtWidgets.QPushButton(self.CrowdNav)
+        self.btn_crwnav_run.setGeometry(QtCore.QRect(270, 80, 81, 41))
+        self.btn_crwnav_run.setObjectName("btn_crwnav_run")
+        self.crwnav_goal_input = QtWidgets.QTextEdit(self.CrowdNav)
+        self.crwnav_goal_input.setGeometry(QtCore.QRect(30, 79, 211, 51))
+        self.crwnav_goal_input.setStyleSheet("background-color: #F8F9FA;  /* Light Gray */\n"
+"    color: #333333;  /* Dark Gray Text */\n"
+"    font-size: 16px;\n"
+"    padding: 8px;\n"
+"    border: 2px solid #CCCCCC;  /* Light Border */\n"
+"    border-radius: 6px;\n"
+"    outline: none;")
+        self.crwnav_goal_input.setObjectName("crwnav_goal_input")
         self.mainstack.addWidget(self.CrowdNav)
         self.Multifloor = QtWidgets.QWidget()
         self.Multifloor.setObjectName("Multifloor")
@@ -167,9 +180,9 @@ class Ui_MainWindow(object):
         self.floorStack.addWidget(self.pg_flr_2)
         self.pg_flr_3 = QtWidgets.QWidget()
         self.pg_flr_3.setObjectName("pg_flr_3")
-        self.pushButton = QtWidgets.QPushButton(self.pg_flr_3)
-        self.pushButton.setGeometry(QtCore.QRect(70, 50, 171, 41))
-        self.pushButton.setObjectName("pushButton")
+        self.btn_pg_room = QtWidgets.QPushButton(self.pg_flr_3)
+        self.btn_pg_room.setGeometry(QtCore.QRect(70, 50, 171, 41))
+        self.btn_pg_room.setObjectName("btn_pg_room")
         self.btn_tele_lab = QtWidgets.QPushButton(self.pg_flr_3)
         self.btn_tele_lab.setGeometry(QtCore.QRect(270, 50, 161, 41))
         self.btn_tele_lab.setObjectName("btn_tele_lab")
@@ -249,6 +262,60 @@ class Ui_MainWindow(object):
         self.mainstack.addWidget(self.Multifloor)
         self.Arm = QtWidgets.QWidget()
         self.Arm.setObjectName("Arm")
+        self.btn_ayubowan = QtWidgets.QPushButton(self.Arm)
+        self.btn_ayubowan.setGeometry(QtCore.QRect(60, 70, 121, 51))
+        self.btn_ayubowan.setStyleSheet("QPushButton {\n"
+"    background-color: #B8E0D2;  /* Light Mint Green */\n"
+"    color: #2E3440;\n"
+"    font-size: 16px;\n"
+"    padding: 8px 12px;\n"
+"    border-radius: 8px;\n"
+"    border: 2px solid #90C9B7;\n"
+"    transition: 0.3s;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    background-color: #90C9B7;\n"
+"    border: 2px solid #6CA893;\n"
+"}\n"
+"")
+        self.btn_ayubowan.setObjectName("btn_ayubowan")
+        self.btn_hi = QtWidgets.QPushButton(self.Arm)
+        self.btn_hi.setGeometry(QtCore.QRect(210, 70, 111, 51))
+        self.btn_hi.setStyleSheet("QPushButton {\n"
+"    background-color: #B8E0D2;  /* Light Mint Green */\n"
+"    color: #2E3440;\n"
+"    font-size: 16px;\n"
+"    padding: 8px 12px;\n"
+"    border-radius: 8px;\n"
+"    border: 2px solid #90C9B7;\n"
+"    transition: 0.3s;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    background-color: #90C9B7;\n"
+"    border: 2px solid #6CA893;\n"
+"}\n"
+"")
+        self.btn_hi.setObjectName("btn_hi")
+        self.btn_highfive = QtWidgets.QPushButton(self.Arm)
+        self.btn_highfive.setGeometry(QtCore.QRect(350, 70, 121, 51))
+        self.btn_highfive.setStyleSheet("QPushButton {\n"
+"    background-color: #B8E0D2;  /* Light Mint Green */\n"
+"    color: #2E3440;\n"
+"    font-size: 16px;\n"
+"    padding: 8px 12px;\n"
+"    border-radius: 8px;\n"
+"    border: 2px solid #90C9B7;\n"
+"    transition: 0.3s;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    background-color: #90C9B7;\n"
+"    border: 2px solid #6CA893;\n"
+"}\n"
+"")
+        self.btn_highfive.setObjectName("btn_highfive")
         self.mainstack.addWidget(self.Arm)
         self.Notifications = QtWidgets.QLabel(self.centralwidget)
         self.Notifications.setGeometry(QtCore.QRect(40, 10, 691, 151))
@@ -261,7 +328,7 @@ class Ui_MainWindow(object):
         self.Notifications.setWordWrap(True)
         self.Notifications.setObjectName("Notifications")
         self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(60, 210, 171, 17))
+        self.label.setGeometry(QtCore.QRect(60, 196, 211, 31))
         self.label.setObjectName("label")
         MainWindow.setCentralWidget(self.centralwidget)
 
@@ -275,6 +342,7 @@ class Ui_MainWindow(object):
         self.btn_crowdnav.setText(_translate("MainWindow", "Crowd Navigation"))
         self.btn_multifloor.setText(_translate("MainWindow", "Multifloor Navigation"))
         self.btn_arm.setText(_translate("MainWindow", "Arm Manipulator"))
+        self.btn_crwnav_run.setText(_translate("MainWindow", "Run"))
         self.btn_reception.setText(_translate("MainWindow", "Reception"))
         self.btn_entc1.setText(_translate("MainWindow", "ENTC1"))
         self.btn_uav.setText(_translate("MainWindow", "UAV"))
@@ -283,11 +351,14 @@ class Ui_MainWindow(object):
         self.btn_conference.setText(_translate("MainWindow", "Conference Room"))
         self.btn_digi_lab.setText(_translate("MainWindow", "Digitab lab"))
         self.btn_analog_lab.setText(_translate("MainWindow", "Analog Lab"))
-        self.pushButton.setText(_translate("MainWindow", "btn_pg_room"))
+        self.btn_pg_room.setText(_translate("MainWindow", "PG Seminar Room"))
         self.btn_tele_lab.setText(_translate("MainWindow", "Telecom Lab"))
         self.btn_flr_G.setText(_translate("MainWindow", "Ground Floor"))
         self.btn_flr_1.setText(_translate("MainWindow", "1st Floor"))
         self.btn_flr_2.setText(_translate("MainWindow", "2nd Floor"))
         self.btn_flr_3.setText(_translate("MainWindow", "3rd Floor"))
+        self.btn_ayubowan.setText(_translate("MainWindow", "Ayubowan"))
+        self.btn_hi.setText(_translate("MainWindow", "Hi"))
+        self.btn_highfive.setText(_translate("MainWindow", "HighFive"))
         self.Notifications.setText(_translate("MainWindow", "Notifications"))
         self.label.setText(_translate("MainWindow", "Crowd Navigation"))

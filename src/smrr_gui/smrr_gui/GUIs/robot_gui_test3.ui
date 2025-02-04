@@ -162,7 +162,40 @@ QComboBox:hover {
     <property name="styleSheet">
      <string notr="true"/>
     </property>
-    <widget class="QWidget" name="CrowdNav"/>
+    <widget class="QWidget" name="CrowdNav">
+     <widget class="QPushButton" name="btn_crwnav_run">
+      <property name="geometry">
+       <rect>
+        <x>270</x>
+        <y>80</y>
+        <width>81</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Run</string>
+      </property>
+     </widget>
+     <widget class="QTextEdit" name="crwnav_goal_input">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>79</y>
+        <width>211</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: #F8F9FA;  /* Light Gray */
+    color: #333333;  /* Dark Gray Text */
+    font-size: 16px;
+    padding: 8px;
+    border: 2px solid #CCCCCC;  /* Light Border */
+    border-radius: 6px;
+    outline: none;</string>
+      </property>
+     </widget>
+    </widget>
     <widget class="QWidget" name="Multifloor">
      <widget class="QStackedWidget" name="floorStack">
       <property name="geometry">
@@ -294,7 +327,7 @@ QComboBox:hover {
        </widget>
       </widget>
       <widget class="QWidget" name="pg_flr_3">
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="btn_pg_room">
         <property name="geometry">
          <rect>
           <x>70</x>
@@ -304,7 +337,7 @@ QComboBox:hover {
          </rect>
         </property>
         <property name="text">
-         <string>btn_pg_room</string>
+         <string>PG Seminar Room</string>
         </property>
        </widget>
        <widget class="QPushButton" name="btn_tele_lab">
@@ -443,7 +476,98 @@ QPushButton:hover {
       </property>
      </widget>
     </widget>
-    <widget class="QWidget" name="Arm"/>
+    <widget class="QWidget" name="Arm">
+     <widget class="QPushButton" name="btn_ayubowan">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>70</y>
+        <width>121</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton {
+    background-color: #B8E0D2;  /* Light Mint Green */
+    color: #2E3440;
+    font-size: 16px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 2px solid #90C9B7;
+    transition: 0.3s;
+}
+
+QPushButton:hover {
+    background-color: #90C9B7;
+    border: 2px solid #6CA893;
+}
+</string>
+      </property>
+      <property name="text">
+       <string>Ayubowan</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_hi">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>70</y>
+        <width>111</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton {
+    background-color: #B8E0D2;  /* Light Mint Green */
+    color: #2E3440;
+    font-size: 16px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 2px solid #90C9B7;
+    transition: 0.3s;
+}
+
+QPushButton:hover {
+    background-color: #90C9B7;
+    border: 2px solid #6CA893;
+}
+</string>
+      </property>
+      <property name="text">
+       <string>Hi</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_highfive">
+      <property name="geometry">
+       <rect>
+        <x>350</x>
+        <y>70</y>
+        <width>121</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton {
+    background-color: #B8E0D2;  /* Light Mint Green */
+    color: #2E3440;
+    font-size: 16px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 2px solid #90C9B7;
+    transition: 0.3s;
+}
+
+QPushButton:hover {
+    background-color: #90C9B7;
+    border: 2px solid #6CA893;
+}
+</string>
+      </property>
+      <property name="text">
+       <string>HighFive</string>
+      </property>
+     </widget>
+    </widget>
    </widget>
    <widget class="QLabel" name="Notifications">
     <property name="geometry">
@@ -473,9 +597,9 @@ QPushButton:hover {
     <property name="geometry">
      <rect>
       <x>60</x>
-      <y>210</y>
-      <width>171</width>
-      <height>17</height>
+      <y>196</y>
+      <width>211</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
