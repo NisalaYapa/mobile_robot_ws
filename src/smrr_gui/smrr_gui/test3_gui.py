@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
 from .GUIs.Ui_robot_test3 import Ui_MainWindow
 from functools import partial
-
+import subprocess
 
 
 
@@ -54,9 +54,9 @@ class RobotGUI(Node):
             self.ui.Notifications.setText("No goal is provided")
         else:
             self.ui.Notifications.setText(f"Going to the {goal}")
-
-
-    
+            # Run the ROS 2 command
+            subprocess.Popen(["gnome-terminal", "--","ros2", "topic", "list"])
+            #subprocess.Popen(["gnome-terminal", "--","tmuxinator", "buffer"])  
 
 
 
