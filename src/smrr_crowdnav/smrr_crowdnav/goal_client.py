@@ -9,11 +9,8 @@ import yaml
 import os
 
 
-### This is the action client for control nodes (action servers)
-### the goal should be given as parameters ( --x 10.0 --y 5.8 )
-
 class NavigateToGoalClient(Node):
-    def __init__(self):
+    def __init__(self, goal_x=None, goal_y=None):
         super().__init__('navigate_to_goal_client')
 
         # Create an action client for 'NavigateToGoal'
@@ -24,25 +21,23 @@ class NavigateToGoalClient(Node):
 
         # Load the YAML config file
         package_path = os.path.dirname(__file__)  # Current file's directory
-        config_path = os.path.join(package_path,'config', 'scenario_config.yaml')
-        
-        with open(config_path, 'r') as file:
-            configs = yaml.safe_load(file)
-        
-        # Get parameters for this class
-        node_name = "GoalClient"  # Define your node's name
-        node_configs = configs.get(node_name, {})
+        config_path = os.path.join(package_path, 'config', 'scenario_config.yaml')
 
-        # Set class attributes for each parameter
-        for key, value in node_configs.items():
-            setattr(self, key, value)  # Dynamically add attributes
+        # Load goal from YAML if not provided via CLI
+        try:
+            with open(config_path, 'r') as file:
+                configs = yaml.safe_load(file)
 
-        # Log the loaded parameters
-        goal = getattr(self, 'goal', (0.0,0.0))  # Default to 1 if not defined
-        print(f"Loaded goal: {goal}")
-        
-        # Environment-related variables
-        self.goal = goal        
+            node_name = "GoalClient"
+            node_configs = configs.get(node_name, {})
+            yaml_goal = node_configs.get('goal', (0.0, 0.0))
+        except Exception as e:
+            self.get_logger().warn(f"Failed to load config file. Error: {e}")
+            yaml_goal = (0.0, 0.0)  # Default goal if YAML loading fails
+
+        # Use command-line goal if provided, otherwise use YAML goal
+        self.goal = (goal_x, goal_y) if goal_x is not None and goal_y is not None else yaml_goal
+        self.get_logger().info(f"Using goal: {self.goal}")
 
     def send_goal(self, x, y):
         """Send a goal to the action server."""
@@ -54,14 +49,14 @@ class NavigateToGoalClient(Node):
         self.get_logger().info('Waiting for action server...')
         self._action_client.wait_for_server()
 
-        # Send the goal and set up callbacks for feedback and goal response
-        self.get_logger().info(f'Sending goal to coordinates: x={x}, y={y}')
+        # Send the goal and set up callbacks
+        self.get_logger().info(f'Sending goal: x={x}, y={y}')
         self._send_goal_future = self._action_client.send_goal_async(
             goal_msg, feedback_callback=self.feedback_callback)
         self._send_goal_future.add_done_callback(self.goal_response_callback)
 
     def goal_response_callback(self, future):
-        """Handle the response from the action server after sending the goal."""
+        """Handle the response from the action server."""
         self.goal_handle = future.result()
 
         if not self.goal_handle.accepted:
@@ -69,9 +64,25 @@ class NavigateToGoalClient(Node):
             return
 
         self.get_logger().info('Goal accepted by server.')
-        # Wait for the result once the goal is processed by the server
         self._get_result_future = self.goal_handle.get_result_async()
         self._get_result_future.add_done_callback(self.get_result_callback)
+
+    def cancel_goal(self):
+        """Cancel the current goal."""
+        if self.goal_handle is not None:
+            self.get_logger().info("Cancelling goal...")
+            cancel_future = self.goal_handle.cancel_goal_async()
+            cancel_future.add_done_callback(self.cancel_callback)
+        else:
+            self.get_logger().info("No active goal to cancel.")
+
+    def cancel_callback(self, future):
+        """Handle goal cancellation response."""
+        cancel_response = future.result()
+        if cancel_response.accepted:
+            self.get_logger().info("Goal cancellation accepted.")
+        else:
+            self.get_logger().info("Goal cancellation rejected.")
 
     def feedback_callback(self, feedback_msg):
         """Handle feedback from the action server."""
@@ -87,7 +98,7 @@ class NavigateToGoalClient(Node):
         else:
             self.get_logger().info('Failed to reach the goal.')
 
-        # Reset the goal handle after processing the result
+        # Reset the goal handle
         self.goal_handle = None
 
 
@@ -95,31 +106,40 @@ def main(args=None):
     """Main function to run the action client."""
     rclpy.init(args=args)
 
-    # Create the action client node
-    action_client = NavigateToGoalClient()
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description="Send a goal to the NavigateToGoal action server.")
+    parser.add_argument("--x", type=float, help="X coordinate of the goal")
+    parser.add_argument("--y", type=float, help="Y coordinate of the goal")
+    parser.add_argument("--cancel", action='store_true', help="Cancel the current goal")
+    parsed_args, _ = parser.parse_known_args()
 
-    # Validate and unpack the goal
-    try:
-        goal_x, goal_y = action_client.goal  # Attempt unpacking
-        if not (isinstance(goal_x, (int, float)) and isinstance(goal_y, (int, float))):
-            raise ValueError("Goal coordinates must be numeric.")
-    except (TypeError, ValueError) as e:
-        action_client.get_logger().error(
-            f"Invalid goal format: {action_client.goal}. Expected a tuple or list with two numeric elements. Error: {e}"
-        )
-        return
+    # Create the action client with command-line goal arguments
+    action_client = NavigateToGoalClient(parsed_args.x, parsed_args.y)
 
-    # Send goal and wait until it’s completed
-    action_client.send_goal(goal_x, goal_y)
+    if parsed_args.cancel:
+        action_client.cancel_goal()
+    else:
+        # Validate the goal format
+        try:
+            goal_x, goal_y = action_client.goal
+            if not (isinstance(goal_x, (int, float)) and isinstance(goal_y, (int, float))):
+                raise ValueError("Goal coordinates must be numeric.")
+        except (TypeError, ValueError) as e:
+            action_client.get_logger().error(f"Invalid goal format: {action_client.goal}. Expected numeric values. Error: {e}")
+            return
+
+        # Send the goal
+        action_client.send_goal(goal_x, goal_y)
 
     try:
         rclpy.spin(action_client)
     except KeyboardInterrupt:
+        action_client.cancel_goal()
         action_client.get_logger().info("Keyboard interrupt, shutting down...")
+    
     finally:
         action_client.destroy_node()
         rclpy.shutdown()
-
 
 
 if __name__ == '__main__':
