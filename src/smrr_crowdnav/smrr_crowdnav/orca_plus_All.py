@@ -45,6 +45,7 @@ class ORCAPlusAll(ORCA):
             if state.static_obs:
                 self.sim.processObstacles()
 
+
             self.sim.addAgent(self_state.position, *params, self_state.radius + 0.01 + self.safety_space,
                               self_state.v_pref, self_state.velocity)
             for human_state in state.human_states:
@@ -199,6 +200,7 @@ class ORCAPlusAll(ORCA):
         #current_state.self_state.radius = current_state.self_state.radius
         #current_state.self_state.gx = current_state.self_state.gx
         #current_state.self_state.gy = current_state.self_state.gy
+        
 
         # Update human states
         for i in range(len(current_state.human_states)):
