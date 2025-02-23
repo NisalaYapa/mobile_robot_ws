@@ -15,7 +15,7 @@ ros2 launch smrr_description gazebo_gpu.launch.py
 ```
 
 
-### Vizualization in RViz2
+### Vizualization in RViz2 tool
 ```bash
 rviz2 
 ```
