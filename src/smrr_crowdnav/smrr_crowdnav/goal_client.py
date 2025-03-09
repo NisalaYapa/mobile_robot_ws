@@ -4,85 +4,135 @@ import rclpy
 from rclpy.action import ActionClient
 from rclpy.node import Node
 from smrr_interfaces.action import NavigateToGoal
-import argparse
+from std_msgs.msg import Float32MultiArray, Bool
 import yaml
 import os
-
+import time  # For adding slight delays when sending new goals
 
 class NavigateToGoalClient(Node):
-    def __init__(self, goal_x=None, goal_y=None):
+    def __init__(self):
         super().__init__('navigate_to_goal_client')
 
-        # Create an action client for 'NavigateToGoal'
-        self._action_client = ActionClient(self, NavigateToGoal, 'navigate_to_goal')
+        # Create action client
+        self.create_action_client()
 
-        # Store the goal handle for future use (cancellation, etc.)
+        # Store goal handle and current goal
         self.goal_handle = None
+        self.current_goal = None
 
-        # Load the YAML config file
-        package_path = os.path.dirname(__file__)  # Current file's directory
+        # Load default goal from YAML
+        package_path = os.path.dirname(__file__)  
         config_path = os.path.join(package_path, 'config', 'scenario_config.yaml')
 
-        # Load goal from YAML if not provided via CLI
         try:
             with open(config_path, 'r') as file:
                 configs = yaml.safe_load(file)
-
             node_name = "GoalClient"
             node_configs = configs.get(node_name, {})
-            yaml_goal = node_configs.get('goal', (0.0, 0.0))
+            yaml_goal = node_configs.get('goal', [0.0, 0.0])
         except Exception as e:
             self.get_logger().warn(f"Failed to load config file. Error: {e}")
-            yaml_goal = (0.0, 0.0)  # Default goal if YAML loading fails
+            yaml_goal = [0.0, 0.0]  
 
-        # Use command-line goal if provided, otherwise use YAML goal
-        self.goal = (goal_x, goal_y) if goal_x is not None and goal_y is not None else yaml_goal
-        self.get_logger().info(f"Using goal: {self.goal}")
+        self.default_goal = tuple(yaml_goal)
+
+        # Subscribers for goal and cancel commands
+        self.goal_subscriber = self.create_subscription(
+            Float32MultiArray, '/goal', self.goal_callback, 10)
+
+        self.cancel_subscriber = self.create_subscription(
+            Bool, '/cancel_goal', self.cancel_callback, 10)
+
+        self.get_logger().info("NavigateToGoalClient initialized. Listening for goals...")
+
+    def create_action_client(self):
+        """(Re)Initialize the action client to allow sending new goals."""
+        self._action_client = ActionClient(self, NavigateToGoal, 'navigate_to_goal')
+
+    def goal_callback(self, msg):
+        """Handle incoming goals from the topic."""
+        if len(msg.data) != 2:
+            self.get_logger().error("Invalid goal format! Expected Float32MultiArray with [x, y].")
+            return
+
+        new_goal = (msg.data[0], msg.data[1])
+
+        if self.current_goal == new_goal:
+            self.get_logger().info(f"Goal {new_goal} is already active.")
+            return
+
+        if self.goal_handle is not None:
+            self.get_logger().info("New goal received. Cancelling the previous goal...")
+            self.cancel_goal(new_goal)
+        else:
+            self.get_logger().info(f"New goal received: {new_goal}")
+            self.send_goal(*new_goal)
 
     def send_goal(self, x, y):
-        """Send a goal to the action server."""
+        """Send a new goal to the action server."""
+        self.current_goal = (x, y)
         goal_msg = NavigateToGoal.Goal()
         goal_msg.goal_x = x
         goal_msg.goal_y = y
 
-        # Wait for the action server to be available
+        # Ensure action client is available
         self.get_logger().info('Waiting for action server...')
         self._action_client.wait_for_server()
 
-        # Send the goal and set up callbacks
+        # Send the goal
         self.get_logger().info(f'Sending goal: x={x}, y={y}')
         self._send_goal_future = self._action_client.send_goal_async(
             goal_msg, feedback_callback=self.feedback_callback)
         self._send_goal_future.add_done_callback(self.goal_response_callback)
 
     def goal_response_callback(self, future):
-        """Handle the response from the action server."""
+        """Handle response from the action server."""
         self.goal_handle = future.result()
 
         if not self.goal_handle.accepted:
             self.get_logger().info('Goal rejected by server.')
+            self.current_goal = None
             return
 
         self.get_logger().info('Goal accepted by server.')
         self._get_result_future = self.goal_handle.get_result_async()
         self._get_result_future.add_done_callback(self.get_result_callback)
 
-    def cancel_goal(self):
-        """Cancel the current goal."""
+    def cancel_goal(self, new_goal=None):
+        """Cancel the current goal and optionally send a new one."""
         if self.goal_handle is not None:
             self.get_logger().info("Cancelling goal...")
             cancel_future = self.goal_handle.cancel_goal_async()
-            cancel_future.add_done_callback(self.cancel_callback)
+            cancel_future.add_done_callback(lambda future: self.cancel_done_callback(future, new_goal))
         else:
             self.get_logger().info("No active goal to cancel.")
+            if new_goal:
+                self.get_logger().info(f"Sending new goal: {new_goal}")
+                self.send_goal(*new_goal)
 
-    def cancel_callback(self, future):
+    def cancel_done_callback(self, future, new_goal):
         """Handle goal cancellation response."""
         cancel_response = future.result()
-        if cancel_response.accepted:
-            self.get_logger().info("Goal cancellation accepted.")
+
+        # Check if cancellation was successful
+        if cancel_response.success:
+            self.get_logger().info("Goal successfully cancelled.")
         else:
-            self.get_logger().info("Goal cancellation rejected.")
+            self.get_logger().info("Goal cancellation failed.")
+
+        # Reset state
+        self.goal_handle = None
+        self.current_goal = None
+
+        # Reinitialize action client to avoid stuck state
+        self.create_action_client()
+
+        # Introduce a small delay before sending a new goal (if required)
+        time.sleep(0.5)
+
+        if new_goal:
+            self.get_logger().info(f"Sending new goal after cancellation: {new_goal}")
+            self.send_goal(*new_goal)
 
     def feedback_callback(self, feedback_msg):
         """Handle feedback from the action server."""
@@ -98,47 +148,31 @@ class NavigateToGoalClient(Node):
         else:
             self.get_logger().info('Failed to reach the goal.')
 
-        # Reset the goal handle
+        # Reset state
         self.goal_handle = None
+        self.current_goal = None
+
+        # Reinitialize action client to allow new goals
+        self.create_action_client()
+
+    def cancel_callback(self, msg):
+        """Handle cancel requests from the topic."""
+        if msg.data:
+            self.cancel_goal()
 
 
 def main(args=None):
     """Main function to run the action client."""
     rclpy.init(args=args)
-
-    # Parse command-line arguments
-    parser = argparse.ArgumentParser(description="Send a goal to the NavigateToGoal action server.")
-    parser.add_argument("--x", type=float, help="X coordinate of the goal")
-    parser.add_argument("--y", type=float, help="Y coordinate of the goal")
-    parser.add_argument("--cancel", action='store_true', help="Cancel the current goal")
-    parsed_args, _ = parser.parse_known_args()
-
-    # Create the action client with command-line goal arguments
-    action_client = NavigateToGoalClient(parsed_args.x, parsed_args.y)
-
-    if parsed_args.cancel:
-        action_client.cancel_goal()
-    else:
-        # Validate the goal format
-        try:
-            goal_x, goal_y = action_client.goal
-            if not (isinstance(goal_x, (int, float)) and isinstance(goal_y, (int, float))):
-                raise ValueError("Goal coordinates must be numeric.")
-        except (TypeError, ValueError) as e:
-            action_client.get_logger().error(f"Invalid goal format: {action_client.goal}. Expected numeric values. Error: {e}")
-            return
-
-        # Send the goal
-        action_client.send_goal(goal_x, goal_y)
-
-    try:
-        rclpy.spin(action_client)
-    except KeyboardInterrupt:
-        action_client.cancel_goal()
-        action_client.get_logger().info("Keyboard interrupt, shutting down...")
+    node = NavigateToGoalClient()
     
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        node.cancel_goal()
+        node.get_logger().info("Keyboard interrupt, shutting down...")
     finally:
-        action_client.destroy_node()
+        node.destroy_node()
         rclpy.shutdown()
 
 

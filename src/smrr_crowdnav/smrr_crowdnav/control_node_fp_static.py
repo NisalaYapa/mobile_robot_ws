@@ -14,7 +14,7 @@ from geometry_msgs.msg import TwistStamped, Point, PoseStamped
 from tf_transformations import euler_from_quaternion
 from nav_msgs.msg import Odometry
 from time import sleep
-from .NewMPCReal import NewMPCReal
+from .NewMPCReal_fp_static import NewMPCReal
 from .include.transform import GeometricTransformations
 from visualization_msgs.msg import Marker, MarkerArray
 from action_msgs.msg import GoalStatus
@@ -33,7 +33,7 @@ import os
 
 # Define SelfState class
 class SelfState:
-    def __init__(self, px, py, vx, vy, theta, omega, gx=0.0, gy=0.0, radius=0.4, v_pref=0.5):
+    def __init__(self, px, py, vx, vy, theta, omega, gx=0.0, gy=0.0, radius=0.8, v_pref=0.5):
         self.px = px
         self.py = py
         self.vx = vx
@@ -101,6 +101,7 @@ class CrowdNavMPCNode(Node):
         self.policy = NewMPCReal()
         self.self_state = None
         self.human_states = []
+        self.static_obs = []
         self.ready = True
 
 
@@ -110,6 +111,8 @@ class CrowdNavMPCNode(Node):
         self.create_subscription(Entities, '/goal_predictor/pos', self.human_position_callback, 10)
         self.create_subscription(Entities, '/goal_predictor/vel', self.human_velocity_callback, 10)
         self.create_subscription(Entities, '/goal_predictor/goals', self.human_goal_callback, 10)
+        self.create_subscription(Entities, '/local_lines_array', self.static_obs_callback, 10)
+
         self.create_subscription(Footprint, '/object_tracker/footprint_array', self.human_footprint_callback, 10)
         self.create_subscription(Odometry, '/diff_drive_controller/odom', self.robot_velocity_callback, 10)
 
@@ -307,6 +310,24 @@ class CrowdNavMPCNode(Node):
             except:
                 pass
 
+    def static_obs_callback(self, msg):
+        static_x = msg.x
+        static_y = msg.y
+
+        self.static_obs = []
+
+        for i in range(msg.count):
+            start_x = msg.x[2*i]
+            start_y = msg.y[2*i]
+            end_x = msg.x[2*i + 1]
+            end_y = msg.y[2*i + 1]
+
+            line = [(start_x, start_y), (end_x, end_y)]
+
+            self.static_obs.append(line)
+
+
+
 
     def robot_velocity_callback(self, msg):
         #self.get_logger().info('Robot Velocity Callback')
@@ -353,7 +374,8 @@ class CrowdNavMPCNode(Node):
             self.self_state.gy = self.global_path[self.intermediate_goal][1]
             self.self_state.goal_position = (self.self_state.gx, self.self_state.gy)
 
-            env_state = EnvState(self.self_state, self.human_states if self.human_states else [])
+            env_state = EnvState(self.self_state, self.human_states if self.human_states else [] , self.static_obs)
+            
             MPC = self.policy.predict(env_state)      
 
             action = MPC[0]

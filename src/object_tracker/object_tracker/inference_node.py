@@ -16,7 +16,7 @@ class CameraSubscriber(Node):
     def __init__(self):
         super().__init__('camera_subscriber')
 
-        self.model   = YOLO('/home/nisala/mobile_robot_ws/src/object_tracker/object_tracker/best.pt')
+        self.model   = YOLO('/home/nisala/mobile_robot_ws/src/object_tracker/object_tracker/best_nano.pt')
 
         self.sub_       = self.create_subscription(Image, '/camera/camera/color/image_raw', self.camera_callback, 10)
         self.img_pub_   = self.create_publisher(Image, '/object_tracker/inference_result', 1)
