@@ -26,7 +26,6 @@ class LidarLineExtraction(Node):
         # Publishers
         self.marker_publisher = self.create_publisher(Marker, 'line_segments', 10)
         self.line_publisher = self.create_publisher(Entities, '/local_lines_array', 10)
-        self.point_publisher = self.create_publisher(Entities, '/local_points', 10)
 
         # Subscribers
         self.scan_subscriber = self.create_subscription(LaserScan, '/scan_fake', self.scan_callback, 10)
@@ -57,26 +56,12 @@ class LidarLineExtraction(Node):
     def transform_points(self, points, target_frame="map"):
         """Transforms points from Lidar frame to a target frame (map)."""
         transformed_points = []
-        
-        point_array = Entities()
-        point_array.count = len(points)
-        point_array.x = []
-        point_array.y = []
-        
-            
-            
-            
-        
         for point in points:
             point_stamped = PoseStamped()
             point_stamped.header.frame_id = 'rplidar_link'
             point_stamped.header.stamp = self.get_clock().now().to_msg()
             point_stamped.pose.position.x = point[0]
             point_stamped.pose.position.y = point[1]
-            
-            
-            
-
 
             try:
                 transform = self.tf_buffer.lookup_transform(
@@ -94,18 +79,10 @@ class LidarLineExtraction(Node):
                 y = trans.y + point_stamped.pose.position.x * np.sin(yaw) + point_stamped.pose.position.y * np.cos(yaw)
 
                 transformed_points.append((x, y))
-                
-                point_array.x.append(x)
-                point_array.y.append(y)
-                
-                
             except Exception as e:
                 self.get_logger().warn(f"Transform failed: {e}")
                 continue
-                
-                
-	
-        self.point_publisher.publish(point_array)
+
         return transformed_points
 
     def cluster_points(self, points):
@@ -115,9 +92,9 @@ class LidarLineExtraction(Node):
             return []
 
         points = np.array(points)
-        #if points.ndim != 2 or points.shape[1] != 2:
-            #self.get_logger().warn("Invalid point format for clustering.")
-            #return []
+        if points.ndim != 2 or points.shape[1] != 2:
+            self.get_logger().warn("Invalid point format for clustering.")
+            return []
 
         # Apply HAC
         hac = AgglomerativeClustering(n_clusters=None, distance_threshold=self.hac_distance_threshold)
@@ -134,8 +111,8 @@ class LidarLineExtraction(Node):
 
     def rdp(self, points, epsilon):
         """Ramer-Douglas-Peucker line simplification algorithm."""
-        #if len(points) < 2:
-            #return points
+        if len(points) < 2:
+            return points
 
         start, end = np.array(points[0]), np.array(points[-1])
         dmax = 0
@@ -162,7 +139,7 @@ class LidarLineExtraction(Node):
         line_array.y = []
 
         for cluster in clusters:
-            if len(cluster) >= 1:
+            if len(cluster) >= 2:
                 simplified_points = self.rdp(cluster, self.distance_threshold)
                 if len(simplified_points) >= 2:
                     merged_lines.append(simplified_points)

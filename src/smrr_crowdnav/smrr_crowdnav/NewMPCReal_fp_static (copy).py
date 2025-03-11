@@ -61,7 +61,7 @@ class NewMPCReal():
     
 
         # Create a FullyObservableJointState with the new robot_full_state
-        state = FullyObservableJointState(self_state=robot_full_state, human_states=human_states, static_obs=[])
+        state = FullyObservableJointState(self_state=robot_full_state, human_states=human_states, static_obs=static_obs)
             
         # Step 1: Predict future human positions over the time horizon using ORCA
         orca_policy = ORCAPlusAll(self.time_step, self.horizon)
@@ -241,13 +241,25 @@ class NewMPCReal():
             return cs.vertcat(*min_constraints)
 
 
-        
+        def lines_to_points(static_obs):
+            count = len(static_obs)
+            points = []
+
+            for i in range(count):
+                x_ = (static_obs[i][0][0] + static_obs[i][1][0])/2
+                y_ = (static_obs[i][0][1] + static_obs[i][1][1])/2
+
+                point = (x_, y_) 
+
+                points.append(point)
+
+            return points
 
 
 
 
         # Usage in optimization problem
-        wall_constraints = wall_collision_constraint_matrix(X_pred, static_obs, robot_radius)
+        wall_constraints = wall_collision_constraint_matrix(X_pred, lines_to_points(static_obs), robot_radius)
 
         # Apply constraints directly
         for i in range(wall_constraints.shape[0]):

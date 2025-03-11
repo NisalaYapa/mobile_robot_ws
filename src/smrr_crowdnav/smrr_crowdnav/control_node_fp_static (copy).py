@@ -111,8 +111,7 @@ class CrowdNavMPCNode(Node):
         self.create_subscription(Entities, '/goal_predictor/pos', self.human_position_callback, 10)
         self.create_subscription(Entities, '/goal_predictor/vel', self.human_velocity_callback, 10)
         self.create_subscription(Entities, '/goal_predictor/goals', self.human_goal_callback, 10)
-        #self.create_subscription(Entities, '/local_lines_array', self.static_obs_callback, 10)
-        self.create_subscription(Entities, '/local_points', self.static_obs_callback, 10)
+        self.create_subscription(Entities, '/local_lines_array', self.static_obs_callback, 10)
 
         self.create_subscription(Footprint, '/object_tracker/footprint_array', self.human_footprint_callback, 10)
         self.create_subscription(Odometry, '/diff_drive_controller/odom', self.robot_velocity_callback, 10)
@@ -318,13 +317,14 @@ class CrowdNavMPCNode(Node):
         self.static_obs = []
 
         for i in range(msg.count):
-            _x = msg.x[i]
-            _y = msg.y[i]
+            start_x = msg.x[2*i]
+            start_y = msg.y[2*i]
+            end_x = msg.x[2*i + 1]
+            end_y = msg.y[2*i + 1]
 
+            line = [(start_x, start_y), (end_x, end_y)]
 
-            point = [_x, _y]
-
-            self.static_obs.append(point)
+            self.static_obs.append(line)
 
 
 
