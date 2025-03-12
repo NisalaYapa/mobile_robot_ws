@@ -25,7 +25,8 @@ setup(
             'goal_client = smrr_crowdnav.goal_client:main',
             'control_node = smrr_crowdnav.control_node:main',       
             'control_node_fp = smrr_crowdnav.control_node_footprint:main',     
-            'control_node_fp_static = smrr_crowdnav.control_node_fp_static:main',    
+            'control_node_fp_static = smrr_crowdnav.control_node_fp_static:main',  
+            'control_node_fp_static_line = smrr_crowdnav.control_node_fp_static_line:main',  
             'control_node_pubsub = smrr_crowdnav.control_node_pubsub:main',  
             'control_node_test = smrr_crowdnav.control_node_test:main',  
             'control_node_waypoint = smrr_crowdnav.control_node_waypointfollower:main', 
@@ -35,6 +36,7 @@ setup(
             'map_scan = smrr_crowdnav.local_line_generator:main',
             'sample_lidar = smrr_crowdnav.sample_lidar:main',
             'sample_line = smrr_crowdnav.sample_line_pub:main',
+            'sample_point = smrr_crowdnav.sample_point_pub:main',
             'combine_lines = smrr_crowdnav.combined_lines_publisher:main'
         ],
     },

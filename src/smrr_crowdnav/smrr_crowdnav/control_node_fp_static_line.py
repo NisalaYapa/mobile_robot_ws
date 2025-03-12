@@ -14,7 +14,7 @@ from geometry_msgs.msg import TwistStamped, Point, PoseStamped
 from tf_transformations import euler_from_quaternion
 from nav_msgs.msg import Odometry
 from time import sleep
-from .NewMPCReal_fp_static import NewMPCReal
+from .NewMPCReal_fp_static_line import NewMPCReal
 from .include.transform import GeometricTransformations
 from visualization_msgs.msg import Marker, MarkerArray
 from action_msgs.msg import GoalStatus

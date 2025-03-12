@@ -178,9 +178,10 @@ class CrowdNavMPCNode(Node):
                 self.self_state.py + i * (self.final_gy - self.self_state.py) / (self.int_goals + 1)
             ))
 
+        self.timer = self.create_timer(0.7, self.publish_commands)
         if not hasattr(self, 'timer_initialized') or not self.timer_initialized:
             print("timer initalized")
-            self.timer = self.create_timer(0.7, self.publish_commands)
+            #self.timer = self.create_timer(0.7, self.publish_commands)
             self.timer_initialized = True
 
         goal_handle.execute()
@@ -318,8 +319,8 @@ class CrowdNavMPCNode(Node):
         self.static_obs = []
 
         for i in range(msg.count):
-            _x = msg.x[i]
-            _y = msg.y[i]
+            _x = static_x[i]
+            _y = static_y[i]
 
 
             point = [_x, _y]
@@ -363,10 +364,6 @@ class CrowdNavMPCNode(Node):
 
             if (dist_to_int_goal <= 1.0) and (self.intermediate_goal != (self.int_goals + 1)):
                 self.intermediate_goal = self.intermediate_goal + 1
-
-            #print("intermediate goal", self.intermediate_goal)
-
-            #print("distance_to_int_goal", dist_to_int_goal)
 
             self.publish_global_path(self.global_path,self.intermediate_goal)
 
