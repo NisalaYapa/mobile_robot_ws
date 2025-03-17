@@ -323,6 +323,8 @@ class NewMPCReal():
 
         else:
 
+            print("##################################################__No_Human__############################")
+
             # Convert robot_state (of type SelfState) to FullState
             robot_full_state = FullState(px=robot_state.px,  py=robot_state.py, vx=robot_state.vx,  vy=robot_state.vy, radius=robot_state.radius, 
                                         gx=robot_state.gx,  gy=robot_state.gy, v_pref=robot_state.v_pref,  theta=robot_state.theta,  omega=robot_state.omega)
@@ -544,7 +546,7 @@ class NewMPCReal():
             action = (float(u1), float(u2))
 
             #logging.info(f"Generated action: {action}")
-            return action , next_states, []# Return the optimal control action                #next_state = states[t] + cs.vertcat(
+            return action , next_states, [[[]]]# Return the optimal control action                #next_state = states[t] + cs.vertcat(
 
 
 
