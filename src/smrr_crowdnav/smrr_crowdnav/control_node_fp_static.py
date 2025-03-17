@@ -178,10 +178,10 @@ class CrowdNavMPCNode(Node):
                 self.self_state.py + i * (self.final_gy - self.self_state.py) / (self.int_goals + 1)
             ))
 
-        self.timer = self.create_timer(0.7, self.publish_commands)
+        #self.timer = self.create_timer(0.7, self.publish_commands)
         if not hasattr(self, 'timer_initialized') or not self.timer_initialized:
             print("timer initalized")
-            #self.timer = self.create_timer(0.7, self.publish_commands)
+            self.timer = self.create_timer(0.7, self.publish_commands)
             self.timer_initialized = True
 
         goal_handle.execute()
@@ -363,7 +363,7 @@ class CrowdNavMPCNode(Node):
 
     def publish_commands(self):
         print("publishing Commands")
-        if self.self_state and self.human_states and self.ready:
+        if self.self_state and self.ready:
             #print("global path", self.global_path)
 
             if self.intermediate_goal == -1 :
