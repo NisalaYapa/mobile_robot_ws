@@ -194,7 +194,7 @@ class CrowdNavMPCNode(Node):
 
             feedback_msg.distance_to_goal = dist_to_goal
             goal_handle.publish_feedback(feedback_msg)
-            print(f"feedback",feedback_msg)
+            #print(f"feedback",feedback_msg)
 
 
             status = goal_handle.status

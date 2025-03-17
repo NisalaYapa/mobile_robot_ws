@@ -246,15 +246,17 @@ class NewMPCReal():
 
             
 
+            try:
 
 
+                # Usage in optimization problem
+                wall_constraints = wall_collision_constraint_matrix(X_pred, static_obs, robot_radius)
 
-            # Usage in optimization problem
-            wall_constraints = wall_collision_constraint_matrix(X_pred, static_obs, robot_radius)
-
-            # Apply constraints directly
-            for i in range(wall_constraints.shape[0]):
-                opti.subject_to(wall_constraints[i] >= 0.5)
+                # Apply constraints directly
+                for i in range(wall_constraints.shape[0]):
+                    opti.subject_to(wall_constraints[i] >= 0.5)
+            except:
+                pass
 
             
 
@@ -478,17 +480,20 @@ class NewMPCReal():
 
 
 
-            # Usage in optimization problem
-            wall_constraints = wall_collision_constraint_matrix(X_pred, static_obs, robot_radius)
+            try:
+                # Usage in optimization problem
+                wall_constraints = wall_collision_constraint_matrix(X_pred, static_obs, robot_radius)
 
-            # Apply constraints directly
-            for i in range(wall_constraints.shape[0]):
-                opti.subject_to(wall_constraints[i] >= 0.5)
+                # Apply constraints directly
+                for i in range(wall_constraints.shape[0]):
+                    opti.subject_to(wall_constraints[i] >= 0.5)
+            except:
+                pass
 
             
 
 
-            total_cost = cost_function(X_pred, U_opt, predicted_human_poses[0])
+            total_cost = cost_function(X_pred, U_opt, [])
 
                 
             

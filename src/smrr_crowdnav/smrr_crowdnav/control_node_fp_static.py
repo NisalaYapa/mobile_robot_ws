@@ -178,9 +178,14 @@ class CrowdNavMPCNode(Node):
                 self.self_state.py + i * (self.final_gy - self.self_state.py) / (self.int_goals + 1)
             ))
 
+        self.get_logger().warn("#################################################")
+        
+        
         #self.timer = self.create_timer(0.7, self.publish_commands)
         if not hasattr(self, 'timer_initialized') or not self.timer_initialized:
-            print("timer initalized")
+            
+
+            self.get_logger().warn("timer initalized")
             self.timer = self.create_timer(0.7, self.publish_commands)
             self.timer_initialized = True
 
@@ -189,6 +194,16 @@ class CrowdNavMPCNode(Node):
 
     async def execute_callback(self, goal_handle):
         #self.get_logger().info('Executing navigation to goal')
+
+        
+
+        # if not hasattr(self, 'timer_initialized') or not self.timer_initialized:
+            
+
+        #     self.get_logger().warn("timer initalized")
+        #     self.timer = self.create_timer(0.7, self.publish_commands)
+        #     self.timer_initialized = True
+
 
         feedback_msg = NavigateToGoal.Feedback()        
         self.finish = False
@@ -201,11 +216,11 @@ class CrowdNavMPCNode(Node):
 
             feedback_msg.distance_to_goal = dist_to_goal
             goal_handle.publish_feedback(feedback_msg)
-            print(f"feedback",feedback_msg)
+            #print(f"feedback",feedback_msg)
 
 
             status = goal_handle.status
-            self.get_logger().info(f"Status {status}")
+            #self.get_logger().info(f"Status {status}")
 
 
             if goal_handle.is_cancel_requested:
@@ -363,6 +378,10 @@ class CrowdNavMPCNode(Node):
 
     def publish_commands(self):
         print("publishing Commands")
+        self.get_logger().error("###################################################################################")
+        self.get_logger().error("###################################################################################")
+        self.get_logger().error("###################################################################################")
+        self.get_logger().error("###################################################################################")
         if self.self_state and self.ready:
             #print("global path", self.global_path)
 
@@ -380,7 +399,7 @@ class CrowdNavMPCNode(Node):
             self.self_state.gy = self.global_path[self.intermediate_goal][1]
             self.self_state.goal_position = (self.self_state.gx, self.self_state.gy)
 
-            env_state = EnvState(self.self_state, self.human_states if self.human_states else [] , self.static_obs)
+            env_state = EnvState(self.self_state, self.human_states if self.human_states else [], self.static_obs if self.static_obs else [])
             
             MPC = self.policy.predict(env_state)      
 
@@ -395,7 +414,8 @@ class CrowdNavMPCNode(Node):
                 control = TwistStamped()
                 control.header.stamp = self.get_clock().now().to_msg()
                 self.publish_next_states(next_states)
-                self.publish_human_next_states(human_next_states)
+                if human_next_states != [[[]]]:
+                    self.publish_human_next_states(human_next_states)
         
                 dist_to_goal = np.linalg.norm(np.array(self.self_state.position) - np.array(self.final_goal))
 
