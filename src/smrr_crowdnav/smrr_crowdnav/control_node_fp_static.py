@@ -316,16 +316,25 @@ class CrowdNavMPCNode(Node):
         static_x = msg.x
         static_y = msg.y
 
+        print("#############################################")
+        print("len of x", len(static_x))
+        print("count", msg.count)
+
         self.static_obs = []
 
-        for i in range(msg.count):
-            _x = static_x[i]
-            _y = static_y[i]
+        try:
+
+            for i in range(msg.count):
+                _x = static_x[i]
+                _y = static_y[i]
 
 
-            point = [_x, _y]
+                point = [_x, _y]
 
-            self.static_obs.append(point)
+                self.static_obs.append(point)
+        
+        except:
+            pass
 
 
 

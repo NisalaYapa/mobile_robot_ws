@@ -7,7 +7,7 @@ from smrr_interfaces.action import NavigateToGoal
 from std_msgs.msg import Float32MultiArray, Bool
 import yaml
 import os
-import time  # For adding slight delays when sending new goals
+import time
 
 class NavigateToGoalClient(Node):
     def __init__(self):
@@ -89,7 +89,7 @@ class NavigateToGoalClient(Node):
         """Handle response from the action server."""
         self.goal_handle = future.result()
 
-        if not self.goal_handle.accepted:
+        if not self.goal_handle or not self.goal_handle.accepted:
             self.get_logger().info('Goal rejected by server.')
             self.current_goal = None
             return
@@ -114,8 +114,8 @@ class NavigateToGoalClient(Node):
         """Handle goal cancellation response."""
         cancel_response = future.result()
 
-        # Check if cancellation was successful
-        if cancel_response.success:
+        # Correct way to check if the cancellation was accepted
+        if cancel_response.return_code == rclpy.action.CancelResponse.ACCEPT:
             self.get_logger().info("Goal successfully cancelled.")
         else:
             self.get_logger().info("Goal cancellation failed.")
