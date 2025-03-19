@@ -216,8 +216,8 @@ class NewMPCReal():
             
         
         # Add control bounds
-        opti.subject_to(U_opt[0, :] <= 0.5)  # Upper bound for v
-        opti.subject_to(U_opt[0, :] >= 0)  # Lower bound for v
+        opti.subject_to(U_opt[0, :] <= 0.4)  # Upper bound for v
+        opti.subject_to(U_opt[0, :] >= 0.0)  # Lower bound for v
         opti.subject_to(U_opt[1, :] >= -1)
         opti.subject_to(U_opt[1, :] <= 1)
       

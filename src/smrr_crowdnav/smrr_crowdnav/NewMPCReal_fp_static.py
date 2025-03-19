@@ -446,8 +446,8 @@ class NewMPCReal():
             # Add static obstacle constraints
 
             def wall_collision_constraint_matrix(X_pred, laser_data, robot_radius):
-                # Convert X_pred to a matrix with only positions (2, num_timesteps)
-                robot_positions = cs.horzcat(*[X_pred[t][:2] for t in range(len(X_pred))]).T  # Shape (num_timesteps, 2)
+                
+                robot_positions = cs.horzcat(*[X_pred[t][:2] for t in range(len(X_pred))]).T  
                 
                 # Convert laser_data (wall points) to a CasADi matrix (num_walls, 2)
                 wall_positions = cs.DM(laser_data)  # Shape (num_walls, 2)
@@ -498,10 +498,10 @@ class NewMPCReal():
                 
             
             # Add control bounds
-            opti.subject_to(U_opt[0, :] <= 0.5)  # Upper bound for v
-            opti.subject_to(U_opt[0, :] >= 0)  # Lower bound for v
-            opti.subject_to(U_opt[1, :] >= -1)
-            opti.subject_to(U_opt[1, :] <= 1)
+            opti.subject_to(U_opt[0, :] <= 0.15)  # Upper bound for v
+            opti.subject_to(U_opt[0, :] >= 0.03 ) # Lower bound for v
+            opti.subject_to(U_opt[1, :] >= -0.3)
+            opti.subject_to(U_opt[1, :] <= 0.3)
         
 
             # Minimize total cost
