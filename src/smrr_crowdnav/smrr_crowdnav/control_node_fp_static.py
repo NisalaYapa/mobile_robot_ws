@@ -385,8 +385,6 @@ class CrowdNavMPCNode(Node):
         if self.self_state and self.ready:
             #print("global path", self.global_path)
 
-            self.get_logger().warn("Going inside")
-
             if self.intermediate_goal == -1 :
                 self.intermediate_goal = 0
 
