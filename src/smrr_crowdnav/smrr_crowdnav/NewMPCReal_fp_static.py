@@ -214,7 +214,6 @@ class NewMPCReal():
 
             # Add static obstacle constraints
 
-
             def wall_collision_constraint_matrix(X_pred, laser_data, robot_radius):
                 # Convert X_pred to a matrix with only positions (2, num_timesteps)
                 robot_positions = cs.horzcat(*[X_pred[t][:2] for t in range(len(X_pred))]).T  # Shape (num_timesteps, 2)
@@ -245,18 +244,17 @@ class NewMPCReal():
                 return cs.vertcat(*min_constraints)
 
 
-
             
 
-            if static_obs != []:
 
 
-                # Usage in optimization problem
-                wall_constraints = wall_collision_constraint_matrix(X_pred, static_obs, robot_radius)
 
-                # Apply constraints directly
-                for i in range(wall_constraints.shape[0]):
-                    opti.subject_to(wall_constraints[i] >= 0.5)
+            # Usage in optimization problem
+            wall_constraints = wall_collision_constraint_matrix(X_pred, static_obs, robot_radius)
+
+            # Apply constraints directly
+            for i in range(wall_constraints.shape[0]):
+                opti.subject_to(wall_constraints[i] >= 0.5)
 
             
 
@@ -324,8 +322,6 @@ class NewMPCReal():
 
 
         else:
-
-            print("##################################################__No_Human__############################")
 
             # Convert robot_state (of type SelfState) to FullState
             robot_full_state = FullState(px=robot_state.px,  py=robot_state.py, vx=robot_state.vx,  vy=robot_state.vy, radius=robot_state.radius, 
@@ -402,10 +398,10 @@ class NewMPCReal():
             goal_pos = cs.MX([robot_state.gx, robot_state.gy])
 
             # Step 3: Cost function for goal deviation and control effort
-            Q_goal = 800 # Medium priority to reach the goal
+            Q_goal = 500 # Medium priority to reach the goal
             Q_control = 10 # Moderate weight for smooth control inputs
             Q_pref = 5 # Medium preference for stable velocity
-            Q_terminal = 400# Strong weight to reach the goal at the terminal state
+            Q_terminal = 300# Strong weight to reach the goal at the terminal state
             Q_human = 3 # 5
             Q_orientation = 3
 
@@ -480,25 +476,25 @@ class NewMPCReal():
 
 
 
-            if static_obs != []:
-                wall_constraints = wall_collision_constraint_matrix(X_pred, static_obs, robot_radius)
+            # Usage in optimization problem
+            wall_constraints = wall_collision_constraint_matrix(X_pred, static_obs, robot_radius)
 
-                # Apply constraints directly
-                for i in range(wall_constraints.shape[0]):
-                    opti.subject_to(wall_constraints[i] >= 0.5)
+            # Apply constraints directly
+            for i in range(wall_constraints.shape[0]):
+                opti.subject_to(wall_constraints[i] >= 0.5)
 
             
 
 
-            total_cost = cost_function(X_pred, U_opt, [])
+            total_cost = cost_function(X_pred, U_opt, predicted_human_poses[0])
 
                 
             
             # Add control bounds
-            opti.subject_to(U_opt[0, :] <= 2)  # Upper bound for v
+            opti.subject_to(U_opt[0, :] <= 0.5)  # Upper bound for v
             opti.subject_to(U_opt[0, :] >= 0)  # Lower bound for v
-            opti.subject_to(U_opt[1, :] >= -2)
-            opti.subject_to(U_opt[1, :] <= 2)
+            opti.subject_to(U_opt[1, :] >= -1)
+            opti.subject_to(U_opt[1, :] <= 1)
         
 
             # Minimize total cost
@@ -548,7 +544,7 @@ class NewMPCReal():
             action = (float(u1), float(u2))
 
             #logging.info(f"Generated action: {action}")
-            return action , next_states, [[[]]]# Return the optimal control action                #next_state = states[t] + cs.vertcat(
+            return action , next_states, []# Return the optimal control action                #next_state = states[t] + cs.vertcat(
 
 
 
