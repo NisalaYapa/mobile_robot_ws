@@ -198,7 +198,7 @@ class CrowdNavMPCNode(Node):
 
 
             status = goal_handle.status
-            self.get_logger().info(f"Status {status}")
+            ##self.get_logger().info(f"Status {status}")
 
 
             if goal_handle.is_cancel_requested:
@@ -271,6 +271,8 @@ class CrowdNavMPCNode(Node):
         self.get_logger().info('Navigation states reset after goal completion')
 
     def human_position_callback(self, msg):
+
+        print("##################################__huan__###########")
         #self.get_logger().info('Human Position Callback')
         self.human_states = []
         for i in range(msg.count):
@@ -298,6 +300,8 @@ class CrowdNavMPCNode(Node):
                 pass
 
     def robot_velocity_callback(self, msg):
+
+        print("##################################____robott__###########")
         #self.get_logger().info('Robot Velocity Callback')
         linear_x = msg.twist.twist.linear.x
         transformation = self.transform.get_transform('map', 'base_link')

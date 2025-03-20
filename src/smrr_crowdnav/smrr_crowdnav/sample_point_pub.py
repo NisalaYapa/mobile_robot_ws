@@ -20,37 +20,31 @@ class FakeLidarPublisher(Node):
         self.lidar_points = self.generate_lidar_obstacles()
 
     def generate_lidar_obstacles(self):
-        """Generate points along the edges of objects, mimicking lidar scans."""
+        """Generate points simulating a hallway with two parallel walls."""
         points = []
 
-        # --- Square-Shaped Objects (Mimic Lidar Reflection) ---
-        square_centers = [(3, 3), (-4, 5), (5, -3)]  # Example obstacle locations
-        square_size = 2.0
-        num_edge_points = 10  # Number of lidar points per object edge
+        hallway_length = 10  # Length along x-axis
+        wall_y1, wall_y2 = 3, -3  # Positions of the walls
+        num_points = 50  # Density of lidar points along the wall
+        doorway_x = 4  # Position of the doorway gap
+        doorway_width = 2  # Width of the doorway opening
 
-        for center_x, center_y in square_centers:
-            half_size = square_size / 2
-            edges = [
-                [(center_x - half_size, y) for y in self.linspace(center_y - half_size, center_y + half_size, num_edge_points)],  # Left edge
-                [(center_x + half_size, y) for y in self.linspace(center_y - half_size, center_y + half_size, num_edge_points)],  # Right edge
-                [(x, center_y - half_size) for x in self.linspace(center_x - half_size, center_x + half_size, num_edge_points)],  # Bottom edge
-                [(x, center_y + half_size) for x in self.linspace(center_x - half_size, center_x + half_size, num_edge_points)],  # Top edge
-            ]
-            for edge in edges:
-                points.extend(edge)
+        # Left wall (continuous)
+        left_wall = [(x, wall_y1) for x in self.linspace(-hallway_length / 2, hallway_length / 2, num_points)]
 
-        # --- Open Walls (Mimic Lidar Reflection Along Walls) ---
-        wall_sections = [
-            [(x, 7) for x in self.linspace(0, 10, num_edge_points)],  # Horizontal wall
-            [(-3, y) for y in self.linspace(-5, 5, num_edge_points)],  # Vertical wall
-        ]
-        for wall in wall_sections:
-            points.extend(wall)
+        # Right wall (with a doorway gap)
+        right_wall = [(x, wall_y2) for x in self.linspace(-hallway_length / 2, doorway_x - doorway_width / 2, num_points // 2)]
+        right_wall += [(x, wall_y2) for x in self.linspace(doorway_x + doorway_width / 2, hallway_length / 2, num_points // 2)]
 
-        # --- Add Random Noise to Points (Lidar Imperfections) ---
+        # Add walls to points
+        points.extend(left_wall)
+        points.extend(right_wall)
+
+        # Add noise to simulate real-world lidar inaccuracies
         noisy_points = [(x + random.uniform(-0.05, 0.05), y + random.uniform(-0.05, 0.05)) for x, y in points]
 
         return noisy_points
+
 
     def linspace(self, start, end, num):
         """Generate evenly spaced points between start and end."""

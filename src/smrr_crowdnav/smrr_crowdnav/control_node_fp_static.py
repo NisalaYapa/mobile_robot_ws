@@ -33,7 +33,7 @@ import os
 
 # Define SelfState class
 class SelfState:
-    def __init__(self, px, py, vx, vy, theta, omega, gx=0.0, gy=0.0, radius=0.8, v_pref=0.5):
+    def __init__(self, px, py, vx, vy, theta, omega, gx=0.0, gy=0.0, radius=0.2, v_pref=0.5):
         self.px = px
         self.py = py
         self.vx = vx
@@ -107,15 +107,18 @@ class CrowdNavMPCNode(Node):
 
         self.self_state = SelfState(px=0.0, py=0.0, vx=0.0, vy=0.0, theta=0.0, omega=0.0)
 
-        # Create subscribers for custom messages
+        
+
+        #Create subscribers for custom messages
         self.create_subscription(Entities, '/goal_predictor/pos', self.human_position_callback, 10)
         self.create_subscription(Entities, '/goal_predictor/vel', self.human_velocity_callback, 10)
         self.create_subscription(Entities, '/goal_predictor/goals', self.human_goal_callback, 10)
+        self.create_subscription(Odometry, '/diff_drive_controller/odom', self.robot_velocity_callback, 10)
+
         #self.create_subscription(Entities, '/local_lines_array', self.static_obs_callback, 10)
         self.create_subscription(Entities, '/local_points', self.static_obs_callback, 10)
 
         self.create_subscription(Footprint, '/object_tracker/footprint_array', self.human_footprint_callback, 10)
-        self.create_subscription(Odometry, '/diff_drive_controller/odom', self.robot_velocity_callback, 10)
 
         # Publisher for control commands (v, omega)
         self.action_publisher = self.create_publisher(TwistStamped, '/diff_drive_controller/cmd_vel', 10)
@@ -123,6 +126,7 @@ class CrowdNavMPCNode(Node):
         self.human_prediction_publisher = self.create_publisher(MarkerArray, '/smrr_crowdnav/human_trajectories', 10)
         self.global_path_publisher = self.create_publisher(MarkerArray, '/smrr_crowdnav/global_path', 10)
         self.get_logger().info("Node initiated")
+
 
         self.global_path = []
         
@@ -149,6 +153,7 @@ class CrowdNavMPCNode(Node):
             handle_accepted_callback=self.handle_accepted_callback,
             callback_group=self.callback_group 
         )
+
 
     def goal_callback(self, goal_request):
         self.get_logger().info('Received navigation goal request')        
@@ -178,14 +183,8 @@ class CrowdNavMPCNode(Node):
                 self.self_state.py + i * (self.final_gy - self.self_state.py) / (self.int_goals + 1)
             ))
 
-        self.get_logger().warn("#################################################")
-        
-        
-        #self.timer = self.create_timer(0.7, self.publish_commands)
         if not hasattr(self, 'timer_initialized') or not self.timer_initialized:
-            
-
-            self.get_logger().warn("timer initalized")
+            print("timer initalized")
             self.timer = self.create_timer(0.7, self.publish_commands)
             self.timer_initialized = True
 
@@ -194,16 +193,6 @@ class CrowdNavMPCNode(Node):
 
     async def execute_callback(self, goal_handle):
         #self.get_logger().info('Executing navigation to goal')
-
-        
-
-        # if not hasattr(self, 'timer_initialized') or not self.timer_initialized:
-            
-
-        #     self.get_logger().warn("timer initalized")
-        #     self.timer = self.create_timer(0.7, self.publish_commands)
-        #     self.timer_initialized = True
-
 
         feedback_msg = NavigateToGoal.Feedback()        
         self.finish = False
@@ -214,8 +203,8 @@ class CrowdNavMPCNode(Node):
             #self.get_logger().info("Entering while loop iteration")
             dist_to_goal = np.linalg.norm(np.array(self.self_state.position) - np.array(self.final_goal))
 
-            feedback_msg.distance_to_goal = dist_to_goal
-            goal_handle.publish_feedback(feedback_msg)
+            #feedback_msg.distance_to_goal = dist_to_goal
+            #goal_handle.publish_feedback(feedback_msg)
             #print(f"feedback",feedback_msg)
 
 
@@ -319,21 +308,10 @@ class CrowdNavMPCNode(Node):
             except:
                 pass
 
-
-    def human_footprint_callback(self, msg):
-        for i in range(msg.count):
-            try:
-                self.human_states[i].radius = msg.d[i] / 2
-            except:
-                pass
-
     def static_obs_callback(self, msg):
         static_x = msg.x
         static_y = msg.y
 
-        print("#############################################")
-        print("len of x", len(static_x))
-        print("count", msg.count)
 
         self.static_obs = []
 
@@ -352,6 +330,12 @@ class CrowdNavMPCNode(Node):
             pass
 
 
+    def human_footprint_callback(self, msg):
+        for i in range(msg.count):
+            try:
+                self.human_states[i].radius = msg.d[i] / 2
+            except:
+                pass
 
 
     def robot_velocity_callback(self, msg):
@@ -378,12 +362,11 @@ class CrowdNavMPCNode(Node):
 
     def publish_commands(self):
         print("publishing Commands")
-        self.get_logger().error("###################################################################################")
-        self.get_logger().error("###################################################################################")
-        self.get_logger().error("###################################################################################")
-        self.get_logger().error("###################################################################################")
         if self.self_state and self.ready:
             #print("global path", self.global_path)
+
+            
+
 
             if self.intermediate_goal == -1 :
                 self.intermediate_goal = 0
@@ -393,11 +376,12 @@ class CrowdNavMPCNode(Node):
             if (dist_to_int_goal <= 1.0) and (self.intermediate_goal != (self.int_goals + 1)):
                 self.intermediate_goal = self.intermediate_goal + 1
 
-            self.publish_global_path(self.global_path,self.intermediate_goal)
+            #self.publish_global_path(self.global_path,self.intermediate_goal)
 
             self.self_state.gx = self.global_path[self.intermediate_goal][0]
             self.self_state.gy = self.global_path[self.intermediate_goal][1]
             self.self_state.goal_position = (self.self_state.gx, self.self_state.gy)
+
 
             env_state = EnvState(self.self_state, self.human_states if self.human_states else [], self.static_obs if self.static_obs else [])
             
@@ -414,8 +398,8 @@ class CrowdNavMPCNode(Node):
                 control = TwistStamped()
                 control.header.stamp = self.get_clock().now().to_msg()
                 self.publish_next_states(next_states)
-                if human_next_states != [[[]]]:
-                    self.publish_human_next_states(human_next_states)
+                #if human_next_states != [[[]]]:
+                    #self.publish_human_next_states(human_next_states)
         
                 dist_to_goal = np.linalg.norm(np.array(self.self_state.position) - np.array(self.final_goal))
 
