@@ -132,10 +132,10 @@ class NewMPCReal():
             goal_pos = cs.MX([robot_state.gx, robot_state.gy])
 
             # Step 3: Cost function for goal deviation and control effort
-            Q_goal = 500 # Medium priority to reach the goal
+            Q_goal = 1000 # Medium priority to reach the goal
             Q_control = 10 # Moderate weight for smooth control inputs
             Q_pref = 5 # Medium preference for stable velocity
-            Q_terminal = 300# Strong weight to reach the goal at the terminal state
+            Q_terminal = 500# Strong weight to reach the goal at the terminal state
             Q_human = 3 # 5
             Q_orientation = 3
 
@@ -161,8 +161,8 @@ class NewMPCReal():
                 cost = 0
                 for t in range(self.horizon):
                     dist_to_goal = cs.sumsqr(X_pred[t][:2] - goal_pos)  # Distance to the goal
-                    #angle_to_goal = np.arctan2((goal_pos-X_pred[t][:2])[1],(goal_pos-X_pred[t][:2])[0])
-                    #cost += cs.sumsqr(angle_to_goal-X_pred[t][2])*Q_orientation
+                    # angle_to_goal = np.arctan2((goal_pos-X_pred[t][:2])[1],(goal_pos-X_pred[t][:2])[0])
+                    # cost += cs.sumsqr(angle_to_goal-X_pred[t][2])*Q_orientation
 
                     # Penalize control inputs (mainly smoothness in omega)
                     if t > 0:
@@ -249,12 +249,17 @@ class NewMPCReal():
 
 
 
-            # Usage in optimization problem
-            wall_constraints = wall_collision_constraint_matrix(X_pred, static_obs, robot_radius)
+            try:
 
-            # Apply constraints directly
-            for i in range(wall_constraints.shape[0]):
-                opti.subject_to(wall_constraints[i] >= 0.5)
+            # Usage in optimization problem
+                wall_constraints = wall_collision_constraint_matrix(X_pred, static_obs, robot_radius)
+
+                # Apply constraints directly
+                for i in range(wall_constraints.shape[0]):
+                    opti.subject_to(wall_constraints[i] >= 0)
+
+            except:
+                pass
 
             
 
@@ -265,7 +270,7 @@ class NewMPCReal():
             
             # Add control bounds
             opti.subject_to(U_opt[0, :] <= 0.5)  # Upper bound for v
-            opti.subject_to(U_opt[0, :] >= 0)  # Lower bound for v
+            opti.subject_to(U_opt[0, :] >= 0.0)  # Lower bound for v
             opti.subject_to(U_opt[1, :] >= -1)
             opti.subject_to(U_opt[1, :] <= 1)
         
@@ -398,10 +403,10 @@ class NewMPCReal():
             goal_pos = cs.MX([robot_state.gx, robot_state.gy])
 
             # Step 3: Cost function for goal deviation and control effort
-            Q_goal = 500 # Medium priority to reach the goal
+            Q_goal = 1000 # Medium priority to reach the goal
             Q_control = 10 # Moderate weight for smooth control inputs
             Q_pref = 5 # Medium preference for stable velocity
-            Q_terminal = 300# Strong weight to reach the goal at the terminal state
+            Q_terminal = 500# Strong weight to reach the goal at the terminal state
             Q_human = 3 # 5
             Q_orientation = 3
 
@@ -474,14 +479,17 @@ class NewMPCReal():
             
 
 
-
+            try:
 
             # Usage in optimization problem
-            wall_constraints = wall_collision_constraint_matrix(X_pred, static_obs, robot_radius)
+                wall_constraints = wall_collision_constraint_matrix(X_pred, static_obs, robot_radius)
 
-            # Apply constraints directly
-            for i in range(wall_constraints.shape[0]):
-                opti.subject_to(wall_constraints[i] >= 0.5)
+                # Apply constraints directly
+                for i in range(wall_constraints.shape[0]):
+                    opti.subject_to(wall_constraints[i] >= 0)
+
+            except:
+                pass
 
             
 
@@ -492,7 +500,7 @@ class NewMPCReal():
             
             # Add control bounds
             opti.subject_to(U_opt[0, :] <= 0.5)  # Upper bound for v
-            opti.subject_to(U_opt[0, :] >= 0)  # Lower bound for v
+            opti.subject_to(U_opt[0, :] >= 0.0)  # Lower bound for v
             opti.subject_to(U_opt[1, :] >= -1)
             opti.subject_to(U_opt[1, :] <= 1)
         
