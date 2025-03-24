@@ -1,7 +1,7 @@
 NewMPCReal:
-  time_step: 1.0         # Time step for MPC
-  human_max_speed: 1.0  # Maximum speed of humans
-  horizon: 5         # Time horizon for MPC
+  time_step: 0.7       # Time step for MPC
+  human_max_speed: 0.5  # Maximum speed of humans
+  horizon: 5       # Time horizon for MPC
 
 
 ControlNode:

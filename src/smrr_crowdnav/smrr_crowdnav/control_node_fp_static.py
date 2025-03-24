@@ -10,11 +10,14 @@ from std_msgs.msg import Float32MultiArray
 import casadi as cs
 import numpy as np
 from smrr_interfaces.msg import Entities, Footprint
-from geometry_msgs.msg import TwistStamped, Point, PoseStamped
+from geometry_msgs.msg import TwistStamped, Point, PoseStamped , Twist
+
 from tf_transformations import euler_from_quaternion
 from nav_msgs.msg import Odometry
 from time import sleep
 from .NewMPCReal_fp_static import NewMPCReal
+from .global_path import DijkstraGlobalPlanner
+from .global_path import SimplePathPlanner
 from .include.transform import GeometricTransformations
 from visualization_msgs.msg import Marker, MarkerArray
 from action_msgs.msg import GoalStatus
@@ -22,6 +25,8 @@ import asyncio
 from smrr_interfaces.action import NavigateToGoal# Custom action file
 import yaml
 import os
+import math
+
 
 
 
@@ -33,7 +38,7 @@ import os
 
 # Define SelfState class
 class SelfState:
-    def __init__(self, px, py, vx, vy, theta, omega, gx=0.0, gy=0.0, radius=0.8, v_pref=0.5):
+    def __init__(self, px, py, vx, vy, theta, omega, gx=0.0, gy=0.0, radius=0.2, v_pref=0.5):
         self.px = px
         self.py = py
         self.vx = vx
@@ -50,7 +55,7 @@ class SelfState:
 
 # Define HumanState class
 class HumanState:
-    def __init__(self, px, py, vx, vy, gx, gy, radius=0.8, v_pref=1):
+    def __init__(self, px, py, vx, vy, gx, gy, radius=0.2, v_pref=1):
         self.px = px
         self.py = py
         self.vx = vx
@@ -103,6 +108,7 @@ class CrowdNavMPCNode(Node):
         self.human_states = []
         self.static_obs = []
         self.ready = True
+        self.rot_rate = self.create_rate(2) 
 
 
         self.self_state = SelfState(px=0.0, py=0.0, vx=0.0, vy=0.0, theta=0.0, omega=0.0)
@@ -169,14 +175,26 @@ class CrowdNavMPCNode(Node):
         # Set robot's goal based on action input
         self.final_gx = goal_handle.request.goal_x
         self.final_gy = goal_handle.request.goal_y
+        self.final_rot = goal_handle.request.goal_rot
         self.final_goal = (self.final_gx, self.final_gy)
         self.intermediate_goal = -1
 
-        for i in range(self.int_goals + 2):
-            self.global_path.append((
-                self.self_state.px + i * (self.final_gx - self.self_state.px) / (self.int_goals + 1),
-                self.self_state.py + i * (self.final_gy - self.self_state.py) / (self.int_goals + 1)
-            ))
+
+
+        #planner = DijkstraGlobalPlanner(self.static_obs, self.int_goals)
+        planner = SimplePathPlanner(self.static_obs, self.int_goals)
+    
+        #self.global_path = planner.find_path((self.self_state.px, self.self_state.py), self.final_goal)
+        self.global_path = planner.find_intermediate_goals((self.self_state.px, self.self_state.py), self.final_goal)
+
+
+
+
+        # for i in range(self.int_goals + 2):
+        #     self.global_path.append((
+        #         self.self_state.px + i * (self.final_gx - self.self_state.px) / (self.int_goals + 1),
+        #         self.self_state.py + i * (self.final_gy - self.self_state.py) / (self.int_goals + 1)
+        #     ))
 
         #self.timer = self.create_timer(0.7, self.publish_commands)
         if not hasattr(self, 'timer_initialized') or not self.timer_initialized:
@@ -205,7 +223,7 @@ class CrowdNavMPCNode(Node):
 
 
             status = goal_handle.status
-            self.get_logger().info(f"Status {status}")
+            #self.get_logger().info(f"Status {status}")
 
 
             if goal_handle.is_cancel_requested:
@@ -237,7 +255,11 @@ class CrowdNavMPCNode(Node):
                     self.destroy_timer(self.timer)
                     self.timer = None
                 
-                self.get_logger().info('Goal reached successfully')
+                self.get_logger().info('Goal reached successfully. Rotating to the correct angle')
+
+                self.rotate_to_goal_angle(self.final_rot)
+
+                self.get_logger().info('Rotated to the correct angle')
                 
                 self.cleanup_after_goal()  # Reset states after successful goal completion
                 return result
@@ -316,9 +338,6 @@ class CrowdNavMPCNode(Node):
         static_x = msg.x
         static_y = msg.y
 
-        print("#############################################")
-        print("len of x", len(static_x))
-        print("count", msg.count)
 
         self.static_obs = []
 
@@ -361,9 +380,51 @@ class CrowdNavMPCNode(Node):
         self.self_state.position = (self.self_state.px, self.self_state.py)
         self.self_state.omega = msg.twist.twist.angular.z
 
+
+    def rotate_to_goal_angle(self, goal_yaw_degrees):
+        """Rotate the robot to align with the goal orientation after reaching the goal."""
+        self.get_logger().info(f"Rotating to goal angle: {goal_yaw_degrees} degrees")
+
+        # Convert degrees to radians
+        goal_yaw_radians = math.radians(goal_yaw_degrees)
+
+        # Create a simple control command (zero linear velocity, nonzero angular velocity)
+        control = TwistStamped()
+        control.header.stamp = self.get_clock().now().to_msg()
+        control.twist.linear.x = 0.0
+        control.twist.angular.z = 0.3
+
+        tolerance = 0.05  # Allowable error in radians
+
+        while rclpy.ok():
+            # Get the current yaw
+            current_yaw = self.self_state.theta
+
+            # Calculate the angular difference
+            yaw_error = goal_yaw_radians - current_yaw
+
+            # Normalize the error to [-pi, pi]
+            yaw_error = (yaw_error + math.pi) % (2 * math.pi) - math.pi
+
+            if abs(yaw_error) < tolerance:
+                self.get_logger().info("Reached the goal orientation!")
+                break
+
+            # Adjust angular velocity based on the error
+            control.twist.angular.z = 0.5 * yaw_error  # Proportional control
+
+            # Publish the command
+            self.action_publisher.publish(control)
+            self.rot_rate.sleep()
+
+        # Stop rotation
+        control.twist.angular.z = 0.0
+        self.action_publisher.publish(control)
+
+
     def publish_commands(self):
         print("publishing Commands")
-        if self.self_state and self.ready:
+        if self.self_state and self.human_states and self.ready:
             #print("global path", self.global_path)
 
             if self.intermediate_goal == -1 :
@@ -394,8 +455,11 @@ class CrowdNavMPCNode(Node):
             if action != 0:
                 control = TwistStamped()
                 control.header.stamp = self.get_clock().now().to_msg()
+
                 self.publish_next_states(next_states)
-                self.publish_human_next_states(human_next_states)
+
+                if human_next_states == [[[]]]:
+                    self.publish_human_next_states(human_next_states)
         
                 dist_to_goal = np.linalg.norm(np.array(self.self_state.position) - np.array(self.final_goal))
 

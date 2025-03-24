@@ -24,7 +24,7 @@ class FakeLidarPublisher(Node):
         points = []
 
         hallway_length = 10  # Length along x-axis
-        wall_y1, wall_y2 = 3, -3  # Positions of the walls
+        wall_y1, wall_y2 = 5, -5 # Positions of the walls
         num_points = 50  # Density of lidar points along the wall
         doorway_x = 4  # Position of the doorway gap
         doorway_width = 2  # Width of the doorway opening

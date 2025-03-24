@@ -5,9 +5,12 @@ from rclpy.action import ActionClient
 from rclpy.node import Node
 from smrr_interfaces.action import NavigateToGoal
 from std_msgs.msg import Float32MultiArray, Bool
+from geometry_msgs.msg import PoseStamped
 import yaml
 import os
 import time
+import math
+import tf_transformations
 
 class NavigateToGoalClient(Node):
     def __init__(self):
@@ -39,11 +42,23 @@ class NavigateToGoalClient(Node):
         # Subscribers for goal and cancel commands
         self.goal_subscriber = self.create_subscription(
             Float32MultiArray, '/goal', self.goal_callback, 10)
+        
+        self.goal_subscriber = self.create_subscription(
+            PoseStamped, '/goal_pose', self.goal_pose_callback, 10)
 
         self.cancel_subscriber = self.create_subscription(
             Bool, '/cancel_goal', self.cancel_callback, 10)
 
         self.get_logger().info("NavigateToGoalClient initialized. Listening for goals...")
+
+
+    def quaternion_to_degrees(self, quaternion):
+        """Convert quaternion to yaw angle in degrees."""
+        roll, pitch, yaw = tf_transformations.euler_from_quaternion([
+            quaternion.x, quaternion.y, quaternion.z, quaternion.w
+        ])
+        return math.degrees(yaw)
+
 
     def create_action_client(self):
         """(Re)Initialize the action client to allow sending new goals."""
@@ -68,12 +83,32 @@ class NavigateToGoalClient(Node):
             self.get_logger().info(f"New goal received: {new_goal}")
             self.send_goal(*new_goal)
 
-    def send_goal(self, x, y):
+    def goal_pose_callback(self, msg):
+        """Handle incoming goals from the topic."""
+
+        yaw_degrees = self.quaternion_to_degrees(msg.pose.orientation)
+        
+
+        new_goal = (msg.pose.position.x, msg.pose.position.y, yaw_degrees)
+
+        if self.current_goal == new_goal:
+            self.get_logger().info(f"Goal {new_goal} is already active.")
+            return
+
+        if self.goal_handle is not None:
+            self.get_logger().info("New goal received. Cancelling the previous goal...")
+            self.cancel_goal(new_goal)
+        else:
+            self.get_logger().info(f"New goal received: {new_goal}")
+            self.send_goal(*new_goal)
+
+    def send_goal(self, x, y,rot):
         """Send a new goal to the action server."""
         self.current_goal = (x, y)
         goal_msg = NavigateToGoal.Goal()
         goal_msg.goal_x = x
         goal_msg.goal_y = y
+        goal_msg.goal_rot = rot
 
         # Ensure action client is available
         self.get_logger().info('Waiting for action server...')
@@ -160,6 +195,7 @@ class NavigateToGoalClient(Node):
         if msg.data:
             self.cancel_goal()
 
+    
 
 def main(args=None):
     """Main function to run the action client."""
