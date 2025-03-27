@@ -18,6 +18,7 @@ from time import sleep
 from .NewMPCReal_fp_static import NewMPCReal
 from .global_path import DijkstraGlobalPlanner
 from .global_path import SimplePathPlanner
+from .global_path import AStarPathPlanner
 from .include.transform import GeometricTransformations
 from visualization_msgs.msg import Marker, MarkerArray
 from action_msgs.msg import GoalStatus
@@ -38,7 +39,7 @@ import math
 
 # Define SelfState class
 class SelfState:
-    def __init__(self, px, py, vx, vy, theta, omega, gx=0.0, gy=0.0, radius=0.2, v_pref=0.5):
+    def __init__(self, px, py, vx, vy, theta, omega, gx=0.0, gy=0.0, radius=0.4, v_pref=0.5):
         self.px = px
         self.py = py
         self.vx = vx
@@ -55,7 +56,7 @@ class SelfState:
 
 # Define HumanState class
 class HumanState:
-    def __init__(self, px, py, vx, vy, gx, gy, radius=0.2, v_pref=1):
+    def __init__(self, px, py, vx, vy, gx, gy, radius=0.4, v_pref=1):
         self.px = px
         self.py = py
         self.vx = vx
@@ -183,9 +184,15 @@ class CrowdNavMPCNode(Node):
 
         #planner = DijkstraGlobalPlanner(self.static_obs, self.int_goals)
         planner = SimplePathPlanner(self.static_obs, self.int_goals)
+        #planner = AStarPathPlanner(self.static_obs, self.int_goals)
     
         #self.global_path = planner.find_path((self.self_state.px, self.self_state.py), self.final_goal)
         self.global_path = planner.find_intermediate_goals((self.self_state.px, self.self_state.py), self.final_goal)
+        #self.global_path = planner.find_path_with_intermediate_goals((self.self_state.px, self.self_state.py), self.final_goal)
+
+
+        self.get_logger().warn('Global path')
+        print(self.global_path)
 
 
 
@@ -326,7 +333,6 @@ class CrowdNavMPCNode(Node):
             except:
                 pass
 
-
     def human_footprint_callback(self, msg):
         for i in range(msg.count):
             try:
@@ -355,9 +361,6 @@ class CrowdNavMPCNode(Node):
         except:
             pass
 
-
-
-
     def robot_velocity_callback(self, msg):
         #self.get_logger().info('Robot Velocity Callback')
         linear_x = msg.twist.twist.linear.x
@@ -379,7 +382,6 @@ class CrowdNavMPCNode(Node):
         self.self_state.vy = linear_x * np.sin(self.self_state.theta)
         self.self_state.position = (self.self_state.px, self.self_state.py)
         self.self_state.omega = msg.twist.twist.angular.z
-
 
     def rotate_to_goal_angle(self, goal_yaw_degrees):
         """Rotate the robot to align with the goal orientation after reaching the goal."""
@@ -421,7 +423,6 @@ class CrowdNavMPCNode(Node):
         control.twist.angular.z = 0.0
         self.action_publisher.publish(control)
 
-
     def publish_commands(self):
         print("publishing Commands")
         if self.self_state and self.human_states and self.ready:
@@ -458,7 +459,7 @@ class CrowdNavMPCNode(Node):
 
                 self.publish_next_states(next_states)
 
-                if human_next_states == [[[]]]:
+                if human_next_states != [[[]]]:
                     self.publish_human_next_states(human_next_states)
         
                 dist_to_goal = np.linalg.norm(np.array(self.self_state.position) - np.array(self.final_goal))
@@ -466,6 +467,7 @@ class CrowdNavMPCNode(Node):
                 if dist_to_goal >= 0.25:
                     control.twist.linear.x = float(action[0])
                     control.twist.angular.z = float(action[1])
+                    print(f"control {(float(action[0]), float(action[1]))}")
                     self.action_publisher.publish(control)
                     return
                 else:
@@ -550,7 +552,6 @@ class CrowdNavMPCNode(Node):
 
         marker_array.markers.append(line_strip_marker)
         self.prediction_publisher.publish(marker_array)
-
 
     def publish_human_next_states(self, human_next_states):
         marker_array = MarkerArray()

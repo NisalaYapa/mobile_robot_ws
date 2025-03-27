@@ -19,7 +19,7 @@ from .include.transform import GeometricTransformations
 from visualization_msgs.msg import Marker, MarkerArray
 from action_msgs.msg import GoalStatus
 import asyncio
-from smrr_interfaces.action import NavigateToGoal# Custom action file
+from smrr_interfaces.action import NavigateToGoal
 import yaml
 import os
 

@@ -132,7 +132,7 @@ class NewMPCReal():
             goal_pos = cs.MX([robot_state.gx, robot_state.gy])
 
             # Step 3: Cost function for goal deviation and control effort
-            Q_goal = 1000 # Medium priority to reach the goal
+            Q_goal = 500 # Medium priority to reach the goal
             Q_control = 10 # Moderate weight for smooth control inputs
             Q_pref = 5 # Medium preference for stable velocity
             Q_terminal = 500# Strong weight to reach the goal at the terminal state
@@ -403,7 +403,7 @@ class NewMPCReal():
             goal_pos = cs.MX([robot_state.gx, robot_state.gy])
 
             # Step 3: Cost function for goal deviation and control effort
-            Q_goal = 1000 # Medium priority to reach the goal
+            Q_goal = 500 # Medium priority to reach the goal
             Q_control = 10 # Moderate weight for smooth control inputs
             Q_pref = 5 # Medium preference for stable velocity
             Q_terminal = 500# Strong weight to reach the goal at the terminal state
