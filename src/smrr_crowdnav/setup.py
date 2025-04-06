@@ -25,6 +25,8 @@ setup(
             'goal_client = smrr_crowdnav.goal_client:main',
             'control_node = smrr_crowdnav.control_node:main',       
             'control_node_fp = smrr_crowdnav.control_node_footprint:main',     
+            'control_node_baseline = smrr_crowdnav.control_node_baseline:main',  
+            'control_node_ours = smrr_crowdnav.control_node_ours:main',  
             'control_node_fp_static = smrr_crowdnav.control_node_fp_static:main',  
             'control_node_fp_static_line = smrr_crowdnav.control_node_fp_static_line:main',  
             'control_node_pubsub = smrr_crowdnav.control_node_pubsub:main',  

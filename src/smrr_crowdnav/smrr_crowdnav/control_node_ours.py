@@ -15,7 +15,7 @@ from geometry_msgs.msg import TwistStamped, Point, PoseStamped , Twist
 from tf_transformations import euler_from_quaternion
 from nav_msgs.msg import Odometry
 from time import sleep
-from .NewMPCReal_fp_static import NewMPCReal
+from .NewMPCReal_ours import NewMPCReal
 from .global_path import DijkstraGlobalPlanner
 from .global_path import SimplePathPlanner
 from .global_path import AStarPathPlanner
@@ -26,8 +26,11 @@ import asyncio
 from smrr_interfaces.action import NavigateToGoal# Custom action file
 import yaml
 import os
+from datetime import datetime
 import math
-
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy.stats import norm
 
 
 
@@ -98,7 +101,7 @@ class CrowdNavMPCNode(Node):
 
         # Log the loaded parameters
         int_goals = getattr(self, 'Intermediate_Goals', 0)  # Default to 1 if not defined
-        print(f"Loaded Intermediate_goals size: {int_goals}")
+        self.get_logger().info(f"Loaded Intermediate_goals size: {int_goals}")
 
         self.int_goals = int_goals
         
@@ -110,6 +113,10 @@ class CrowdNavMPCNode(Node):
         self.static_obs = []
         self.ready = True
         self.rot_rate = self.create_rate(2) 
+        self.starttime = 0
+        self.endtime = 0
+        self.frozen_steps = 0
+        self.social_distances = []
 
 
         self.self_state = SelfState(px=0.0, py=0.0, vx=0.0, vy=0.0, theta=0.0, omega=0.0)
@@ -193,8 +200,8 @@ class CrowdNavMPCNode(Node):
         #self.global_path = planner.find_path_with_intermediate_goals((self.self_state.px, self.self_state.py), self.final_goal)
 
 
-        self.get_logger().warn('Global path')
-        print(self.global_path)
+        
+        self.get_logger().info(f"Global Path: {self.global_path}") 
 
 
 
@@ -207,7 +214,16 @@ class CrowdNavMPCNode(Node):
 
         #self.timer = self.create_timer(0.7, self.publish_commands)
         if not hasattr(self, 'timer_initialized') or not self.timer_initialized:
-            print("timer initalized")
+            self.get_logger().info("timer initalized")
+
+
+            # Formatted output
+            self.starttime = datetime.now()
+            self.get_logger().warn(f"Current Time = {self.starttime.strftime('%H:%M:%S')}")
+            self.frozen_steps = 0
+
+
+
             self.timer = self.create_timer(0.7, self.publish_commands)
             self.timer_initialized = True
 
@@ -228,6 +244,7 @@ class CrowdNavMPCNode(Node):
 
             feedback_msg.distance_to_goal = dist_to_goal
             goal_handle.publish_feedback(feedback_msg)
+            #self.get_logger().info(f"feedback",feedback_msg)
             print(f"feedback",feedback_msg)
 
 
@@ -249,6 +266,7 @@ class CrowdNavMPCNode(Node):
 
             if dist_to_goal < 0.25:
                 goal_handle.succeed()
+
                 status = goal_handle.status
                 self.get_logger().info(f"Status {status}")
                 result = NavigateToGoal.Result()
@@ -258,17 +276,46 @@ class CrowdNavMPCNode(Node):
                 control.twist.linear.x = 0.0
                 control.twist.angular.z = 0.0
                 self.finish = True
+                self.endtime = datetime.now()
+                self.get_logger().warn(f"Current Time = {self.endtime.strftime('%H:%M:%S')}")
                 self.action_publisher.publish(control)
                 if hasattr(self, 'timer') and self.timer is not None:
                     self.timer.cancel()
                     self.destroy_timer(self.timer)
+                    self.get_logger().error("timer cancled")
                     self.timer = None
                 
                 self.get_logger().info('Goal reached successfully. Rotating to the correct angle')
 
                 self.rotate_to_goal_angle(self.final_rot)
 
+
                 self.get_logger().info('Rotated to the correct angle')
+
+                # self.endtime = datetime.now()
+                # self.get_logger().warn(f"Current Time = {self.endtime.strftime('%H:%M:%S')}")
+
+                time_difference = self.endtime - self.starttime  # This gives a timedelta object
+
+                # Extract hours, minutes, and seconds from the time difference
+                total_seconds = time_difference.total_seconds()
+                hours = int(total_seconds // 3600)
+                minutes = int((total_seconds % 3600) // 60)
+                seconds = int(total_seconds % 60)
+
+                self.get_logger().warn(f"Navigation Time = {hours}:{minutes}:{seconds}")
+                self.get_logger().warn(f"Frozen Steps= {self.frozen_steps}")
+                #print(f"social distance {self.social_distances}")
+                # social_distances_array = np.asarray(self.social_distances).flatten()
+
+                # plt.figure(figsize=(10, 6))
+                # sns.histplot(x=social_distances_array.tolist(), kde=True, bins=20, color='skyblue', stat='density')
+                # plt.title('Probability Distribution of Social Distances')
+                # plt.xlabel('Distance (meters)')
+                # plt.ylabel('Probability Density')
+                # plt.grid(True)
+                # plt.savefig('/home/nisala/social_distances_plot.png')
+                # plt.close()
                 
                 self.cleanup_after_goal()  # Reset states after successful goal completion
                 return result
@@ -313,6 +360,10 @@ class CrowdNavMPCNode(Node):
         self.human_states = []
         for i in range(msg.count):
             self.human_states.append(HumanState(px=msg.x[i], py=msg.y[i], vx=0.0, vy=0.0, gx=0.0, gy=0.0))
+            dx = msg.x[i] - self.self_state.px
+            dy = msg.y[i] - self.self_state.py
+            distance = math.sqrt(dx**2 + dy**2)  # Euclidean distance
+            self.social_distances.append(distance)
 
     def human_velocity_callback(self, msg):
         #self.get_logger().info('Human Velocity Callback')
@@ -346,7 +397,7 @@ class CrowdNavMPCNode(Node):
         for i in range(len(msg.preferred_velocities)):
             try:
                 self.human_states[i].v_pref= msg.preferred_velocities[i]
-                print(f"#########PrefVel######### {msg.preferred_velocities[i]}")
+                #self.get_logger().info(f"#########PrefVel######### {msg.preferred_velocities[i]}")
             except:
                 pass
 
@@ -434,7 +485,7 @@ class CrowdNavMPCNode(Node):
         self.action_publisher.publish(control)
 
     def publish_commands(self):
-        print("publishing Commands")
+        self.get_logger().info("publishing Commands")
         if self.self_state and self.human_states and self.ready:
             #print("global path", self.global_path)
 
@@ -458,12 +509,18 @@ class CrowdNavMPCNode(Node):
 
             action = MPC[0]
             next_states = MPC[1]
-            if MPC != (0,0):
-                human_next_states = MPC[2]
-            else:
+            human_next_states = MPC[2]
+
+            
+
+            #print(f"action {action}")
+            
+
+            if human_next_states == []:
                 human_next_states = [[[]]]
 
-            if action != 0:
+
+            if action != (0,0):
                 control = TwistStamped()
                 control.header.stamp = self.get_clock().now().to_msg()
 
@@ -477,14 +534,28 @@ class CrowdNavMPCNode(Node):
                 if dist_to_goal >= 0.25:
                     control.twist.linear.x = float(action[0])
                     control.twist.angular.z = float(action[1])
-                    print(f"control {(float(action[0]), float(action[1]))}")
+                    self.get_logger().info(f"control {(float(action[0]), float(action[1]))}")
                     self.action_publisher.publish(control)
                     return
                 else:
                     control.twist.linear.x = 0.0
                     control.twist.angular.z = 0.0
                     self.action_publisher.publish(control)
+                    self.get_logger().info(f"control {0, 0}")
                     return
+                
+            else:
+                control = TwistStamped()
+                control.header.stamp = self.get_clock().now().to_msg()
+                self.frozen_steps += 1
+                control.twist.linear.x = 0.0
+                control.twist.angular.z = 0.0
+                self.action_publisher.publish(control)
+                self.get_logger().info(f"control {0, 0}")
+                return
+                
+
+            
 
     def publish_global_path(self, points, current_goal):
         marker_array = MarkerArray()
@@ -612,11 +683,9 @@ def main(args=None):
 
     try:
         executor.spin()
-        print("Test14")
     except KeyboardInterrupt:
         pass
-    
-    print("Test15")
+
     mpc_node.destroy_node()
     rclpy.shutdown()
 

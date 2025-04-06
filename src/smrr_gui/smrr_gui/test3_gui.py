@@ -4,6 +4,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QProcess
 from .GUIs.Ui_robot_test3 import Ui_MainWindow
 from functools import partial
 import subprocess
@@ -21,6 +22,7 @@ class RobotGUI(Node):
         self.main_win = main_win
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self.main_win)
+
 
         # Connect buttons to functions
         self.ui.btn_crowdnav.clicked.connect(self.handle_crowdnav)
@@ -56,10 +58,11 @@ class RobotGUI(Node):
             self.ui.Notifications.setText(f"Going to the {goal}")
             # Run the ROS 2 command
             subprocess.Popen(["gnome-terminal", "--","ros2", "topic", "list"])
-            #subprocess.Popen(["gnome-terminal", "--","tmuxinator", "buffer"])  
+            # subprocess.Popen(["gnome-terminal", "--","tmuxinator", "buffer"])  
 
-
-
+        
+        
+    
     def handle_muiltinav(self):
         self.get_logger().info('Multifloor Navigation activated')
         self.ui.mainstack.setCurrentWidget(self.ui.Multifloor)
