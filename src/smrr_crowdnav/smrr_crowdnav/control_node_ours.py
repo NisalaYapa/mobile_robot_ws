@@ -31,6 +31,9 @@ import math
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import norm
+from matplotlib.lines import Line2D  # For custom legend creation
+from matplotlib.colors import LinearSegmentedColormap  # Op
+from matplotlib.animation import FuncAnimation
 
 
 
@@ -117,6 +120,9 @@ class CrowdNavMPCNode(Node):
         self.endtime = 0
         self.frozen_steps = 0
         self.social_distances = []
+        self.self_path = []
+        self.human_paths = []
+        self.trajectories = []
 
 
         self.self_state = SelfState(px=0.0, py=0.0, vx=0.0, vy=0.0, theta=0.0, omega=0.0)
@@ -221,6 +227,10 @@ class CrowdNavMPCNode(Node):
             self.starttime = datetime.now()
             self.get_logger().warn(f"Current Time = {self.starttime.strftime('%H:%M:%S')}")
             self.frozen_steps = 0
+            self.social_distances = []
+            self.self_path = []
+            self.human_paths = []
+            self.trajectories = []
 
 
 
@@ -294,29 +304,12 @@ class CrowdNavMPCNode(Node):
 
                 # self.endtime = datetime.now()
                 # self.get_logger().warn(f"Current Time = {self.endtime.strftime('%H:%M:%S')}")
-
-                time_difference = self.endtime - self.starttime  # This gives a timedelta object
-
-                # Extract hours, minutes, and seconds from the time difference
-                total_seconds = time_difference.total_seconds()
-                hours = int(total_seconds // 3600)
-                minutes = int((total_seconds % 3600) // 60)
-                seconds = int(total_seconds % 60)
-
-                self.get_logger().warn(f"Navigation Time = {hours}:{minutes}:{seconds}")
-                self.get_logger().warn(f"Frozen Steps= {self.frozen_steps}")
-                #print(f"social distance {self.social_distances}")
-                # social_distances_array = np.asarray(self.social_distances).flatten()
-
-                # plt.figure(figsize=(10, 6))
-                # sns.histplot(x=social_distances_array.tolist(), kde=True, bins=20, color='skyblue', stat='density')
-                # plt.title('Probability Distribution of Social Distances')
-                # plt.xlabel('Distance (meters)')
-                # plt.ylabel('Probability Density')
-                # plt.grid(True)
-                # plt.savefig('/home/nisala/social_distances_plot.png')
-                # plt.close()
                 
+                self.plot_summary()
+                
+                
+                
+                                
                 self.cleanup_after_goal()  # Reset states after successful goal completion
                 return result
             
@@ -358,12 +351,17 @@ class CrowdNavMPCNode(Node):
     def human_position_callback(self, msg):
         #self.get_logger().info('Human Position Callback')
         self.human_states = []
+        current_pos = []
+        current_pos.append((self.self_state.px, self.self_state.py)) 
         for i in range(msg.count):
             self.human_states.append(HumanState(px=msg.x[i], py=msg.y[i], vx=0.0, vy=0.0, gx=0.0, gy=0.0))
             dx = msg.x[i] - self.self_state.px
             dy = msg.y[i] - self.self_state.py
             distance = math.sqrt(dx**2 + dy**2)  # Euclidean distance
             self.social_distances.append(distance)
+            #self.human_paths.append((msg.x[i], msg.y[i]))
+            current_pos.append((msg.x[i], msg.y[i]))
+        self.trajectories.append(current_pos)
 
     def human_velocity_callback(self, msg):
         #self.get_logger().info('Human Velocity Callback')
@@ -383,6 +381,8 @@ class CrowdNavMPCNode(Node):
                 #self.human_states[i].gy = 0.0
                 self.human_states[i].gx = msg.x[i]
                 self.human_states[i].gy = msg.y[i]
+                
+                
             except:
                 pass
 
@@ -443,6 +443,8 @@ class CrowdNavMPCNode(Node):
         self.self_state.vy = linear_x * np.sin(self.self_state.theta)
         self.self_state.position = (self.self_state.px, self.self_state.py)
         self.self_state.omega = msg.twist.twist.angular.z
+
+        #self.self_path.append((self.self_state.px, self.self_state.py))
 
     def rotate_to_goal_angle(self, goal_yaw_degrees):
         """Rotate the robot to align with the goal orientation after reaching the goal."""
@@ -669,6 +671,298 @@ class CrowdNavMPCNode(Node):
         #print(marker_array)
         self.human_prediction_publisher.publish(marker_array)
 
+
+    def plot_summary(self):
+
+        current_time = self.endtime.strftime("%Y-%m-%d_%H-%M-%S")
+
+        # Create a dynamic filename
+        filename = f"social_dis_pdf_{current_time}.png"
+
+        time_difference = self.endtime - self.starttime  # This gives a timedelta object
+
+        # Extract hours, minutes, and seconds from the time difference
+        total_seconds = time_difference.total_seconds()
+        hours = int(total_seconds // 3600)
+        minutes = int((total_seconds % 3600) // 60)
+        seconds = int(total_seconds % 60)
+
+        path_data = self.trajectories
+        num_timesteps = len(path_data)
+
+        # Create figure with subplots
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
+
+        # --- Subplot 1: Social Distance Histogram ---
+        ax1.hist(self.social_distances, bins=30, density=True, alpha=0.6, color='b')
+        ax1.set_title('Social Distance Distribution')
+        ax1.set_xlabel('Distance (m)')
+        ax1.set_ylabel('Probability Density')
+        ax1.grid(True)
+
+        # --- Subplot 2: Robot and Human Visualization ---
+        # Create color gradient for time
+        time_cmap = plt.cm.viridis(np.linspace(0, 1, num_timesteps))
+
+        # Plot ROBOT PATH as connected line segments
+        robot_x = []
+        robot_y = []
+        for t in range(num_timesteps):
+            if len(path_data[t]) > 0:  # Has robot position
+                robot_x.append(path_data[t][0][0])
+                robot_y.append(path_data[t][0][1])
+
+        # Plot the actual path the robot traveled
+        ax2.plot(robot_x, robot_y, 'b-', linewidth=2, label='Robot Path')
+
+        # Add start/end markers for robot
+        if len(robot_x) > 0:
+            ax2.scatter(robot_x[0], robot_y[0], 
+                        color='green', s=150, zorder=5, label='Robot Start')
+            ax2.scatter(robot_x[-1], robot_y[-1], 
+                        color='red', s=150, zorder=5, label='Robot End')
+
+        # Plot HUMAN POSITIONS as points (colored by timestep)
+        for t in range(num_timesteps):
+            if len(path_data[t]) > 1:  # Has humans
+                # Get all human positions at this timestep
+                humans = path_data[t][1:]
+                for human in humans:
+                    ax2.scatter(
+                        human[0], human[1],
+                        color=time_cmap[t],
+                        s=50,
+                        alpha=0.7,
+                        edgecolor='k',
+                        label=f'Humans t={t}' if t in [0, num_timesteps-1] else ""
+                    )
+
+        # Visualization settings
+        max_humans = max(len(timestep)-1 for timestep in path_data) if num_timesteps > 0 else 0
+        ax2.set_title(f'Robot Path and Human Positions\n(Max Humans: {max_humans})')
+        ax2.set_xlabel('X Position (m)')
+        ax2.set_ylabel('Y Position (m)')
+        ax2.grid(True, alpha=0.3)
+        ax2.axis('equal')
+
+        # Create simplified legend
+        handles = [
+            Line2D([0], [0], color='blue', lw=2, label='Robot Path'),
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='green', markersize=10, label='Robot Start'),
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='red', markersize=10, label='Robot End'),
+            Line2D([0], [0], marker='o', color='k', markerfacecolor='purple', markersize=10, label='Early Humans'),
+            Line2D([0], [0], marker='o', color='k', markerfacecolor='yellow', markersize=10, label='Late Humans')
+        ]
+        ax2.legend(handles=handles, bbox_to_anchor=(1.05, 1), loc='upper left')
+
+        # --- Add Info Text ---
+        human_counts = [len(timestep)-1 for timestep in path_data]
+        info_text = (f"Navigation Time = {hours}:{minutes}:{seconds}\n"
+                    f"Frozen Steps = {self.frozen_steps}\n"
+                    f"Minimum Social Distance = {min(self.social_distances):.2f} m\n"
+                    f"Timesteps = {num_timesteps}\n"
+                    f"Human Count Range: {min(human_counts)}-{max(human_counts)}")
+
+        fig.text(0.5, 0.02, info_text, ha='center', va='top', fontsize=10, 
+                bbox={'facecolor': 'white', 'alpha': 0.7, 'pad': 5})
+
+        ros_ws_path = os.path.expanduser("~/mobile_robot_ws/src/smrr_crowdnav/smrr_crowdnav/EvalMatrics")
+        plt.tight_layout(rect=[0, 0.1, 1, 0.95])
+        plt.savefig(os.path.join(ros_ws_path, filename), dpi=300, bbox_inches='tight')
+        plt.close()  
+
+
+        # Use the original trajectories list directly
+        # Use the original trajectories list directly
+
+
+        # path_data = self.trajectories
+        # num_timesteps = len(path_data)
+
+        # # Only proceed if we have valid data
+        # if num_timesteps == 0 or any(len(timestep) == 0 for timestep in path_data):
+        #     self.get_logger().error("Invalid trajectory data - empty timesteps found")
+        #     return
+
+        # # Create figure with subplots
+        # fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
+
+        # # --- Subplot 1: Social Distance Histogram ---
+        # ax1.hist(self.social_distances, bins=30, density=True, alpha=0.6, color='b')
+        # ax1.set_title('Social Distance Distribution')
+        # ax1.set_xlabel('Distance (m)')
+        # ax1.set_ylabel('Probability Density')
+        # ax1.grid(True)
+
+        # # --- Subplot 2: Robot and Human Visualization ---
+        # # Create color gradient for time
+        # time_cmap = plt.cm.viridis(np.linspace(0, 1, num_timesteps))
+
+        # # Initialize plot elements for animation
+        # robot_line, = ax2.plot([], [], 'b-', linewidth=2, label='Robot Path')
+        # robot_dot = ax2.scatter([], [], color='green', s=150, zorder=5)
+        # human_dots = ax2.scatter([], [], color='orange', s=50, alpha=0.7, edgecolor='k')
+
+        # # Set plot limits based on all data
+        # all_x = []
+        # all_y = []
+        # for timestep in path_data:
+        #     if len(timestep) > 0:
+        #         all_x.append(timestep[0][0])
+        #         all_y.append(timestep[0][1])
+        #     if len(timestep) > 1:
+        #         for human in timestep[1:]:
+        #             all_x.append(human[0])
+        #             all_y.append(human[1])
+
+        # padding = 1.0  # meters
+        # ax2.set_xlim(min(all_x)-padding, max(all_x)+padding)
+        # ax2.set_ylim(min(all_y)-padding, max(all_y)+padding)
+        # ax2.set_xlabel('X Position (m)')
+        # ax2.set_ylabel('Y Position (m)')
+        # ax2.grid(True, alpha=0.3)
+        # ax2.axis('equal')
+
+        # # Add start/end markers
+        # ax2.scatter(path_data[0][0][0], path_data[0][0][1], 
+        #             color='green', s=150, zorder=5, label='Robot Start')
+        # ax2.scatter(path_data[-1][0][0], path_data[-1][0][1], 
+        #             color='red', s=150, zorder=5, label='Robot End')
+
+        # # Create simplified legend
+        # handles = [
+        #     Line2D([0], [0], color='blue', lw=2, label='Robot Path'),
+        #     Line2D([0], [0], marker='o', color='w', markerfacecolor='green', markersize=10, label='Robot Start'),
+        #     Line2D([0], [0], marker='o', color='w', markerfacecolor='red', markersize=10, label='Robot End'),
+        #     Line2D([0], [0], marker='o', color='orange', markersize=10, label='Human Positions')
+        # ]
+        # ax2.legend(handles=handles, bbox_to_anchor=(1.05, 1), loc='upper left')
+
+        # # --- Add Info Text ---
+        # human_counts = [len(timestep)-1 for timestep in path_data]
+        # max_humans = max(human_counts) if human_counts else 0
+        # info_text = (f"Navigation Time = {hours}:{minutes}:{seconds}\n"
+        #             f"Frozen Steps = {self.frozen_steps}\n"
+        #             f"Minimum Social Distance = {min(self.social_distances):.2f} m\n"
+        #             f"Timesteps = {num_timesteps}\n"
+        #             f"Max Humans: {max_humans}")
+
+        # fig.text(0.5, 0.02, info_text, ha='center', va='top', fontsize=10, 
+        #         bbox={'facecolor': 'white', 'alpha': 0.7, 'pad': 5})
+
+        # # Save static plot
+        # ros_ws_path = os.path.expanduser("~/mobile_robot_ws/src/smrr_crowdnav/smrr_crowdnav/EvalMatrics")
+        # plt.tight_layout(rect=[0, 0.1, 1, 0.95])
+        # plt.savefig(os.path.join(ros_ws_path, filename), dpi=300, bbox_inches='tight')
+
+        # # --- Create Animation ---
+        # def init():
+        #     robot_line.set_data([], [])
+        #     robot_dot.set_offsets(np.empty((0, 2)))  # Empty 2D array
+        #     human_dots.set_offsets(np.empty((0, 2)))  # Empty 2D array
+        #     return robot_line, robot_dot, human_dots
+
+        # def update(frame):
+        #     # Update robot path (all points up to current frame)
+        #     robot_x = [path_data[t][0][0] for t in range(frame+1)]
+        #     robot_y = [path_data[t][0][1] for t in range(frame+1)]
+        #     robot_line.set_data(robot_x, robot_y)
+            
+        #     # Update current robot position
+        #     robot_dot.set_offsets([[path_data[frame][0][0], path_data[frame][0][1]]])
+            
+        #     # Update human positions
+        #     if len(path_data[frame]) > 1:
+        #         humans = np.array([[human[0], human[1]] for human in path_data[frame][1:]])
+        #         human_dots.set_offsets(humans)
+        #     else:
+        #         human_dots.set_offsets(np.empty((0, 2)))
+            
+        #     return robot_line, robot_dot, human_dots
+
+        # # Create animation only if we have enough frames
+        # if num_timesteps > 1:
+        #     ani = FuncAnimation(fig, update, frames=num_timesteps,
+        #                         init_func=init, blit=True, interval=200)
+            
+        #     # Save GIF
+        #     gif_filename = os.path.splitext(filename)[0] + '.gif'
+        #     try:
+        #         ani.save(os.path.join(ros_ws_path, gif_filename), 
+        #                 writer='pillow', fps=5, dpi=100)
+        #         self.get_logger().info(f"Saved animation to {gif_filename}")
+        #     except Exception as e:
+        #         self.get_logger().error(f"Failed to save animation: {e}")
+        # else:
+        #     self.get_logger().warn("Not enough timesteps to create animation")
+
+        # plt.close()
+
+
+
+        # Your existing data
+                # self.get_logger().warn(f"Navigation Time = {hours}:{minutes}:{seconds}")
+                # self.get_logger().warn(f"Frozen Steps= {self.frozen_steps}")
+                # social_distances_array = np.asarray(self.social_distances).flatten()
+                # self.get_logger().info(f"minimum social distance = {min(self.social_distances)}")
+                # self.get_logger().info(f"human_positions = {self.human_paths}")
+
+                # # Assuming you have a path_array = [(x1,y1), (x2,y2), ...]
+                # path_array = np.array(self.self_path)  # Convert your path data to numpy array
+                # human_paths_array = np.array(self.human_paths)
+                # trajectories = np.array(self.trajectories)
+
+                # ros_ws_path = os.path.expanduser("~/mobile_robot_ws/src/smrr_crowdnav/smrr_crowdnav/EvalMatrics")
+
+                # # Create a figure with two subplots (1 row, 2 columns)
+                # fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
+
+                # # First subplot - Histogram
+                # ax1.hist(social_distances_array, bins=30, density=True, alpha=0.6, color='b')
+                # ax1.set_title('Social Distance Distribution')
+                # ax1.set_xlabel('Distance')
+                # ax1.set_ylabel('Probability Density')
+                # ax1.grid(True)
+
+                # # Second subplot - Path
+                # ax2.plot(path_array[:, 0], path_array[:, 1], 'b-', linewidth=2, label='Robot Path')
+                # ax2.scatter(path_array[0, 0], path_array[0, 1], color='green', s=100, label='Start')
+                # ax2.scatter(path_array[-1, 0], path_array[-1, 1], color='red', s=100, label='End')
+                # ax2.scatter(human_paths_array[:, 0], human_paths_array[:, 1], color='orange', alpha=0.6, s=50, label='Human Positions')
+                # ax2.set_title('Robot Navigation Path')
+                # ax2.set_xlabel('X Position')
+                # ax2.set_ylabel('Y Position')
+                # ax2.grid(True)
+                # ax2.legend()
+
+                # # Add the info text below both subplots
+                # info_text = (f"Navigation Time = {hours}:{minutes}:{seconds}\n"
+                #             f"Frozen Steps = {self.frozen_steps}\n"
+                #             f"Minimum Social Distance = {min(self.social_distances)}")
+
+                # fig.text(0.5, 0.02, info_text, ha='center', va='top', fontsize=10, 
+                #         bbox={'facecolor': 'white', 'alpha': 0.7, 'pad': 5})
+
+                # # Adjust layout
+                # plt.tight_layout(rect=[0, 0.1, 1, 0.95])  # Adjust bottom margin for text
+
+                # full_path = os.path.join(ros_ws_path, filename)
+
+                # # Save the figure
+                # plt.savefig(full_path, dpi=300, bbox_inches='tight')
+                # plt.close()
+
+
+                # Convert your array to numpy for easier manipulation
+                # Convert your array to numpy
+
+
+                # Convert your array to numpy
+                # First, let's examine your actual data structure
+                
+                #path_data = np.array(self.trajectories, dtype=object) # shape: (timesteps, agents, coordinates)
+                # Use the original trajectories list directly
+                # Use the original trajectories list directly
     
 
 
