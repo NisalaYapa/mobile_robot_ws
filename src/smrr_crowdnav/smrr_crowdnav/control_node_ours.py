@@ -358,17 +358,14 @@ class CrowdNavMPCNode(Node):
     def human_position_callback(self, msg):
         #self.get_logger().info('Human Position Callback')
         self.human_states = []
-        current_pos = []
-        current_pos.append((self.self_state.px, self.self_state.py)) 
+        # current_pos = []
+        # current_pos.append((self.self_state.px, self.self_state.py)) 
         for i in range(msg.count):
             self.human_states.append(HumanState(px=msg.x[i], py=msg.y[i], vx=0.0, vy=0.0, gx=0.0, gy=0.0))
-            dx = msg.x[i] - self.self_state.px
-            dy = msg.y[i] - self.self_state.py
-            distance = math.sqrt(dx**2 + dy**2)  # Euclidean distance
-            self.social_distances.append(distance)
+            
             #self.human_paths.append((msg.x[i], msg.y[i]))
-            current_pos.append((msg.x[i], msg.y[i]))
-        self.trajectories.append(current_pos)
+        #     current_pos.append((msg.x[i], msg.y[i]))
+        # self.trajectories.append(current_pos)
 
     def human_velocity_callback(self, msg):
         #self.get_logger().info('Human Velocity Callback')
@@ -484,6 +481,19 @@ class CrowdNavMPCNode(Node):
 
             # Adjust angular velocity based on the error
             control.twist.angular.z = 0.5 * yaw_error  # Proportional control
+            current_pose = []        
+            current_pose.append((self.self_state.px, self.self_state.py))
+            for human in self.human_states:
+                current_pose.append((human.px, human.py))
+                dx = human.px- self.self_state.px
+                dy = human.py- self.self_state.py
+                distance = math.sqrt(dx**2 + dy**2)  # Euclidean distance
+                self.social_distances.append(distance)
+           
+            self.trajectories.append(current_pose)
+
+            self.linear_vel.append(0.0)
+            self.angular_vel.append(control.twist.angular.z)
 
             # Publish the command
             self.action_publisher.publish(control)
@@ -495,7 +505,8 @@ class CrowdNavMPCNode(Node):
 
     def publish_commands(self):
         self.get_logger().info("publishing Commands")
-        if self.self_state and self.human_states and self.ready:
+
+        if self.self_state and self.ready:
             #print("global path", self.global_path)
 
             if self.intermediate_goal == -1 :
@@ -507,6 +518,19 @@ class CrowdNavMPCNode(Node):
                 self.intermediate_goal = self.intermediate_goal + 1
 
             #self.publish_global_path(self.global_path,self.intermediate_goal)
+
+            current_pose = []        
+            current_pose.append((self.self_state.px, self.self_state.py))
+            for human in self.human_states:
+                current_pose.append((human.px, human.py))
+                dx = human.px- self.self_state.px
+                dy = human.py- self.self_state.py
+                distance = math.sqrt(dx**2 + dy**2)  # Euclidean distance
+                self.social_distances.append(distance)
+           
+            self.trajectories.append(current_pose)
+ 
+
 
             self.self_state.gx = self.global_path[self.intermediate_goal][0]
             self.self_state.gy = self.global_path[self.intermediate_goal][1]
@@ -774,6 +798,8 @@ class CrowdNavMPCNode(Node):
         ax3.grid(True)
         ax3.legend()
 
+        
+
         ax4.plot(self.angular_vel, 'g-', label='Angular Velocity')
         ax4.set_title('Angular Velocity Over Time')
         ax4.set_xlabel('Time Step')
@@ -781,11 +807,16 @@ class CrowdNavMPCNode(Node):
         ax4.grid(True)
         ax4.legend()
 
+        try:
+            min_social_dis = f"{min(self.social_distances)} m"
+        except:
+            min_social_dis = "No human detected"
+
         # Info Text
         human_counts = [len(timestep)-1 for timestep in path_data]
         info_text = (f"Navigation Time = {hours}:{minutes}:{seconds}\n"
                     f"Frozen Steps = {self.frozen_steps}\n"
-                    f"Minimum Social Distance = {min(self.social_distances):.2f} m\n"
+                    f"Minimum Social Distance = {min_social_dis}\n"
                     f"Timesteps = {num_timesteps}\n"
                     f"Human Count Range: {min(human_counts)}-{max(human_counts)}\n"
                     f"navigation distance: {nav_distance}m")

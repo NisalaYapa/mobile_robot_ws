@@ -168,11 +168,11 @@ class NewMPCReal():
                     if t > 0:
                         # Penalize change in omega between consecutive time steps
                         control_smooth = cs.sumsqr(U[1, t])
-                        control_pref = cs.sumsqr(U[0, t] - 0.5)  # Prefer certain velocity
+                        control_pref = cs.sumsqr(U[0, t] - 0.3)  # Prefer certain velocity
                     else:
                         control_smooth = cs.sumsqr(U[1, t])                
                         #current_velocity = cs.vertcat(robot_state.vx, robot_state.vy)
-                        control_pref = cs.sumsqr(U[0, t] - 0.5)
+                        control_pref = cs.sumsqr(U[0, t] - 0.3)
                     
                     
                     for hum in human_states[t][1:]:
@@ -494,7 +494,7 @@ class NewMPCReal():
             
 
 
-            total_cost = cost_function(X_pred, U_opt, predicted_human_poses[0])
+            total_cost = cost_function(X_pred, U_opt, [])
 
                 
             
