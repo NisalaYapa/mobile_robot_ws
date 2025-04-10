@@ -136,7 +136,7 @@ class NewMPCReal():
             Q_control = 10 # Moderate weight for smooth control inputs
             Q_pref = 5 # Medium preference for stable velocity
             Q_terminal = 500# Strong weight to reach the goal at the terminal state
-            Q_human = 3 # 5
+            Q_human = 5 # 5
             Q_orientation = 3
 
             

@@ -35,16 +35,9 @@ class GoalPredictor(Node):
         self.max_agent_buffer = 12
 
         self.destinations = np.array(
-            [[5.0, 8.0], 
-           [2.0, -5.0], 
-           [5, 3], 
-           [-1, 2], 
-           [3, 0], 
-           [-1, -3], 
-           [8.0, 3], 
-           [-5, 5], 
-           [9, -2], 
-           [6, 0]])
+            [[5.0, 3.0], 
+           [-1.0, -2.0], 
+           [3.0, 0.0]])
 
 
         self.agents = Entities()

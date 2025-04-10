@@ -8,6 +8,7 @@ from PyQt5.QtCore import QProcess
 from .GUIs.Ui_robot_test3 import Ui_MainWindow
 from functools import partial
 import subprocess
+import time
 
 
 
@@ -49,19 +50,55 @@ class RobotGUI(Node):
         # Connect button click to crowdnav_goal function
         self.ui.btn_crwnav_run.clicked.connect(self.crowdnav_goal)
 
-    def crowdnav_goal(self):
-        goal = self.ui.crwnav_goal_input.toPlainText()  # Use toPlainText() for QTextEdit
+    # def crowdnav_goal(self):
+    #     goal = self.ui.crwnav_goal_input.toPlainText()  # Use toPlainText() for QTextEdit
 
-        if not goal.strip():  # Ensure input is not empty or just spaces
-            self.ui.Notifications.setText("No goal is provided")
-        else:
-            self.ui.Notifications.setText(f"Going to the {goal}")
-            # Run the ROS 2 command
-            subprocess.Popen(["gnome-terminal", "--","ros2", "topic", "list"])
+    #     if not goal.strip():  # Ensure input is not empty or just spaces
+    #         self.ui.Notifications.setText("No goal is provided")
+    #     else:
+    #         self.ui.Notifications.setText(f"Going to the {goal}")
+    #         # Run the ROS 2 command
+    #         subprocess.Popen(["gnome-terminal", "--","ros2", "topic", "list"])
             # subprocess.Popen(["gnome-terminal", "--","tmuxinator", "buffer"])  
 
-        
-        
+
+
+    def crowdnav_goal(self):
+        goal = self.ui.crwnav_goal_input.toPlainText()
+
+        if not goal.strip():
+            self.ui.Notifications.setText("No goal is provided")
+            return
+
+        self.ui.Notifications.setText(f"Going to the {goal}")
+
+        # 1. Ensure tmux session exists (create if missing)
+        try:
+            subprocess.run(["tmux", "has-session", "-t", "ros2_commands"], check=True)
+        except subprocess.CalledProcessError:
+            subprocess.run(["tmux", "new-session", "-d", "-s", "ros2_commands"])
+
+        # 2. Check if any terminal is already attached to this session
+        try:
+            # Get list of clients attached to this tmux session
+            clients = subprocess.check_output(
+                ["tmux", "list-clients", "-t", "ros2_commands"]
+            ).decode().strip()
+            
+            # If no clients are attached, open a new terminal
+            if not clients:
+                subprocess.Popen(["gnome-terminal", "--", "tmux", "attach", "-t", "ros2_commands"])
+        except subprocess.CalledProcessError:
+            # If list-clients fails, assume no terminal is attached
+            subprocess.Popen(["gnome-terminal", "--", "tmux", "attach", "-t", "ros2_commands"])
+
+        # 3. Send commands to tmux (with small delay if needed)
+        time.sleep(0.5)  # Allow terminal to initialize if just opened
+        subprocess.run([
+            "tmux", "send-keys", "-t", "ros2_commands",
+            f"ros2 topic list && ros2 run some_package some_node --goal {goal}",
+            "Enter"
+        ])
     
     def handle_muiltinav(self):
         self.get_logger().info('Multifloor Navigation activated')
