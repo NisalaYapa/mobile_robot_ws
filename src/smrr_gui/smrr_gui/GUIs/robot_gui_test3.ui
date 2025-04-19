@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>600</height>
+    <height>480</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -102,61 +102,13 @@ QComboBox:hover {
 </string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="btn_crowdnav">
-    <property name="geometry">
-     <rect>
-      <x>80</x>
-      <y>520</y>
-      <width>161</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true"/>
-    </property>
-    <property name="text">
-     <string>Crowd Navigation</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btn_multifloor">
-    <property name="geometry">
-     <rect>
-      <x>260</x>
-      <y>520</y>
-      <width>211</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true"/>
-    </property>
-    <property name="text">
-     <string>Multifloor Navigation</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btn_arm">
-    <property name="geometry">
-     <rect>
-      <x>490</x>
-      <y>520</y>
-      <width>181</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true"/>
-    </property>
-    <property name="text">
-     <string>Arm Manipulator</string>
-    </property>
-   </widget>
    <widget class="QStackedWidget" name="mainstack">
     <property name="geometry">
      <rect>
-      <x>59</x>
-      <y>239</y>
-      <width>691</width>
-      <height>251</height>
+      <x>40</x>
+      <y>160</y>
+      <width>681</width>
+      <height>221</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -167,7 +119,7 @@ QComboBox:hover {
       <property name="geometry">
        <rect>
         <x>270</x>
-        <y>80</y>
+        <y>10</y>
         <width>81</width>
         <height>41</height>
        </rect>
@@ -179,8 +131,8 @@ QComboBox:hover {
      <widget class="QTextEdit" name="crwnav_goal_input">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>79</y>
+        <x>10</x>
+        <y>10</y>
         <width>211</width>
         <height>51</height>
        </rect>
@@ -197,12 +149,42 @@ QComboBox:hover {
      </widget>
     </widget>
     <widget class="QWidget" name="Multifloor">
+     <widget class="QPushButton" name="btn_flr_G">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>150</y>
+        <width>121</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton {
+    background-color: #B8E0D2;  /* Light Mint Green */
+    color: #2E3440;
+    font-size: 16px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 2px solid #90C9B7;
+    transition: 0.3s;
+}
+
+QPushButton:hover {
+    background-color: #90C9B7;
+    border: 2px solid #6CA893;
+}
+</string>
+      </property>
+      <property name="text">
+       <string>Ground Floor</string>
+      </property>
+     </widget>
      <widget class="QStackedWidget" name="floorStack">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>20</y>
-        <width>611</width>
+        <x>80</x>
+        <y>0</y>
+        <width>531</width>
         <height>131</height>
        </rect>
       </property>
@@ -261,7 +243,7 @@ QComboBox:hover {
        <widget class="QPushButton" name="btn_com_lab">
         <property name="geometry">
          <rect>
-          <x>70</x>
+          <x>30</x>
           <y>40</y>
           <width>121</width>
           <height>25</height>
@@ -274,7 +256,7 @@ QComboBox:hover {
        <widget class="QPushButton" name="btn_office">
         <property name="geometry">
          <rect>
-          <x>230</x>
+          <x>180</x>
           <y>40</y>
           <width>89</width>
           <height>25</height>
@@ -287,7 +269,7 @@ QComboBox:hover {
        <widget class="QPushButton" name="btn_conference">
         <property name="geometry">
          <rect>
-          <x>380</x>
+          <x>310</x>
           <y>40</y>
           <width>171</width>
           <height>25</height>
@@ -355,41 +337,11 @@ QComboBox:hover {
        </widget>
       </widget>
      </widget>
-     <widget class="QPushButton" name="btn_flr_G">
-      <property name="geometry">
-       <rect>
-        <x>50</x>
-        <y>170</y>
-        <width>121</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">QPushButton {
-    background-color: #B8E0D2;  /* Light Mint Green */
-    color: #2E3440;
-    font-size: 16px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 2px solid #90C9B7;
-    transition: 0.3s;
-}
-
-QPushButton:hover {
-    background-color: #90C9B7;
-    border: 2px solid #6CA893;
-}
-</string>
-      </property>
-      <property name="text">
-       <string>Ground Floor</string>
-      </property>
-     </widget>
      <widget class="QPushButton" name="btn_flr_1">
       <property name="geometry">
        <rect>
-        <x>200</x>
-        <y>170</y>
+        <x>160</x>
+        <y>150</y>
         <width>131</width>
         <height>41</height>
        </rect>
@@ -418,8 +370,8 @@ QPushButton:hover {
      <widget class="QPushButton" name="btn_flr_2">
       <property name="geometry">
        <rect>
-        <x>360</x>
-        <y>170</y>
+        <x>320</x>
+        <y>150</y>
         <width>131</width>
         <height>41</height>
        </rect>
@@ -448,8 +400,8 @@ QPushButton:hover {
      <widget class="QPushButton" name="btn_flr_3">
       <property name="geometry">
        <rect>
-        <x>510</x>
-        <y>170</y>
+        <x>480</x>
+        <y>150</y>
         <width>131</width>
         <height>41</height>
        </rect>
@@ -573,9 +525,9 @@ QPushButton:hover {
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>10</y>
+      <y>0</y>
       <width>691</width>
-      <height>151</height>
+      <height>101</height>
      </rect>
     </property>
     <property name="font">
@@ -596,14 +548,62 @@ QPushButton:hover {
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>196</y>
-      <width>211</width>
+      <x>40</x>
+      <y>110</y>
+      <width>161</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
      <string>Crowd Navigation</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_crowdnav">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>390</y>
+      <width>161</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <property name="text">
+     <string>Crowd Navigation</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_multifloor">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>390</y>
+      <width>211</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <property name="text">
+     <string>Multifloor Navigation</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_arm">
+    <property name="geometry">
+     <rect>
+      <x>480</x>
+      <y>390</y>
+      <width>181</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <property name="text">
+     <string>Arm Manipulator</string>
     </property>
    </widget>
   </widget>
