@@ -40,7 +40,8 @@ setup(
             'sample_line = smrr_crowdnav.sample_line_pub:main',
             'sample_point = smrr_crowdnav.sample_point_pub:main',
             'combine_lines = smrr_crowdnav.combined_lines_publisher:main',
-            'filter_points = smrr_crowdnav.point_filter:main'
+            'filter_points = smrr_crowdnav.point_filter:main',
+            'global_planner = smrr_crowdnav.global_planner:main'
         ],
     },
 )

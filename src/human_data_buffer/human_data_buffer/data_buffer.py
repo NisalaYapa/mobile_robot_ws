@@ -226,8 +226,8 @@ class DataBufferNode(Node):
         self.pub_buffer.publish(msg)
         self.get_logger().info("Published buffer data.")
 
-        self.human_position_marker(msg)
-        self.human_velocity_marker(msg)
+        # self.human_position_marker(msg)
+        # self.human_velocity_marker(msg)
 
         # log buffer x and y velocities
         #self.get_logger().info(f"x_velocities: {x_velocities}")

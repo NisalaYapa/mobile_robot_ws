@@ -64,8 +64,8 @@ class HumanPrefferedVelocity(Node):
         self.preferred_velocity_publisher.publish(msg)
         self.get_logger().info('Publishing preferred velocity')
 
-        self.human_position_marker()
-        self.human_velocity_marker()
+        #self.human_position_marker()
+        #self.human_velocity_marker()
 
 
     def human_position_marker(self):

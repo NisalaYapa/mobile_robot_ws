@@ -47,7 +47,7 @@ from PIL import Image
 
 # Define SelfState class
 class SelfState:
-    def __init__(self, px, py, vx, vy, theta, omega, gx=0.0, gy=0.0, radius=0.4, v_pref=0.5):
+    def __init__(self, px, py, vx, vy, theta, omega, gx=0.0, gy=0.0, radius=0.25, v_pref=0.5):
         self.px = px
         self.py = py
         self.vx = vx
@@ -64,7 +64,7 @@ class SelfState:
 
 # Define HumanState class
 class HumanState:
-    def __init__(self, px, py, vx, vy, gx, gy, radius=0.4, v_pref=2):
+    def __init__(self, px, py, vx, vy, gx, gy, radius=0.25, v_pref=2):
         self.px = px
         self.py = py
         self.vx = vx
@@ -127,6 +127,10 @@ class CrowdNavMPCNode(Node):
         self.trajectories = []
         self.linear_vel = []
         self.angular_vel = []
+        self.collision_count = 0
+        self.infeasible = False
+        self.error_count = 0
+        self.min_social_distance_array = []
 
 
 
@@ -139,6 +143,7 @@ class CrowdNavMPCNode(Node):
         self.create_subscription(PrefVelocity, '/preffered_velocity_prediction/preferred_velocity', self.human_prefvel_callback, 10)
         #self.create_subscription(Entities, '/local_lines_array', self.static_obs_callback, 10)
         self.create_subscription(Entities, '/local_points', self.static_obs_callback, 10)
+        self.create_subscription(Entities, '/int_goals', self.int_goals_callback, 10)
         
 
         self.create_subscription(Footprint, '/object_tracker/footprint_array', self.human_footprint_callback, 10)
@@ -188,6 +193,7 @@ class CrowdNavMPCNode(Node):
         control.twist.linear.x = 0.0
         control.twist.angular.z = 0.0
         self.action_publisher.publish(control)
+        # self.plot_summary()
         return CancelResponse.ACCEPT
 
     def handle_accepted_callback(self, goal_handle):
@@ -204,11 +210,11 @@ class CrowdNavMPCNode(Node):
 
         #planner = DijkstraGlobalPlanner(self.static_obs, self.int_goals)
         planner = SimplePathPlanner(self.static_obs, self.int_goals)
-        #planner = AStarPathPlanner(self.static_obs, self.int_goals)
+        # #planner = AStarPathPlanner(self.static_obs, self.int_goals)
     
-        #self.global_path = planner.find_path((self.self_state.px, self.self_state.py), self.final_goal)
+        # #self.global_path = planner.find_path((self.self_state.px, self.self_state.py), self.final_goal)
         self.global_path = planner.find_intermediate_goals((self.self_state.px, self.self_state.py), self.final_goal)
-        #self.global_path = planner.find_path_with_intermediate_goals((self.self_state.px, self.self_state.py), self.final_goal)
+        # #self.global_path = planner.find_path_with_intermediate_goals((self.self_state.px, self.self_state.py), self.final_goal)
 
 
         
@@ -238,6 +244,10 @@ class CrowdNavMPCNode(Node):
             self.trajectories = []
             self.linear_vel = []
             self.angular_vel = []
+            self.collision_count = 0
+            self.infeasible = False
+            self.error_count = 0
+            self.min_social_distance_array = []
 
 
 
@@ -450,6 +460,11 @@ class CrowdNavMPCNode(Node):
 
         #self.self_path.append((self.self_state.px, self.self_state.py))
 
+    def int_goals_callback(self, msg):
+        length = msg.count
+        for i in range(length):
+            self.global_path.append((msg.x[i], msg.y[i]))
+
     def rotate_to_goal_angle(self, goal_yaw_degrees):
         """Rotate the robot to align with the goal orientation after reaching the goal."""
         self.get_logger().info(f"Rotating to goal angle: {goal_yaw_degrees} degrees")
@@ -506,7 +521,23 @@ class CrowdNavMPCNode(Node):
     def publish_commands(self):
         self.get_logger().info("publishing Commands")
 
-        if self.self_state and self.ready:
+        if self.infeasible:
+            self.error_count += 1
+            if self.error_count >= 4:
+                self.infeasible = False
+            control = TwistStamped()
+            control.header.stamp = self.get_clock().now().to_msg()
+            self.frozen_steps += 1
+            control.twist.linear.x = 0.1
+            control.twist.angular.z = 0.8
+            self.action_publisher.publish(control)
+            self.get_logger().info(f"control {-0.2, 0.3}")
+
+            self.linear_vel.append(0.0)
+            self.angular_vel.append(0.0)
+
+
+        elif self.self_state and self.ready:
             #print("global path", self.global_path)
 
             if self.intermediate_goal == -1 :
@@ -517,16 +548,24 @@ class CrowdNavMPCNode(Node):
             if (dist_to_int_goal <= 1.0) and (self.intermediate_goal != (self.int_goals + 1)):
                 self.intermediate_goal = self.intermediate_goal + 1
 
-            #self.publish_global_path(self.global_path,self.intermediate_goal)
+            self.publish_global_path(self.global_path,self.intermediate_goal)
 
             current_pose = []        
             current_pose.append((self.self_state.px, self.self_state.py))
+            min_social_distance = 1000
             for human in self.human_states:
                 current_pose.append((human.px, human.py))
                 dx = human.px- self.self_state.px
                 dy = human.py- self.self_state.py
                 distance = math.sqrt(dx**2 + dy**2)  # Euclidean distance
                 self.social_distances.append(distance)
+                gap = distance - self.self_state.radius - human.radius
+                if distance < min_social_distance:
+                    min_social_distance = distance
+                if gap<=0:
+                    self.collision_count += 1
+
+            self.min_social_distance_array.append(min_social_distance)
            
             self.trajectories.append(current_pose)
  
@@ -554,13 +593,14 @@ class CrowdNavMPCNode(Node):
 
 
             if action != (0,0):
+                self.error_count = 0
                 control = TwistStamped()
                 control.header.stamp = self.get_clock().now().to_msg()
 
-                #self.publish_next_states(next_states)
+                self.publish_next_states(next_states)
 
                 if human_next_states != [[[]]]:
-                    #self.publish_human_next_states(human_next_states)
+                    self.publish_human_next_states(human_next_states)
                     pass
         
                 dist_to_goal = np.linalg.norm(np.array(self.self_state.position) - np.array(self.final_goal))
@@ -583,6 +623,9 @@ class CrowdNavMPCNode(Node):
                     return
                 
             else:
+                self.error_count += 1
+                if self.error_count >= 1:
+                    self.infeasible = True
                 control = TwistStamped()
                 control.header.stamp = self.get_clock().now().to_msg()
                 self.frozen_steps += 1
@@ -749,11 +792,29 @@ class CrowdNavMPCNode(Node):
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(20, 10))
 
         # Histogram subplot
-        ax1.hist(self.social_distances, bins=30, density=True, alpha=0.6, color='b')
-        ax1.set_title('Social Distance Distribution')
-        ax1.set_xlabel('Distance (m)')
-        ax1.set_ylabel('Probability Density')
+        # ax1.hist(self.social_distances, bins=30, density=True, alpha=0.6, color='b')
+        # ax1.set_title('Social Distance Distribution')
+        # ax1.set_xlabel('Distance (m)')
+        # ax1.set_ylabel('Probability Density')
+        # ax1.grid(True)
+
+        timesteps = range(len(self.min_social_distance_array)) 
+
+        ax1.plot(timesteps, self.min_social_distance_array, 'b-', linewidth=2, label='Min Social Distance')
+
+        # Add labels and title
+        ax1.set_title('Minimum Social Distance Over Time')
+        ax1.set_xlabel('Time Step')
+        ax1.set_ylabel('Minimum Distance (m)')
         ax1.grid(True)
+        ax1.legend()
+
+        # Optional: Highlight dangerous distances (e.g., below 1 meter)
+        danger_threshold = 1.0  # meters
+        ax1.axhline(y=danger_threshold, color='r', linestyle='--', label='Safety Threshold')
+        ax1.fill_between(timesteps, 0, danger_threshold, color='red', alpha=0.1)
+
+        
 
         # Trajectory subplot
         robot_x, robot_y = [], []
@@ -819,7 +880,8 @@ class CrowdNavMPCNode(Node):
                     f"Minimum Social Distance = {min_social_dis}\n"
                     f"Timesteps = {num_timesteps}\n"
                     f"Human Count Range: {min(human_counts)}-{max(human_counts)}\n"
-                    f"navigation distance: {nav_distance}m")
+                    f"navigation distance: {nav_distance}m\n"
+                    f"collision steps: {self.collision_count}")
         
         self.get_logger().info("\n" + info_text) 
         fig.text(0.5, 0.02, info_text, ha='center', va='top', fontsize=10,
