@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 from nav_msgs.msg import OccupancyGrid, Path
 from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped
+from nav_msgs.msg import Odometry
 import numpy as np
 import math
 from queue import PriorityQueue
@@ -10,6 +11,10 @@ import yaml
 from smrr_interfaces.msg import Entities
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import TwistStamped, Point
+from geometry_msgs.msg import Pose
+import tf_transformations
+from .include.transform import GeometricTransformations
+from tf_transformations import euler_from_quaternion
 
 class GlobalPathPlanner(Node):
     def __init__(self):
@@ -41,13 +46,19 @@ class GlobalPathPlanner(Node):
         self.goal_sub = self.create_subscription(
             PoseStamped, '/goal_pose', self.goal_callback, 10)
         
-        self.initial_pose_sub = self.create_subscription(
-            PoseWithCovarianceStamped, '/initialpose', self.initial_pose_callback, 10)
+        self.transform = GeometricTransformations(self)
+        
+        # self.initial_pose_sub = self.create_subscription(
+        #     PoseWithCovarianceStamped, '/initialpose', self.initial_pose_callback, 10)
+        
+
+        self.create_subscription(Odometry, '/diff_drive_controller/odom', self.robot_position_callback, 10)
         
         # Publisher
         self.path_pub = self.create_publisher(Path, '/global_path', 10)
         self.intermediate_goals_pub = self.create_publisher(Entities, '/int_goals', 10)
         self.intermediate_goals_marker= self.create_publisher(MarkerArray, '/smrr_crowdnav/global_path', 10)
+        self.goal_pub = self.create_publisher(PoseStamped, '/goal_pose_processed', 10)
         
         # Variables
         self.map_data = None
@@ -63,11 +74,35 @@ class GlobalPathPlanner(Node):
         self.map_info = msg.info
         self.get_logger().info("Map received")
     
-    def initial_pose_callback(self, msg):
-        self.start_pose = msg.pose.pose
-        self.get_logger().info(f"Start pose set: {self.start_pose.position.x}, {self.start_pose.position.y}")
-        self.try_plan_path()
-    
+
+    def robot_position_callback(self, msg):
+        #self.get_logger().info('Robot Velocity Callback')
+        linear_x = msg.twist.twist.linear.x
+        transformation = self.transform.get_transform('map', 'base_link')
+
+        if transformation is None:
+            self.ready = False
+            return
+        else:
+            self.ready = True
+
+        quaternion = (transformation.rotation.x, transformation.rotation.y, transformation.rotation.z, transformation.rotation.w)
+        roll, pitch, yaw = tf_transformations.euler_from_quaternion(quaternion)
+
+
+      
+        pose = Pose()
+        pose.position.x = transformation.translation.x
+        pose.position.y = transformation.translation.y
+        pose.position.z = transformation.translation.z
+        pose.orientation.x = transformation.rotation.x
+        pose.orientation.y = transformation.rotation.y
+        pose.orientation.z = transformation.rotation.z
+        pose.orientation.w = transformation.rotation.w
+
+        self.start_pose = pose
+
+            
     def goal_callback(self, msg):
         self.goal_pose = msg.pose
         self.get_logger().info(f"Goal pose set: {self.goal_pose.position.x}, {self.goal_pose.position.y}")
@@ -364,7 +399,7 @@ class GlobalPathPlanner(Node):
 
         int_goal_entities = Entities()
 
-        int_goal_entities.count = step + 1
+        
 
         arr_x = []
         arr_y = []        
@@ -389,8 +424,11 @@ class GlobalPathPlanner(Node):
         arr_y.append(goal[1])
 
 
+        int_goal_entities.count = len(arr_x)
         int_goal_entities.x = arr_x
         int_goal_entities.y = arr_y
+
+        goal_pos = None
         
         # Ensure goal is included
         if len(path_msg.poses) == 0 or path_msg.poses[-1].pose.position.x != goal[0] or path_msg.poses[-1].pose.position.y != goal[1]:
@@ -404,10 +442,16 @@ class GlobalPathPlanner(Node):
             pose.pose.orientation.w = 1.0
             
             path_msg.poses.append(pose)
+
+            goal_pos = pose
         
         self.path_pub.publish(path_msg)
         self.intermediate_goals_pub.publish(int_goal_entities)
         self.publish_global_path(int_goal_entities)
+
+
+
+        self.goal_pub.publish(goal_pos)
         
         self.get_logger().info("Published global path!")
 

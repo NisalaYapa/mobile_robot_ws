@@ -422,40 +422,44 @@
         <actor name="actor2">
             <pose>3 0 1.25 0 0 0</pose>
             <skin>
-              <filename>/home/nisala/mobile_robot_ws/src/gazebo_sfm_plugin-galactic/media/models/elegant_woman.dae</filename> 
-              <scale>1.0</scale>
+                <filename>/home/nisala/mobile_robot_ws/src/gazebo_sfm_plugin-galactic/media/models/elegant_woman.dae</filename>
+                <scale>1.0</scale>
             </skin>
+            
+            
+            
+            <!-- Rest of your animation and plugin code -->
             <animation name="walking">
-              <filename>/home/nisala/mobile_robot_ws/src/gazebo_sfm_plugin-galactic/media/models/walk-green.dae</filename>
-              <scale>1.000000</scale>
-              <interpolate_x>true</interpolate_x>
+                <filename>/home/nisala/mobile_robot_ws/src/gazebo_sfm_plugin-galactic/media/models/walk-green.dae</filename>
+                <scale>1.0</scale>
+                <interpolate_x>true</interpolate_x>
             </animation>
-      
+            
+            <!-- SFM Plugin -->
             <plugin name="actor2_plugin" filename="libPedestrianSFMPlugin.so">
-              <topic_name>elegant_woman_green_pose</topic_name>
-              <velocity>0.5</velocity>
-              <radius>0.4</radius>
-              <animation_factor>5.1</animation_factor>
-              <animation_name>walking</animation_name>
-
-              <people_distance>6.0</people_distance>
-              <goal_weight>2.0</goal_weight>
-              <obstacle_weight>80.0</obstacle_weight>
-              <social_weight>15.0</social_weight> 
-              <group_gaze_weight>3.0</group_gaze_weight>
-              <group_coh_weight>2.0</group_coh_weight>
-              <group_rep_weight>1.0</group_rep_weight>
-              <ignore_obstacles>
-                <model>ground_plane</model>
-              </ignore_obstacles>
-              <trajectory>
-                <cyclic>true</cyclic>
-                <waypoint>1 4.8 1.25</waypoint>
-                <waypoint>-3.8 -4.8 1.25</waypoint>
-                
-              </trajectory>
+                <topic_name>elegant_woman_green_pose</topic_name>
+                <velocity>0.5</velocity>
+                <radius>0.4</radius>
+                <animation_factor>5.1</animation_factor>
+                <animation_name>walking</animation_name>
+                <people_distance>6.0</people_distance>
+                <goal_weight>2.0</goal_weight>
+                <obstacle_weight>80.0</obstacle_weight>
+                <social_weight>15.0</social_weight>
+                <group_gaze_weight>3.0</group_gaze_weight>
+                <group_coh_weight>2.0</group_coh_weight>
+                <group_rep_weight>1.0</group_rep_weight>
+                <ignore_obstacles>
+                    <model>ground_plane</model>
+                </ignore_obstacles>
+                <trajectory>
+                    <cyclic>true</cyclic>
+                    <waypoint>1 4.8 1.25</waypoint>
+                    <waypoint>-3.8 -4.8 1.25</waypoint>
+                </trajectory>
             </plugin>
-        </actor>  
+        </actor>
+
       
 
         <actor name="actor3">

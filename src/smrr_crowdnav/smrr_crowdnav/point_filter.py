@@ -31,7 +31,7 @@ class PointExtraction(Node):
         self.point_marker_publisher= self.create_publisher(MarkerArray, '/filterd_points_marker', 10)
 
         # Subscribers
-        self.scan_subscriber = self.create_subscription(LaserScan, '/scan_fake', self.scan_callback, 10)
+        self.scan_subscriber = self.create_subscription(LaserScan, '/scan', self.scan_callback, 10)
         self.odom_subscriber = self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
 
         # Timer for visualization updates
@@ -46,7 +46,7 @@ class PointExtraction(Node):
         self.robot_pose = msg.pose.pose
 
 
-    def polar_to_cartesian(self, angle_min, angle_increment, ranges, max_range=3.0):
+    def polar_to_cartesian(self, angle_min, angle_increment, ranges, max_range=2.0):
         """Convert polar LiDAR scan data to Cartesian coordinates and filter out far points."""
         points = []
         for i, range_val in enumerate(ranges):
