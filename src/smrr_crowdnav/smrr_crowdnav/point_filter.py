@@ -46,7 +46,7 @@ class PointExtraction(Node):
         self.robot_pose = msg.pose.pose
 
 
-    def polar_to_cartesian(self, angle_min, angle_increment, ranges, max_range=2.0):
+    def polar_to_cartesian(self, angle_min, angle_increment, ranges, max_range=1.0):
         """Convert polar LiDAR scan data to Cartesian coordinates and filter out far points."""
         points = []
         for i, range_val in enumerate(ranges):

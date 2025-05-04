@@ -49,7 +49,7 @@ from rclpy.duration import Duration
 
 # Define SelfState class
 class SelfState:
-    def __init__(self, px, py, vx, vy, theta, omega, gx=0.0, gy=0.0, radius=0.25, v_pref=0.5):
+    def __init__(self, px, py, vx, vy, theta, omega, gx=0.0, gy=0.0, radius=0.40, v_pref=0.5):
         self.px = px
         self.py = py
         self.vx = vx
@@ -66,7 +66,7 @@ class SelfState:
 
 # Define HumanState class
 class HumanState:
-    def __init__(self, px, py, vx, vy, gx, gy, radius=0.25, v_pref=2):
+    def __init__(self, px, py, vx, vy, gx, gy, radius=0.25, v_pref=0.5):
         self.px = px
         self.py = py
         self.vx = vx
@@ -141,10 +141,10 @@ class CrowdNavMPCNode(Node):
 
         # Create subscribers for custom messages
         self.create_subscription(Entities, '/goal_predictor/pos', self.human_position_callback, 10)
-        self.create_subscription(Entities, '/goal_predictor/vel', self.human_velocity_callback, 10)
-        self.create_subscription(Entities, '/goal_predictor/goals', self.human_goal_callback, 10)
-        self.create_subscription(PrefVelocity, '/preffered_velocity_prediction/preferred_velocity', self.human_prefvel_callback, 10)
-        self.create_subscription(Entities, '/local_lines_array', self.static_obs_callback, 10)
+        self.create_subscription(Entities, '/goal_predictor/vel_', self.human_velocity_callback, 10)
+        self.create_subscription(Entities, '/goal_predictor/goals_', self.human_goal_callback, 10)
+        self.create_subscription(PrefVelocity, '/preffered_velocity_prediction/preferred_velocity_', self.human_prefvel_callback, 10)
+        self.create_subscription(Entities, '/local_points_', self.static_obs_callback, 10)
         # self.create_subscription(Entities, '/object_tracker/static_data_array', self.static_obs_callback, 10)
         self.create_subscription(Entities, '/int_goals', self.int_goals_callback, 10)
         
@@ -388,6 +388,8 @@ class CrowdNavMPCNode(Node):
         # current_pos = []
         # current_pos.append((self.self_state.px, self.self_state.py)) 
         for i in range(msg.count):
+            # if msg.x[i] < 50.0 and msg.y[i] < 50.0:
+            #     self.human_states.append(HumanState(px=msg.x[i], py=msg.y[i], vx=0.0, vy=0.0, gx=0.0, gy=0.0))
             self.human_states.append(HumanState(px=msg.x[i], py=msg.y[i], vx=0.0, vy=0.0, gx=0.0, gy=0.0))
 
         self.human_entities = msg
@@ -411,8 +413,8 @@ class CrowdNavMPCNode(Node):
     def human_goal_callback(self, msg):
         for i in range(msg.count):
             try:
-                #self.human_states[i].gx = 0.0
-                #self.human_states[i].gy = 0.0
+                #self.human_states[i].gx = self.human_states[i].px
+                #self.human_states[i].gy = self.human_states[i].py
                 self.human_states[i].gx = msg.x[i]
                 self.human_states[i].gy = msg.y[i]
                 
@@ -441,6 +443,8 @@ class CrowdNavMPCNode(Node):
 
 
         self.static_obs = []
+
+        print(f"########################### Static {len(static_x)} #######################")
 
         try:
 

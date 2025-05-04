@@ -344,14 +344,14 @@ class GlobalPathPlanner(Node):
         return 1.0 + (max_multiplier - 1.0) * t * t
 
     def precompute_distance_field(self):
-        """Precompute distance to nearest obstacle for all cells"""
-        from scipy.ndimage import distance_transform_edt
+        """Precompute distance to nearest obstacle for all cells""" 
+        from scipy.ndimage import distance_transform_edt 
         
-        width = self.map_info.width
-        height = self.map_info.height
+        width = self.map_info.width 
+        height = self.map_info.height 
         
         # Create obstacle matrix (1 for free, 0 for obstacle)
-        obstacle_grid = np.ones((height, width))
+        obstacle_grid = np.ones((height, width)) 
         for y in range(height):
             for x in range(width):
                 if self.map_data[y * width + x] > 0:  # Occupied

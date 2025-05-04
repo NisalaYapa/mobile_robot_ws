@@ -41,6 +41,11 @@ class NewMPCReal():
         robot_radius = robot_state.radius
         x_inital =(env_state.self_state.px, env_state.self_state.py, env_state.self_state.theta)
         goal = (env_state.self_state.gx , env_state.self_state.gy)
+
+        print(f"*************************************************************************")
+        print(f"***************************   goal:   {goal}      ****************************")
+        print(f"***************************   robot:   {x_inital}      ****************************")
+        print(f"*************************************************************************")
         static_obs = env_state.static_obs
         u_current = cs.vertcat(cs.sumsqr(cs.vertcat(robot_state.vx, robot_state.vy)), robot_state.omega)
         print("######################################################################")
@@ -203,7 +208,7 @@ class NewMPCReal():
                         human_pos = cs.vertcat(hum[0], hum[1])  # Human's position
                         dist_to_human_sqr = cs.sumsqr(X_pred[t][:2] - human_pos)
                         human_radius = hum[4]  # Human's radius
-                        cost -= Q_human*(dist_to_human_sqr - (human_radius + robot_radius + 0.1)**2)  
+                        cost += 1/(Q_human*(dist_to_human_sqr - (human_radius + robot_radius + 0.1)**2))
 
                     cost += Q_goal * dist_to_goal  + control_pref * Q_pref - Q_control * (control_smooth)
                     #cost += Q_goal * dist_to_goal + control_pref * Q_pref
