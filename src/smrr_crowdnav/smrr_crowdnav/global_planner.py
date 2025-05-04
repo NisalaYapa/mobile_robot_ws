@@ -395,7 +395,9 @@ class GlobalPathPlanner(Node):
         path_msg.header.frame_id = 'map'
         path_msg.header.stamp = self.get_clock().now().to_msg()
 
-        step = max(1, len(path_map) // self.int_goals)  # Aim for ~20 points
+        
+        
+        
 
         int_goal_entities = Entities()
 
@@ -404,21 +406,23 @@ class GlobalPathPlanner(Node):
         arr_x = []
         arr_y = []        
         # Add points to path (with some decimation to reduce number of points)
+        if self.int_goals != 0:
+            step = max(1, len(path_map) // self.int_goals)  # Aim for ~20 points
 
-        for i in range(0, len(path_map), step):
-            mx, my = path_map[i]
-            x, y = self.map_to_world(mx, my)
-            
-            pose = PoseStamped()
-            pose.header = path_msg.header
-            pose.pose.position.x = x
-            pose.pose.position.y = y
-            pose.pose.orientation.w = 1.0  # Neutral orientation
+            for i in range(0, len(path_map), step):
+                mx, my = path_map[i]
+                x, y = self.map_to_world(mx, my)
+                
+                pose = PoseStamped()
+                pose.header = path_msg.header
+                pose.pose.position.x = x
+                pose.pose.position.y = y
+                pose.pose.orientation.w = 1.0  # Neutral orientation
 
-            arr_x.append(x)
-            arr_y.append(y)
-            
-            path_msg.poses.append(pose)
+                arr_x.append(x)
+                arr_y.append(y)
+                
+                path_msg.poses.append(pose)
 
         arr_x.append(goal[0])
         arr_y.append(goal[1])
@@ -439,7 +443,10 @@ class GlobalPathPlanner(Node):
             pose.header = path_msg.header
             pose.pose.position.x = x
             pose.pose.position.y = y
-            pose.pose.orientation.w = 1.0
+            pose.pose.orientation.w = self.goal_pose.orientation.w 
+            pose.pose.orientation.x = self.goal_pose.orientation.x
+            pose.pose.orientation.y = self.goal_pose.orientation.y 
+            pose.pose.orientation.z = self.goal_pose.orientation.z 
             
             path_msg.poses.append(pose)
 

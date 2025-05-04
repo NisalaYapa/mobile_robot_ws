@@ -29,6 +29,7 @@ setup(
             'control_node_baseline = smrr_crowdnav.control_node_baseline:main',  
             'control_node_ours = smrr_crowdnav.control_node_ours:main', 
             'control_node_SLAM = smrr_crowdnav.control_node_SLAM:main',  
+            'control_node_robot = smrr_crowdnav.ControlNode_Robot:main', 
             'control_node_fp_static = smrr_crowdnav.control_node_fp_static:main',  
             'control_node_fp_static_line = smrr_crowdnav.control_node_fp_static_line:main',  
             'control_node_pubsub = smrr_crowdnav.control_node_pubsub:main',  
