@@ -22,7 +22,8 @@ setup(
         'console_scripts': [
         'test1_gui= smrr_gui.test1_gui:main',
         'test2_gui= smrr_gui.test2_gui:main',
-        'test3_gui= smrr_gui.test3_gui:main'
+        'test3_gui= smrr_gui.test3_gui:main',
+        'test4_gui= smrr_gui.test4_gui:main'
         ],
     },
 )

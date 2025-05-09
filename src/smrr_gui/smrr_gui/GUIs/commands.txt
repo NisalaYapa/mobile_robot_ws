@@ -1,3 +1,10 @@
 pyuic5 robot_gui_test#.ui -o Ui_robot_test#.py
 
 pyuic5 robot_gui_test3.ui -o Ui_robot_test3.py
+
+pyuic5 robot_gui_test4.ui -o Ui_robot_test4.py
+
+pyside6-rcc resources.qrc -o resources_rc.py
+
+
+/home/nisala/mobile_robot_ws/src/smrr_gui/smrr_gui/GUIs/Icons/aybowan.png

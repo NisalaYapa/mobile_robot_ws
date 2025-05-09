@@ -15,7 +15,7 @@ from geometry_msgs.msg import TwistStamped, Point, PoseStamped , Twist
 from tf_transformations import euler_from_quaternion
 from nav_msgs.msg import Odometry
 from time import sleep
-from .MPC_robot import NewMPCReal
+from .NewMPCReal_SLAM import NewMPCReal
 from .global_path import DijkstraGlobalPlanner
 from .global_path import SimplePathPlanner
 from .global_path import AStarPathPlanner
@@ -49,7 +49,7 @@ from rclpy.duration import Duration
 
 # Define SelfState class
 class SelfState:
-    def __init__(self, px, py, vx, vy, theta, omega, gx=0.0, gy=0.0, radius=0.40, v_pref=0.5):
+    def __init__(self, px, py, vx, vy, theta, omega, gx=0.0, gy=0.0, radius=0.28, v_pref=0.5):
         self.px = px
         self.py = py
         self.vx = vx
@@ -66,7 +66,7 @@ class SelfState:
 
 # Define HumanState class
 class HumanState:
-    def __init__(self, px, py, vx, vy, gx, gy, radius=0.25, v_pref=0.5):
+    def __init__(self, px, py, vx, vy, gx, gy, radius=0.30, v_pref=0.5):
         self.px = px
         self.py = py
         self.vx = vx
@@ -120,20 +120,10 @@ class CrowdNavMPCNode(Node):
         self.static_obs = []
         self.ready = True
         self.rot_rate = self.create_rate(2) 
-        self.starttime = 0
-        self.endtime = 0
-        self.frozen_steps = 0
-        self.social_distances = []
-        self.self_path = []
-        self.human_paths = []
-        self.trajectories = []
-        self.linear_vel = []
-        self.angular_vel = []
-        self.collision_count = 0
-        self.infeasible = False
         self.error_count = 0
-        self.min_social_distance_array = []
-        self.human_entities = None
+        self.infeasible = False
+       
+        
 
 
 
@@ -141,11 +131,11 @@ class CrowdNavMPCNode(Node):
 
         # Create subscribers for custom messages
         self.create_subscription(Entities, '/goal_predictor/pos', self.human_position_callback, 10)
-        self.create_subscription(Entities, '/goal_predictor/vel_', self.human_velocity_callback, 10)
-        self.create_subscription(Entities, '/goal_predictor/goals_', self.human_goal_callback, 10)
+        self.create_subscription(Entities, '/goal_predictor/vel', self.human_velocity_callback, 10)
+        self.create_subscription(Entities, '/goal_predictor/goals', self.human_goal_callback, 10)
         self.create_subscription(PrefVelocity, '/preffered_velocity_prediction/preferred_velocity_', self.human_prefvel_callback, 10)
-        self.create_subscription(Entities, '/local_points_', self.static_obs_callback, 10)
-        # self.create_subscription(Entities, '/object_tracker/static_data_array', self.static_obs_callback, 10)
+        #self.create_subscription(Entities, '/local_points_', self.static_obs_callback, 10)
+        self.create_subscription(Entities, '/object_tracker/static_data_array_', self.static_obs_callback, 10)
         self.create_subscription(Entities, '/int_goals', self.int_goals_callback, 10)
         
         
@@ -245,23 +235,7 @@ class CrowdNavMPCNode(Node):
         if not hasattr(self, 'timer_initialized') or not self.timer_initialized:
             self.get_logger().info("timer initalized")
 
-
-            # Formatted output
-            self.starttime = datetime.now()
-            self.get_logger().warn(f"Current Time = {self.starttime.strftime('%H:%M:%S')}")
-            self.frozen_steps = 0
-            self.social_distances = []
-            self.self_path = []
-            self.human_paths = []
-            self.trajectories = []
-            self.linear_vel = []
-            self.angular_vel = []
-            self.collision_count = 0
-            self.infeasible = False
-            self.error_count = 0
-            self.min_social_distance_array = []
-
-            
+         
 
 
 
@@ -336,10 +310,7 @@ class CrowdNavMPCNode(Node):
 
                 self.get_logger().info('Rotated to the correct angle')
 
-                # self.endtime = datetime.now()
-                # self.get_logger().warn(f"Current Time = {self.endtime.strftime('%H:%M:%S')}")
-                
-                # self.plot_summary()
+     
                 
                 
                 
@@ -388,9 +359,11 @@ class CrowdNavMPCNode(Node):
         # current_pos = []
         # current_pos.append((self.self_state.px, self.self_state.py)) 
         for i in range(msg.count):
-            # if msg.x[i] < 50.0 and msg.y[i] < 50.0:
-            #     self.human_states.append(HumanState(px=msg.x[i], py=msg.y[i], vx=0.0, vy=0.0, gx=0.0, gy=0.0))
-            self.human_states.append(HumanState(px=msg.x[i], py=msg.y[i], vx=0.0, vy=0.0, gx=0.0, gy=0.0))
+            if msg.x[i] < 50.0 and msg.y[i] < 50.0:
+                 self.human_states.append(HumanState(px=msg.x[i], py=msg.y[i], vx=0.0, vy=0.0, gx=0.0, gy=0.0))
+                 
+                 #print(f"********************** human{i}: px={msg.x[i]}, py={msg.y[i]} ************************")
+            #self.human_states.append(HumanState(px=msg.x[i], py=msg.y[i], vx=0.0, vy=0.0, gx=0.0, gy=0.0))
 
         self.human_entities = msg
         
@@ -481,6 +454,8 @@ class CrowdNavMPCNode(Node):
         self.self_state.vy = linear_x * np.sin(self.self_state.theta)
         self.self_state.position = (self.self_state.px, self.self_state.py)
         self.self_state.omega = msg.twist.twist.angular.z
+        
+        #print(f"********************** robot {self.self_state.px}  , {self.self_state.py}************************")
 
         #self.self_path.append((self.self_state.px, self.self_state.py))
 
@@ -511,7 +486,7 @@ class CrowdNavMPCNode(Node):
         control.twist.linear.x = 0.0
         control.twist.angular.z = 0.3
 
-        tolerance = 0.05  # Allowable error in radians
+        tolerance = 0.15 # Allowable error in radians
 
         while rclpy.ok():
             # Get the current yaw
@@ -523,12 +498,20 @@ class CrowdNavMPCNode(Node):
             # Normalize the error to [-pi, pi]
             yaw_error = (yaw_error + math.pi) % (2 * math.pi) - math.pi
 
+            ang_vel = np.clip(yaw_error, -0.3, 0.3)
+
+            self.get_logger().warn(f"########### yaw error : {yaw_error} #####################")
+            self.get_logger().warn(f"########### ang vel : {ang_vel} #####################")
+
             if abs(yaw_error) < tolerance:
                 self.get_logger().info("Reached the goal orientation!")
                 break
 
             # Adjust angular velocity based on the error
-            control.twist.angular.z = min(0.3,  1.2* yaw_error)  # Proportional control
+            control = TwistStamped()
+            control.header.stamp = self.get_clock().now().to_msg()
+            control.twist.linear.x = 0.0
+            control.twist.angular.z = ang_vel # Proportional control
             
 
             # Publish the command
@@ -585,7 +568,7 @@ class CrowdNavMPCNode(Node):
             try:
                 action = MPC[0]
                 next_states = MPC[1]
-                human_next_states = MPC[2]
+                human_next_states = []
 
             except:
                 action = (0,0)
@@ -605,6 +588,8 @@ class CrowdNavMPCNode(Node):
                 self.error_count = 0
                 control = TwistStamped()
                 control.header.stamp = self.get_clock().now().to_msg()
+                self.infeasible = False
+                self.error_count = 0
 
                 self.publish_next_states(next_states)
 
@@ -619,116 +604,43 @@ class CrowdNavMPCNode(Node):
                     control.twist.angular.z = float(action[1])
                     self.get_logger().info(f"control {(float(action[0]), float(action[1]))}")
                     self.action_publisher.publish(control)
-                    self.linear_vel.append(control.twist.linear.x )
-                    self.angular_vel.append(control.twist.angular.z)
                     return
+     
                 else:
                     control.twist.linear.x = 0.0
                     control.twist.angular.z = 0.0
                     self.action_publisher.publish(control)
                     self.get_logger().info(f"control {0, 0}")
-                    self.linear_vel.append(0.0)
-                    self.angular_vel.append(0.0)
                     return
-                
-            else:
-                self.error_count += 1
-                if self.error_count >= 1:
-                    self.infeasible = True
-                control = TwistStamped()
-                control.header.stamp = self.get_clock().now().to_msg()
-                self.frozen_steps += 1
-                control.twist.linear.x = 0.0
-                control.twist.angular.z = 0.0
-                self.action_publisher.publish(control)
-                self.get_logger().info(f"control {0, 0}")
 
-                self.linear_vel.append(0.0)
-                self.angular_vel.append(0.0)
-                return
+            else:
+
+                self.error_count += 1
+                if self.error_count > 4:
+                    self.get_logger().error("MPC infeasible, rotating robot")
+                    self.infeasible = True
+
+                if self.infeasible:
+                    control = TwistStamped()
+                    control.header.stamp = self.get_clock().now().to_msg()
+                    control.twist.linear.x = 0.0
+                    control.twist.angular.z = 0.3
+                    self.action_publisher.publish(control)
+                    self.get_logger().info(f"control {0, 0}")
+                    return
+                else:            
+                    control = TwistStamped()
+                    control.header.stamp = self.get_clock().now().to_msg()
+                    control.twist.linear.x = 0.0
+                    control.twist.angular.z = 0.0
+                    self.action_publisher.publish(control)
+                    self.get_logger().info(f"control {0, 0}")
+
+                    return
                 
 
             
-    def publish_human_position(self, human_states):
-        marker_array = MarkerArray()
-        
-        # Loop through each human trajectory
-        i = 0
-        for human in human_states:
-                # Create a marker for each individual point
-                point_marker = Marker()
-                point_marker.header.frame_id = "map"
-                point_marker.header.stamp = self.get_clock().now().to_msg()
-                point_marker.ns = f"human_{i}_point_"
-                i += 1
-                point_marker.id = i * 1000   # Unique ID for each point
-                point_marker.type = Marker.SPHERE
-                point_marker.action = Marker.ADD
-                point_marker.scale.x = human.radius # Adjust scale for visibility
-                point_marker.scale.y = human.radius
-                point_marker.scale.z = human.radius
-                point_marker.color.r = 0.0  # Red color for visibility
-                point_marker.color.g = 0.0
-                point_marker.color.b = 1.0
-                point_marker.color.a = 1.0  # Fully opaque
-                point_marker.lifetime = rclpy.time.Duration(seconds=0.5).to_msg()  # Markers persist for 5 seconds
-
-                # Set the position of the marker
-                point_marker.pose.position.x = float(human.px)
-                point_marker.pose.position.y = float(human.py)
-                point_marker.pose.position.z = 0.0
-
-                # Add each point as a separate marker in the MarkerArray
-                marker_array.markers.append(point_marker)
-
-        # Publish all points as separate markers
-        #print(marker_array)
-        self.human_pos_marker.publish(marker_array)
-
-
-    def publish_human_position_ent(self, msg):
-        marker_array = MarkerArray()
-        
-        # Loop through each human trajectory
-        i = 0
-        arr_x = msg.x
-        arr_y = msg.y
-        count = len(arr_x)
-
-        
-    
-        for i in range(count):
-                # Create a marker for each individual point
-                point_marker = Marker()
-                point_marker.header.frame_id = "map"
-                point_marker.header.stamp = self.get_clock().now().to_msg()
-                point_marker.ns = f"human_{i}_point_"
-                i += 1
-                point_marker.id = i * 1000   # Unique ID for each point
-                point_marker.type = Marker.SPHERE
-                point_marker.action = Marker.ADD
-                point_marker.scale.x = 0.1 # Adjust scale for visibility
-                point_marker.scale.y = 0.1
-                point_marker.scale.z = 0.1
-                point_marker.color.r = 1.0  # Red color for visibility
-                point_marker.color.g = 0.0
-                point_marker.color.b = 1.0
-                point_marker.color.a = 1.0  # Fully opaque
-                point_marker.lifetime = rclpy.time.Duration(seconds=0.5).to_msg()  # Markers persist for 5 seconds
-
-                print(f"human{arr_x[i]}")
-
-                # Set the position of the marker
-                point_marker.pose.position.x = float(arr_x[i])
-                point_marker.pose.position.y = float(arr_y[i])
-                point_marker.pose.position.z = 0.0
-
-                # Add each point as a separate marker in the MarkerArray
-                marker_array.markers.append(point_marker)
-
-        # Publish all points as separate markers
-        #print(marker_array)
-        self.human_pos_marker.publish(marker_array)
+   
 
 
     def publish_global_path(self, points, current_goal):
@@ -844,250 +756,6 @@ class CrowdNavMPCNode(Node):
         self.human_prediction_publisher.publish(marker_array)
 
 
-    def plot_summary(self):
-
-
-        # Create timestamped filename
-        current_time = self.endtime.strftime("%Y-%m-%d_%H-%M-%S")
-        filename_png = f"social_dis_pdf_{current_time}.png"
-        filename_gif = f"robot_human_trajectory_{current_time}.gif"
-
-        
-
-
-
-        
-
-        # Time calculations
-        time_difference = self.endtime - self.starttime
-        total_seconds = time_difference.total_seconds()
-        hours = int(total_seconds // 3600)
-        minutes = int((total_seconds % 3600) // 60)
-        seconds = int(total_seconds % 60)
-
-        # Data
-        path_data = self.trajectories
-        num_timesteps = len(path_data)
-        time_cmap = plt.cm.viridis(np.linspace(0, 1, num_timesteps))
-
-        nav_distance = 0
-
-        for i in range(num_timesteps - 1):
-            dx = self.trajectories[i+1][0][0] - self.trajectories[i][0][0]  # x-difference
-            dy = self.trajectories[i+1][0][1] - self.trajectories[i][0][1]  # y-difference
-            nav_distance += math.sqrt(dx**2 + dy**2)  # Euclidean distance
-     
-
-        # --- STATIC PLOT (PNG) ---
-        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(20, 10))
-
-        # Histogram subplot
-        # ax1.hist(self.social_distances, bins=30, density=True, alpha=0.6, color='b')
-        # ax1.set_title('Social Distance Distribution')
-        # ax1.set_xlabel('Distance (m)')
-        # ax1.set_ylabel('Probability Density')
-        # ax1.grid(True)
-
-        timesteps = range(len(self.min_social_distance_array)) 
-
-        ax1.plot(timesteps, self.min_social_distance_array, 'b-', linewidth=2, label='Min Social Distance')
-
-        # Add labels and title
-        ax1.set_title('Minimum Social Distance Over Time')
-        ax1.set_xlabel('Time Step')
-        ax1.set_ylabel('Minimum Distance (m)')
-        ax1.grid(True)
-        ax1.legend()
-
-        # Optional: Highlight dangerous distances (e.g., below 1 meter)
-        danger_threshold = 1.0  # meters
-        ax1.axhline(y=danger_threshold, color='r', linestyle='--', label='Safety Threshold')
-        ax1.fill_between(timesteps, 0, danger_threshold, color='red', alpha=0.1)
-
-        
-
-        # # Trajectory subplot
-        # robot_x, robot_y = [], []
-        # for t in range(num_timesteps):
-        #     if len(path_data[t]) > 0:
-        #         robot_x.append(path_data[t][0][0])
-        #         robot_y.append(path_data[t][0][1])
-        # ax2.plot(robot_x, robot_y, 'b-', linewidth=2, label='Robot Path')
-        # if len(robot_x) > 0:
-        #     ax2.scatter(robot_x[0], robot_y[0], color='green', s=150, zorder=5, label='Robot Start')
-        #     ax2.scatter(robot_x[-1], robot_y[-1], color='red', s=150, zorder=5, label='Robot End')
-
-        # # Plot human positions and annotate timesteps
-        # for t in range(num_timesteps):
-        #     if len(path_data[t]) > 1:
-        #         humans = path_data[t][1:]
-        #         for human in humans:
-        #             ax2.scatter(human[0], human[1], color=time_cmap[t], s=50, alpha=0.7, edgecolor='k')
-        #             ax2.text(human[0] + 0.05, human[1] + 0.05, str(t), fontsize=6, color='black')
-        #     if len(path_data[t]) > 0:
-        #         ax2.text(path_data[t][0][0] + 0.05, path_data[t][0][1] + 0.05, str(t), fontsize=6, color='blue')
-
-        # max_humans = max(len(timestep)-1 for timestep in path_data) if num_timesteps > 0 else 0
-        # ax2.set_title(f'Robot Path and Human Positions\n(Max Humans: {max_humans})')
-        # ax2.set_xlabel('X Position (m)')
-        # ax2.set_ylabel('Y Position (m)')
-        # ax2.grid(True, alpha=0.3)
-        # ax2.axis('equal')
-
-        # # Legend
-        # handles = [
-        #     Line2D([0], [0], color='blue', lw=2, label='Robot Path'),
-        #     Line2D([0], [0], marker='o', color='w', markerfacecolor='green', markersize=10, label='Robot Start'),
-        #     Line2D([0], [0], marker='o', color='w', markerfacecolor='red', markersize=10, label='Robot End'),
-        # ]
-        # ax2.legend(handles=handles, bbox_to_anchor=(1.05, 1), loc='upper left')
-
-        # Trajectory subplot
-        robot_x, robot_y = [], []
-        for t in range(num_timesteps):
-            if len(path_data[t]) > 0:
-                robot_x.append(path_data[t][0][0])
-                robot_y.append(path_data[t][0][1])
-        ax2.plot(robot_x, robot_y, 'b-', linewidth=2, label='Robot Path')
-        if len(robot_x) > 0:
-            ax2.scatter(robot_x[0], robot_y[0], color='green', s=150, zorder=5, label='Robot Start')
-            ax2.scatter(robot_x[-1], robot_y[-1], color='red', s=150, zorder=5, label='Robot End')
-
-        # Plot human positions (only if within [-10, 10] range)
-        for t in range(num_timesteps):
-            if len(path_data[t]) > 1:
-                humans = path_data[t][1:]
-                for human in humans:
-                    x, y = human[0], human[1]
-                    # Only plot if within bounds
-                    if -10 <= x <= 10 and -10 <= y <= 10:
-                        ax2.scatter(x, y, color=time_cmap[t], s=50, alpha=0.7, edgecolor='k')
-                        ax2.text(x + 0.05, y + 0.05, str(t), fontsize=6, color='black')
-            
-            # Annotate robot position (if within bounds)
-            if len(path_data[t]) > 0:
-                robot_pos = path_data[t][0]
-                if -10 <= robot_pos[0] <= 10 and -10 <= robot_pos[1] <= 10:
-                    ax2.text(robot_pos[0] + 0.05, robot_pos[1] + 0.05, str(t), fontsize=6, color='blue')
-
-        max_humans = max(len(timestep)-1 for timestep in path_data) if num_timesteps > 0 else 0
-        ax2.set_title(f'Robot Path and Human Positions\n(Max Humans: {max_humans})')
-        ax2.set_xlabel('X Position (m)')
-        ax2.set_ylabel('Y Position (m)')
-
-        # Set axis limits to -10 to +10
-        ax2.set_xlim(-10, 10)
-        ax2.set_ylim(-10, 10)
-
-        ax2.grid(True, alpha=0.3)
-        ax2.axis('equal')  # Ensures equal scaling
-
-        # Legend
-        handles = [
-            Line2D([0], [0], color='blue', lw=2, label='Robot Path'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='green', markersize=10, label='Robot Start'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='red', markersize=10, label='Robot End'),
-        ]
-        ax2.legend(handles=handles, bbox_to_anchor=(1.05, 1), loc='upper left')
-
-
-        ax3.plot(self.linear_vel, 'r-', label='Linear Velocity')  # Plot as a red line
-        ax3.set_title('Linear Velocity Over Time')
-        ax3.set_xlabel('Time Step')
-        ax3.set_ylabel('Velocity (m/s)')
-        ax3.grid(True)
-        ax3.legend()
-
-        
-
-        ax4.plot(self.angular_vel, 'g-', label='Angular Velocity')
-        ax4.set_title('Angular Velocity Over Time')
-        ax4.set_xlabel('Time Step')
-        ax4.set_ylabel('Velocity (rad/s)')
-        ax4.grid(True)
-        ax4.legend()
-
-        try:
-            min_social_dis = f"{min(self.social_distances)} m"
-        except:
-            min_social_dis = "No human detected"
-
-        # Info Text
-        human_counts = [len(timestep)-1 for timestep in path_data]
-        info_text = (f"Navigation Time = {hours}:{minutes}:{seconds}\n"
-                    f"Frozen Steps = {self.frozen_steps}\n"
-                    f"Minimum Social Distance = {min_social_dis}\n"
-                    f"Timesteps = {num_timesteps}\n"
-                    f"Human Count Range: {min(human_counts)}-{max(human_counts)}\n"
-                    f"navigation distance: {nav_distance}m\n"
-                    f"collision steps: {self.collision_count}")
-        
-        self.get_logger().info("\n" + info_text) 
-        fig.text(0.5, 0.02, info_text, ha='center', va='top', fontsize=10,
-                bbox={'facecolor': 'white', 'alpha': 0.7, 'pad': 5})
-
-        # Save PNG
-        package_path = os.path.dirname(__file__)  # Current file's directory
-        folder_path = os.path.join(package_path,'EvalMatrics')
-        # ros_ws_path = os.path.expanduser("~/mobile_robot_ws/src/smrr_crowdnav/smrr_crowdnav/EvalMatrics")
-        os.makedirs(folder_path, exist_ok=True)
-        plt.tight_layout(rect=[0, 0.1, 1, 0.95])
-        plt.savefig(os.path.join(folder_path, filename_png), dpi=300, bbox_inches='tight')
-        plt.close()
-
-        # --- ANIMATED GIF ---
-        fig_anim, ax = plt.subplots(figsize=(8, 8))
-        ax.set_title("Robot and Human Positions Over Time")
-        ax.set_xlabel("X Position (m)")
-        ax.set_ylabel("Y Position (m)")
-        ax.grid(True)
-        ax.axis('equal')
-
-        # Set plot limits
-        all_x = [agent[0] for timestep in path_data for agent in timestep]
-        all_y = [agent[1] for timestep in path_data for agent in timestep]
-        ax.set_xlim(min(all_x) - 1, max(all_x) + 1)
-        ax.set_ylim(min(all_y) - 1, max(all_y) + 1)
-
-        robot_dot, = ax.plot([], [], 'bo', label='Robot', markersize=10)
-        human_dots = []
-        timestep_text = ax.text(0.02, 0.95, '', transform=ax.transAxes, fontsize=12)
-
-        def init():
-            robot_dot.set_data([], [])
-            for dot in human_dots:
-                dot.remove()
-            human_dots.clear()
-            timestep_text.set_text('')
-            return [robot_dot, timestep_text]
-
-        def update(t):
-            timestep = path_data[t]
-            if len(timestep) == 0:
-                return []
-
-            robot_dot.set_data(timestep[0][0], timestep[0][1])
-            robot_dot.set_color(time_cmap[t])
-
-            for dot in human_dots:
-                dot.remove()
-            human_dots.clear()
-
-            if len(timestep) > 1:
-                for human in timestep[1:]:
-                    dot = ax.plot(human[0], human[1], 'o', color=time_cmap[t], alpha=0.7, markersize=6)[0]
-                    human_dots.append(dot)
-
-            timestep_text.set_text(f"Timestep: {t}/{num_timesteps-1}")
-            return [robot_dot, *human_dots, timestep_text]
-
-        anim = FuncAnimation(fig_anim, update, frames=num_timesteps, init_func=init, blit=True, interval=200)
-        gif_fullpath = os.path.join(folder_path, filename_gif)
-        anim.save(gif_fullpath, writer='pillow', fps=5)
-        plt.close()
-
-        print(f"Saved PNG to: {os.path.join(folder_path, filename_png)}")
-        print(f"Saved GIF to: {gif_fullpath}")
 
 
 
