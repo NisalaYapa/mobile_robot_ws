@@ -1,5 +1,5 @@
 import rclpy
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, PoseStamped
 from rclpy.qos import QoSProfile, ReliabilityPolicy
 import sys
 from rclpy.node import Node
@@ -11,6 +11,7 @@ from .GUIs.Ui_robot_test4 import Ui_MainWindow
 from functools import partial
 import subprocess
 import time
+from tf_transformations import quaternion_from_euler
 
 
 class RobotGUI(Node):
@@ -24,6 +25,8 @@ class RobotGUI(Node):
         # Initialize publisher
         self.publisher              = self.create_publisher(String, 'robot_control', 10)
         self.multinav_publisher     = self.create_publisher(Twist, 'multinav_goal',self.reliable_qos)
+        self.arm_publisher          = self.create_publisher(String, '/gesture_command',self.reliable_qos)
+        self.crowdnav_publisher     = self.create_publisher(PoseStamped, '/goal_pose',self.reliable_qos)
 
         self.main_win = main_win
         self.ui = Ui_MainWindow()
@@ -44,11 +47,16 @@ class RobotGUI(Node):
                             "tele_lab"          : [0.0, 0.0, 4.0, 0.0],
                             "pg_room"           : [0.0, -2.0, 4.0, 0.0]}
         
+        self.crowdnav_coordinates = {"start"       : [0.0, 0.0, 0.0, 0.0],
+                                     "end"         : [2.0, 0.0, 0.0, 0.0]}
+        
 
         # Connect buttons to functions
         self.ui.btn_crowdnav.clicked.connect(self.handle_crowdnav)
         self.ui.btn_multifloor.clicked.connect(self.handle_muiltinav)
         self.ui.btn_arm.clicked.connect(self.handle_arm)
+        self.ui.btn_dockpage.clicked.connect(self.handle_dock)
+        self.ui.Homebtn.clicked.connect(self.handle_homepage)
 
         self.ui.mainstack.setCurrentWidget(self.ui.HomePage)
         self.ui.floorStack.setCurrentWidget(self.ui.pg_flr_G)
@@ -69,6 +77,9 @@ class RobotGUI(Node):
 
         # Connect button click to crowdnav_goal function
         self.ui.btn_crwnav_run.clicked.connect(self.crowdnav_goal)
+        self.ui.btn_crowdnav_start.clicked.connect(partial(self.go_location_crowdnav, "start"))
+        self.ui.btn_crowdnav_end.clicked.connect(partial(self.go_location_crowdnav, "end"))
+
 
     # def crowdnav_goal(self):
     #     goal = self.ui.crwnav_goal_input.toPlainText()  # Use toPlainText() for QTextEdit
@@ -81,7 +92,74 @@ class RobotGUI(Node):
     #         subprocess.Popen(["gnome-terminal", "--","ros2", "topic", "list"])
             # subprocess.Popen(["gnome-terminal", "--","tmuxinator", "buffer"])  
 
+    def handle_homepage(self):
+        self.get_logger().info('Home Page')
 
+        # Switch to Crowd Navigation page
+        self.ui.mainstack.setCurrentWidget(self.ui.HomePage)
+
+        # Update label text
+        self.ui.label.setText("SANSAR : Mobile Robot Receptionist")
+
+
+    def handle_dock(self):
+        self.get_logger().info('Docking activated')
+
+        # Switch to Crowd Navigation page
+        self.ui.mainstack.setCurrentWidget(self.ui.Docking)
+
+        # Update label text
+        self.ui.label.setText("Docking")
+
+        # Publish message
+        msg = String()
+        msg.data = 'Docking'
+        self.publisher.publish(msg)
+
+        # Connect button click to crowdnav_goal function
+        self.ui.btn_dock.clicked.connect(self.crowdnav_goal)
+        
+
+    def go_location_crowdnav(self, location):
+        """Publish a navigation goal to the /goal_pose topic
+        
+        Args:
+            location (str): The key for the target location in self.coordinates
+        """
+        self.ui.Notifications.setText(f"Going to {location} position")
+        
+        # Create a PoseStamped message
+        goal_pose = PoseStamped()
+        
+        # Set the header
+        goal_pose.header.stamp = self.get_clock().now().to_msg()
+        goal_pose.header.frame_id = "map"  # Or your preferred frame
+        
+        # Set the position coordinates
+        goal_pose.pose.position.x = self.crowdnav_coordinates[location][0]
+        goal_pose.pose.position.y = self.crowdnav_coordinates[location][1]
+        goal_pose.pose.position.z = self.crowdnav_coordinates[location][2]
+        
+        # Convert yaw angle to quaternion for orientation
+        yaw = self.crowdnav_coordinates[location][3]
+        q = quaternion_from_euler(0, 0, yaw)  # Roll, pitch, yaw
+        goal_pose.pose.orientation.x = q[0]
+        goal_pose.pose.orientation.y = q[1]
+        goal_pose.pose.orientation.z = q[2]
+        goal_pose.pose.orientation.w = q[3]
+        
+        # Log the goal information
+        self.get_logger().info(
+            f'Publishing goal to {location}: '
+            f'x:{goal_pose.pose.position.x:.2f}, '
+            f'y:{goal_pose.pose.position.y:.2f}, '
+            f'z:{goal_pose.pose.position.z:.2f}, '
+            f'yaw:{yaw:.2f} rad'
+        )
+        
+        # Publish the goal
+        self.crowdnav_publisher.publish(goal_pose)
+        self.get_logger().info("Navigation goal published to /goal_pose!")
 
     def crowdnav_goal(self):
         goal = self.ui.crwnav_goal_input.toPlainText()
@@ -193,15 +271,19 @@ class RobotGUI(Node):
         # Publish a message
         msg = String()
         msg.data = 'arm_manipulator'
-        self.publisher.publish(msg)
+        # self.publisher.publish(msg)
 
         # Connect buttons with gesture function correctly
-        self.ui.btn_ayubowan.clicked.connect(partial(self.gesture, "Ayubowan"))
-        self.ui.btn_hi.clicked.connect(partial(self.gesture, "Hi"))
-        self.ui.btn_highfive.clicked.connect(partial(self.gesture, "Highfive"))
+        self.ui.btn_ayubowan.clicked.connect(partial(self.gesture, "aubowan"))
+        self.ui.btn_show_left.clicked.connect(partial(self.gesture, "show_left"))
+        self.ui.btn_show_right.clicked.connect(partial(self.gesture, "show_right"))
 
     def gesture(self, gesture_name):
         self.ui.Notifications.setText(f"Doing {gesture_name} Gesture")
+
+        msg = String()
+        msg.data = gesture_name
+        self.arm_publisher.publish(msg)
 
 
 

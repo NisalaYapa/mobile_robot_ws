@@ -6,7 +6,6 @@ from smrr_interfaces.msg import Entities
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
 from .include.transform import GeometricTransformations
-import math
 
 class LidarProcessor:
     def __init__(self, node):
@@ -236,9 +235,7 @@ class LidarSubscriber(Node):
                     static_msg = Entities()
                     static_msg.x = transformed_static[:, 0].tolist()
                     static_msg.y = transformed_static[:, 1].tolist()
-                    static_msg.count = len(static_obstacles)
                     self.stat_obs_pub.publish(static_msg)
-                    
                     
         except Exception as e:
             self.get_logger().error(f"Error in lidar_callback: {str(e)}", throttle_duration_sec=5)

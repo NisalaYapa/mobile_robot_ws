@@ -104,9 +104,12 @@ class GlobalPathPlanner(Node):
 
             
     def goal_callback(self, msg):
-        self.goal_pose = msg.pose
-        self.get_logger().info(f"Goal pose set: {self.goal_pose.position.x}, {self.goal_pose.position.y}")
-        self.try_plan_path()
+        try:
+            self.goal_pose = msg.pose
+            self.get_logger().info(f"Goal pose set: {self.goal_pose.position.x}, {self.goal_pose.position.y}")
+            self.try_plan_path()
+        except:
+            pass
     
     def try_plan_path(self):
         if self.map_data is None:

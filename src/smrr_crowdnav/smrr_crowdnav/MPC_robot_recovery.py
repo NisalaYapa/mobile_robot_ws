@@ -6,7 +6,7 @@ from .state_plus import FullState, FullyObservableJointState
 import yaml
 import os
 
-class NewMPCReal():
+class NewMPCReal_recovery():
     def __init__(self):
         
         # Load the YAML config file
@@ -138,11 +138,11 @@ class NewMPCReal():
         
 
         # Step 3: Cost function for goal deviation and control effort
-        Q_goal = 1000 # Medium priority to reach the goal
+        Q_goal = 100 # Medium priority to reach the goal
         Q_control = 10# Moderate weight for smooth control inputs
         Q_pref = 5 # Medium preference for stable velocity
-        Q_terminal = 1000# Strong weight to reach the goal at the terminal state
-        Q_human = 0.001# 5
+        Q_terminal = 50# Strong weight to reach the goal at the terminal state
+        Q_human = 20# 5
         Q_orientation = 3
 
 
@@ -200,7 +200,7 @@ class NewMPCReal():
                         human_pos = cs.vertcat(hum[0], hum[1])  # Human's position
                         dist_to_human_sqr = cs.sumsqr(robot_pos - human_pos)
                         human_radius = hum[4]  # Human's radius
-                        constraints.append(dist_to_human_sqr - (human_radius + robot_radius + 0.25) ** 2)  # Safety margin
+                        constraints.append(dist_to_human_sqr - (human_radius + robot_radius-0.1) ** 2)  # Safety margin
                 return constraints
 
             human_constraints = collision_constraint(X_pred, predicted_human_poses[0])
@@ -300,10 +300,10 @@ class NewMPCReal():
             
         
         # Add control bounds
-        opti.subject_to(U_opt[0, :] <= 0.15)  # Upper bound for v
-        opti.subject_to(U_opt[0, :] >= 0.04)  # Lower bound for v
-        opti.subject_to(U_opt[1, :] >= -0.25)
-        opti.subject_to(U_opt[1, :] <= 0.25)
+        opti.subject_to(U_opt[0, :] <= 0.25)  # Upper bound for v
+        opti.subject_to(U_opt[0, :] >= -0.10)  # Lower bound for v
+        opti.subject_to(U_opt[1, :] >= -0.6)
+        opti.subject_to(U_opt[1, :] <= 0.6)
     
 
         # Minimize total cost

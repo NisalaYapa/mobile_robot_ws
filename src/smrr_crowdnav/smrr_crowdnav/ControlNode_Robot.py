@@ -9,13 +9,14 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from std_msgs.msg import Float32MultiArray
 import casadi as cs
 import numpy as np
-from smrr_interfaces.msg import Entities, Footprint, PrefVelocity
+from smrr_interfaces.msg import Entities, Footprint, PrefVelocity, VelocityClassData
 from geometry_msgs.msg import TwistStamped, Point, PoseStamped , Twist
 
 from tf_transformations import euler_from_quaternion
 from nav_msgs.msg import Odometry
 from time import sleep
-from .NewMPCReal_SLAM import NewMPCReal
+from .MPC_robot import NewMPCReal
+from .MPC_robot_recovery import NewMPCReal_recovery
 from .global_path import DijkstraGlobalPlanner
 from .global_path import SimplePathPlanner
 from .global_path import AStarPathPlanner
@@ -28,13 +29,8 @@ import yaml
 import os
 from datetime import datetime
 import math
-import matplotlib.pyplot as plt
-import seaborn as sns
 from scipy.stats import norm
-from matplotlib.lines import Line2D  # For custom legend creation
-from matplotlib.colors import LinearSegmentedColormap  # Op
-from matplotlib.animation import FuncAnimation
-from PIL import Image
+
 
 from rclpy.duration import Duration
 
@@ -49,7 +45,7 @@ from rclpy.duration import Duration
 
 # Define SelfState class
 class SelfState:
-    def __init__(self, px, py, vx, vy, theta, omega, gx=0.0, gy=0.0, radius=0.28, v_pref=0.5):
+    def __init__(self, px, py, vx, vy, theta, omega, gx=0.0, gy=0.0, radius=0.25, v_pref=0.5):
         self.px = px
         self.py = py
         self.vx = vx
@@ -66,7 +62,7 @@ class SelfState:
 
 # Define HumanState class
 class HumanState:
-    def __init__(self, px, py, vx, vy, gx, gy, radius=0.30, v_pref=0.5):
+    def __init__(self, px, py, vx, vy, gx, gy, radius=0.20, v_pref=0.5):
         self.px = px
         self.py = py
         self.vx = vx
@@ -115,6 +111,7 @@ class CrowdNavMPCNode(Node):
 
         # Initialize MPC
         self.policy = NewMPCReal()
+        self.policy_recovery = NewMPCReal_recovery()
         self.self_state = None
         self.human_states = []
         self.static_obs = []
@@ -130,8 +127,11 @@ class CrowdNavMPCNode(Node):
         self.self_state = SelfState(px=0.0, py=0.0, vx=0.0, vy=0.0, theta=0.0, omega=0.0)
 
         # Create subscribers for custom messages
-        self.create_subscription(Entities, '/goal_predictor/pos', self.human_position_callback, 10)
-        self.create_subscription(Entities, '/goal_predictor/vel', self.human_velocity_callback, 10)
+        #self.create_subscription(Entities, '/goal_predictor/pos', self.human_position_callback, 10)
+        #self.create_subscription(Entities, '/object_tracker/laser_data_array_', self.human_position_callback, 10)
+        #self.create_subscription(Entities, '/goal_predictor/vel', self.human_velocity_callback, 10)
+        self.create_subscription(VelocityClassData,'human_data_buffer/velocity_class_data_kf', self.human_callback, 10)
+
         self.create_subscription(Entities, '/goal_predictor/goals', self.human_goal_callback, 10)
         self.create_subscription(PrefVelocity, '/preffered_velocity_prediction/preferred_velocity_', self.human_prefvel_callback, 10)
         #self.create_subscription(Entities, '/local_points_', self.static_obs_callback, 10)
@@ -358,16 +358,19 @@ class CrowdNavMPCNode(Node):
         self.human_states = []
         # current_pos = []
         # current_pos.append((self.self_state.px, self.self_state.py)) 
-        for i in range(msg.count):
-            if msg.x[i] < 50.0 and msg.y[i] < 50.0:
-                 self.human_states.append(HumanState(px=msg.x[i], py=msg.y[i], vx=0.0, vy=0.0, gx=0.0, gy=0.0))
-                 
-                 #print(f"********************** human{i}: px={msg.x[i]}, py={msg.y[i]} ************************")
-            #self.human_states.append(HumanState(px=msg.x[i], py=msg.y[i], vx=0.0, vy=0.0, gx=0.0, gy=0.0))
+        try:
+            for i in range(msg.count):
+                if -3.0 < self.self_state.px - msg.x[i] < 3.0 and  -3.0 < self.self_state.py - msg.y[i] < 3.0:
+                    self.human_states.append(HumanState(px=msg.x[i], py=msg.y[i], vx=0.0, vy=0.0, gx=0.0, gy=0.0))
+                    
+                    #print(f"********************** human{i}: px={msg.x[i]}, py={msg.y[i]} ************************")
+                #self.human_states.append(HumanState(px=msg.x[i], py=msg.y[i], vx=0.0, vy=0.0, gx=0.0, gy=0.0))
+            print(f"########################### Human {len(self.human_states)} #######################")
 
-        self.human_entities = msg
+            self.human_entities = msg
         
-            
+        except:
+            pass
             #self.human_paths.append((msg.x[i], msg.y[i]))
         #     current_pos.append((msg.x[i], msg.y[i]))
         # self.trajectories.append(current_pos)
@@ -382,6 +385,22 @@ class CrowdNavMPCNode(Node):
                 # self.human_states[i].vy = 0.5
             except:
                 pass
+
+    def human_callback(self, msg):
+        self.human_states = []
+        try:
+            for i in range(len(msg.class_ids)):
+
+                if -3.0 < self.self_state.px - msg.x[i] < 3.0 and  -3.0 < self.self_state.py - msg.y[i] < 3.0:
+                    px = msg.x_positions[i]
+                    py = msg.y_positions[i]
+                    vx = np.clip(msg.x_velocities[i], -0.5, 0.5)
+                    vy = np.clip(msg.y_velocities[i], -0.5, 0.5)
+                    gx = px + 0.7*vx
+                    gy = py + 0.7*vy
+                    self.human_states.append(HumanState(px=msg.x_positions[i], py=msg.y_positions[i], vx=vx, vy=vy, gx=gx, gy=gy))
+        except:
+            pass
 
     def human_goal_callback(self, msg):
         for i in range(msg.count):
@@ -417,18 +436,23 @@ class CrowdNavMPCNode(Node):
 
         self.static_obs = []
 
-        print(f"########################### Static {len(static_x)} #######################")
+       
 
         try:
 
             for i in range(msg.count):
-                _x = static_x[i]
-                _y = static_y[i]
+                
+                if -2.0 < self.self_state.px - static_x[i] < 2.0 and  -2.0 < self.self_state.py - static_y[i] < 2.0:
+                    _x = static_x[i]
+                    _y = static_y[i]
 
 
-                point = [_x, _y]
+                    point = [_x, _y]
 
-                self.static_obs.append(point)
+                    self.static_obs.append(point)
+            print(f"########################### Static {len(self.static_obs)} #######################")
+
+            
         
         except:
             pass
@@ -534,7 +558,11 @@ class CrowdNavMPCNode(Node):
             if self.intermediate_goal == -1 :
                 self.intermediate_goal = 0
 
+
             dist_to_int_goal = np.linalg.norm(np.array(self.self_state.position) - np.array(self.global_path[self.intermediate_goal]))
+
+
+
 
             if (dist_to_int_goal <= 1.0) and (self.intermediate_goal != (self.int_goals + 1)):
                 self.intermediate_goal = self.intermediate_goal + 1
@@ -542,7 +570,6 @@ class CrowdNavMPCNode(Node):
             self.publish_global_path(self.global_path,self.intermediate_goal)
 
             
-
  
 
 
@@ -584,11 +611,10 @@ class CrowdNavMPCNode(Node):
                 human_next_states = [[[]]]
 
 
-            if action != (0,0):
+            if action != (0,0) :
                 self.error_count = 0
                 control = TwistStamped()
                 control.header.stamp = self.get_clock().now().to_msg()
-                self.infeasible = False
                 self.error_count = 0
 
                 self.publish_next_states(next_states)
@@ -615,28 +641,15 @@ class CrowdNavMPCNode(Node):
 
             else:
 
-                self.error_count += 1
-                if self.error_count > 4:
-                    self.get_logger().error("MPC infeasible, rotating robot")
-                    self.infeasible = True
+                control = TwistStamped()
+                control.header.stamp = self.get_clock().now().to_msg()
+                control.twist.linear.x = 0.0
+                control.twist.angular.z = 0.0
+                self.action_publisher.publish(control)
+                self.get_logger().info(f"control {0, 0}")
 
-                if self.infeasible:
-                    control = TwistStamped()
-                    control.header.stamp = self.get_clock().now().to_msg()
-                    control.twist.linear.x = 0.0
-                    control.twist.angular.z = 0.3
-                    self.action_publisher.publish(control)
-                    self.get_logger().info(f"control {0, 0}")
-                    return
-                else:            
-                    control = TwistStamped()
-                    control.header.stamp = self.get_clock().now().to_msg()
-                    control.twist.linear.x = 0.0
-                    control.twist.angular.z = 0.0
-                    self.action_publisher.publish(control)
-                    self.get_logger().info(f"control {0, 0}")
 
-                    return
+                
                 
 
             

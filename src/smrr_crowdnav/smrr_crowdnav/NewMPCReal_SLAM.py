@@ -37,6 +37,7 @@ class NewMPCReal():
 
     def predict(self, env_state):
         human_states = []
+        human_positions = []
         robot_state = env_state.self_state
         robot_radius = robot_state.radius
         x_inital =(env_state.self_state.px, env_state.self_state.py, env_state.self_state.theta)
@@ -61,10 +62,12 @@ class NewMPCReal():
             robot_full_state = FullState(px=robot_state.px,  py=robot_state.py, vx=robot_state.vx,  vy=robot_state.vy, radius=robot_state.radius, 
                                         gx=robot_state.gx,  gy=robot_state.gy, v_pref=robot_state.v_pref,  theta=robot_state.theta,  omega=robot_state.omega)
             
+            
 
             for hum in env_state.human_states:               
                 #gx = hum.px + hum.vx * 2 #
                 #gy = hum.py + hum.vy * 2 # need to remove when the goal prediction is fully completed
+
                 hum_state = FullState(px=hum.px, py=hum.py, vx=hum.vx, vy=hum.vy, 
                                     gx=hum.gx, gy=hum.gy, v_pref=self.human_max_speed, 
                                     theta=np.arctan2(hum.vy, hum.vx), radius=hum.radius, omega=None)                    

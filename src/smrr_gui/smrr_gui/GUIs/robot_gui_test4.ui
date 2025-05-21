@@ -14,7 +14,9 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">/* Main application background - lighter version */
+   <string notr="true">
+
+/* Main application background - lighter version */
 QWidget {
     background-color: #E0F7FA;  /* very light bluish background */
 }
@@ -183,7 +185,7 @@ QGroupBox::title {
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>120</y>
+      <y>140</y>
       <width>701</width>
       <height>241</height>
      </rect>
@@ -236,8 +238,8 @@ QLabel::hover {
      <widget class="QPushButton" name="btn_crwnav_run">
       <property name="geometry">
        <rect>
-        <x>260</x>
-        <y>10</y>
+        <x>250</x>
+        <y>20</y>
         <width>130</width>
         <height>41</height>
        </rect>
@@ -263,6 +265,38 @@ QLabel::hover {
     border: 2px solid #CCCCCC;  /* Light Border */
     border-radius: 6px;
     outline: none;</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_crowdnav_">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>110</y>
+        <width>101</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font-size:20px</string>
+      </property>
+      <property name="text">
+       <string>Start</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_3">
+      <property name="geometry">
+       <rect>
+        <x>500</x>
+        <y>100</y>
+        <width>101</width>
+        <height>71</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font-size:20px</string>
+      </property>
+      <property name="text">
+       <string>End</string>
       </property>
      </widget>
     </widget>
@@ -624,6 +658,32 @@ QLabel::hover {
       </property>
      </widget>
     </widget>
+    <widget class="QWidget" name="Docking">
+     <widget class="QPushButton" name="btn_dock">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>100</y>
+        <width>171</width>
+        <height>81</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>-1</pointsize>
+        <weight>75</weight>
+        <italic>false</italic>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font-size: 20px</string>
+      </property>
+      <property name="text">
+       <string>Start Docking</string>
+      </property>
+     </widget>
+    </widget>
     <widget class="QWidget" name="Arm">
      <layout class="QHBoxLayout" name="horizontalLayout_7">
       <item>
@@ -650,7 +710,7 @@ QPushButton:hover {
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>Icons/aybowan.png</normaloff>Icons/aybowan.png</iconset>
+          <normaloff>../../../../../.designer/backup/Icons/aybowan.png</normaloff>../../../../../.designer/backup/Icons/aybowan.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -684,7 +744,7 @@ QPushButton:hover {
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>Icons/Hi.png</normaloff>Icons/Hi.png</iconset>
+          <normaloff>../../../../../.designer/backup/Icons/Hi.png</normaloff>../../../../../.designer/backup/Icons/Hi.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -718,7 +778,7 @@ QPushButton:hover {
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>Icons/highfive.png</normaloff>Icons/highfive.png</iconset>
+          <normaloff>../../../../../.designer/backup/Icons/highfive.png</normaloff>../../../../../.designer/backup/Icons/highfive.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -734,8 +794,8 @@ QPushButton:hover {
    <widget class="QLabel" name="Notifications">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>10</y>
+      <x>70</x>
+      <y>30</y>
       <width>691</width>
       <height>51</height>
      </rect>
@@ -759,8 +819,8 @@ QPushButton:hover {
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>370</y>
-      <width>701</width>
+      <y>380</y>
+      <width>691</width>
       <height>81</height>
      </rect>
     </property>
@@ -809,11 +869,17 @@ QFrame[frameShape=&quot;4&quot;] {  /* WinPanel */
     <layout class="QHBoxLayout" name="horizontalLayout_6">
      <item>
       <widget class="QPushButton" name="btn_crowdnav">
+       <property name="maximumSize">
+        <size>
+         <width>250</width>
+         <height>50</height>
+        </size>
+       </property>
        <property name="styleSheet">
         <string notr="true"/>
        </property>
        <property name="text">
-        <string>Crowd Navigation</string>
+        <string>Crowd Nav</string>
        </property>
        <property name="icon">
         <iconset>
@@ -829,11 +895,17 @@ QFrame[frameShape=&quot;4&quot;] {  /* WinPanel */
      </item>
      <item>
       <widget class="QPushButton" name="btn_multifloor">
+       <property name="maximumSize">
+        <size>
+         <width>250</width>
+         <height>50</height>
+        </size>
+       </property>
        <property name="styleSheet">
         <string notr="true"/>
        </property>
        <property name="text">
-        <string>Multifloor Navigation</string>
+        <string>Multifloor Nav</string>
        </property>
        <property name="icon">
         <iconset>
@@ -851,7 +923,7 @@ QFrame[frameShape=&quot;4&quot;] {  /* WinPanel */
       <widget class="QPushButton" name="btn_arm">
        <property name="maximumSize">
         <size>
-         <width>227</width>
+         <width>250</width>
          <height>50</height>
         </size>
        </property>
@@ -867,8 +939,31 @@ QFrame[frameShape=&quot;4&quot;] {  /* WinPanel */
        </property>
        <property name="iconSize">
         <size>
-         <width>40</width>
-         <height>40</height>
+         <width>30</width>
+         <height>30</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_2">
+       <property name="maximumSize">
+        <size>
+         <width>250</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Docking</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>Icons/docking.png</normaloff>Icons/docking.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>30</width>
+         <height>30</height>
         </size>
        </property>
       </widget>
@@ -903,6 +998,46 @@ font-weight: bold;</string>
       </widget>
      </item>
     </layout>
+   </widget>
+   <widget class="QPushButton" name="Homebtn">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>40</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton {
+    background-color: #e6f2ff;
+    border: 1px solid #b3d1ff;
+    border-radius: 4px;
+    padding: 5px;
+    color: #0066cc;
+}
+
+QPushButton:hover {
+    background-color: #cce5ff;
+}
+
+QPushButton:pressed {
+    background-color: #99ccff;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normaloff>Icons/home.png</normaloff>Icons/home.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>40</width>
+      <height>40</height>
+     </size>
+    </property>
    </widget>
   </widget>
  </widget>

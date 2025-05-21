@@ -1,0 +1,310 @@
+/* Modern and Enhanced Stylesheet for SANSAR Robot Interface */
+
+/* Global Styling */
+QMainWindow {
+    background-color: #f4f4f4;
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+/* Central Widget Styling */
+QWidget#centralwidget {
+    background-color: #ffffff;
+    border-radius: 10px;
+}
+
+/* Navigation Buttons Styling */
+QPushButton {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-weight: bold;
+    min-height: 40px;
+    min-width: 120px;
+    transition: all 0.3s ease;
+}
+
+QPushButton:hover {
+    background-color: #2980b9;
+    transform: scale(1.05);
+}
+
+QPushButton:pressed {
+    background-color: #21618c;
+    transform: scale(0.95);
+}
+
+
+/* Navigation Buttons Styling */
+QPushButton#Homebtn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-weight: bold;
+    min-height: 15px;
+    min-width: 45px;
+    transition: all 0.3s ease;
+}
+
+QPushButton#Homebtn:hover {
+    background-color: #2980b9;
+    transform: scale(1.05);
+}
+
+/* Specific Button Styling */
+/* Floor Buttons */
+QPushButton#btn_flr_G,
+QPushButton#btn_flr_1,
+QPushButton#btn_flr_2,
+QPushButton#btn_flr_3 {
+    background-color: #2ecc71;
+}
+
+QPushButton#btn_flr_G:hover,
+QPushButton#btn_flr_1:hover,
+QPushButton#btn_flr_2:hover,
+QPushButton#btn_flr_3:hover {
+    background-color: #27ae60;
+}
+
+/* Location Buttons */
+QPushButton#btn_reception,
+QPushButton#btn_entc1,
+QPushButton#btn_uav,
+QPushButton#btn_com_lab,
+QPushButton#btn_office,
+QPushButton#btn_conference,
+QPushButton#btn_digi_lab,
+QPushButton#btn_analog_lab,
+QPushButton#btn_pg_room,
+QPushButton#btn_tele_lab {
+    background-color: #9b59b6;
+}
+
+QPushButton#btn_reception:hover,
+QPushButton#btn_entc1:hover,
+QPushButton#btn_uav:hover,
+QPushButton#btn_com_lab:hover,
+QPushButton#btn_office:hover,
+QPushButton#btn_conference:hover,
+QPushButton#btn_digi_lab:hover,
+QPushButton#btn_analog_lab:hover,
+QPushButton#btn_pg_room:hover,
+QPushButton#btn_tele_lab:hover {
+    background-color: #8e44ad;
+}
+
+/* Navigation and Control Buttons */
+QPushButton#btn_crowdnav,
+QPushButton#btn_multifloor,
+QPushButton#btn_arm,
+QPushButton#btn_dockpage {
+    background-color: #e67e22;
+}
+
+QPushButton#btn_crowdnav:hover,
+QPushButton#btn_multifloor:hover,
+QPushButton#btn_arm:hover,
+QPushButton#btn_dockpage:hover {
+    background-color: #d35400;
+}
+
+/* Special Action Buttons */
+QPushButton#btn_ayubowan,
+QPushButton#btn_hi,
+QPushButton#btn_highfive {
+    background-color: #3498db;
+}
+
+QPushButton#btn_ayubowan:hover,
+QPushButton#btn_hi:hover,
+QPushButton#btn_highfive:hover {
+    background-color: #2980b9;
+}
+
+/* Docking and Critical Buttons */
+QPushButton#btn_dock,
+QPushButton#btn_crowdnav_end {
+    background-color: #e74c3c;
+}
+
+QPushButton#btn_dock:hover,
+QPushButton#btn_crowdnav_end:hover {
+    background-color: #c0392b;
+}
+
+/* Start Buttons */
+QPushButton#btn_crowdnav_start,
+QPushButton#btn_crwnav_run {
+    background-color: #2ecc71;
+}
+
+QPushButton#btn_crowdnav_start:hover,
+QPushButton#btn_crwnav_run:hover {
+    background-color: #27ae60;
+}
+
+/* Labels and Notifications */
+QLabel {
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+QLabel#label {
+    color: white;
+    font-size: 18px;
+    background-color: #3498db;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+QLabel#Notifications,
+QLabel#Notifications_2 {
+    background-color: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    padding: 10px;
+    color: #2c3e50;
+}
+
+
+QLabel#label_2 {
+    background: linear-gradient(45deg, 
+        #ff6b6b, 
+        #4ecdc4, 
+        #45aaf2, 
+        #6a5acd, 
+        #ff6b6b
+    );
+    background-size: 400% 400%;
+    border: 3px solid transparent;
+    border-radius: 20px;
+    padding: 20px;
+    color: rgb(9, 145, 65);
+    font-size: 80px;
+    font-weight: bold;
+    text-align: center;
+    min-width: 500px;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+    animation: 
+        welcome-pulse 2s infinite alternate,
+        gradient-shift 10s ease infinite;
+    border-image: linear-gradient(45deg, 
+        #ff6b6b, 
+        #4ecdc4, 
+        #45aaf2, 
+        #6a5acd, 
+        #ff6b6b
+    ) 1;
+}
+
+@keyframes welcome-pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    }
+    100% {
+        transform: scale(1.03);
+        box-shadow: 0 0 25px rgba(0,0,0,0.5);
+    }
+}
+
+@keyframes gradient-shift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Frame Styling */
+QFrame#frame_2 {
+    background-color: #b4f0ff;
+    border-radius: 10px;
+    margin: 5px;
+}
+
+QFrame#frame_3 {
+    background-color: #3498db;
+    border-radius: 10px;
+}
+
+/* Stacked Widget Styling */
+QStackedWidget#mainstack {
+    background-color: #aeffd9;
+    border-radius: 10px;
+}
+
+/* Stacked Widget Styling */
+QStackedWidget#floorStack {
+    background-color: #faf390;
+    border-radius: 10px;
+}
+
+
+
+/* Input Fields */
+QTextEdit,
+QLineEdit {
+    background-color: #f1f2f6;
+    border: 1px solid #dfe4ea;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+/* Scroll Bar Styling */
+QScrollBar:vertical {
+    background-color: #f1f1f1;
+    width: 10px;
+    margin: 0px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #3498db;
+    min-height: 20px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #2980b9;
+}
+
+QScrollBar::add-line:vertical, 
+QScrollBar::sub-line:vertical {
+    height: 0px;
+    background-color: transparent;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    QPushButton {
+        min-height: 35px;
+        font-size: 12px;
+        min-width: 100px;
+    }
+    
+    QLabel {
+        font-size: 14px;
+    }
+}
+
+/* Focus and Accessibility */
+QPushButton:focus {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+}
+
+/* Disabled State */
+QPushButton:disabled {
+    background-color: #bdc3c7;
+    color: #7f8c8d;
+    cursor: not-allowed;
+}
